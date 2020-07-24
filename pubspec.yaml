@@ -1,0 +1,26 @@
+name: tinkoff_sdk
+description: Flutter TinkoffSDK plugin
+version: 0.0.1
+author: 'Denis Mamnitskiy: d.mamnitskiy@pmobi.tech'
+homepage: 'https://pmobi.tech'
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+  flutter: ">=1.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: tech.pmobi.tinkoff_sdk
+        pluginClass: TinkoffSdkPlugin
+      ios:
+        pluginClass: TinkoffSdkPlugin
