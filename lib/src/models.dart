@@ -9,17 +9,20 @@ part of tinkoff_sdk;
 /// [OrderOptions.title] - Название платежа, видимое пользователю.
 /// [OrderOptions.description] - Описание платежа, видимое пользователю.
 /// [OrderOptions.reccurentPayment] - Флаг определяющий является ли платеж рекуррентным.
+/// [OrderOptions.parentPaymentId] - ID родительского заказа для рекуррентного платежа.
 class OrderOptions {
   static const String _orderId = 'orderId';
   static const String _amount = 'amount';
   static const String _title = 'title';
   static const String _description = 'description';
+  static const String _parentPaymentId = 'parentPaymentId';
   static const String _reccurent = 'reccurentPayment';
 
   final int orderId;
   final int amount;
   final String title;
   final String description;
+  final int parentPaymentId;
   final bool reccurentPayment;
 
   OrderOptions({
@@ -27,9 +30,11 @@ class OrderOptions {
     @required this.amount,
     @required this.title,
     @required this.description,
+    this.parentPaymentId,
     this.reccurentPayment = false,
   }) :
-      assert(reccurentPayment != null, "ReccurentPayment cannot be null");
+      assert(reccurentPayment != null, "ReccurentPayment cannot be null"),
+      assert(!reccurentPayment || reccurentPayment && parentPaymentId != null, "ParentPaymentId cannot be null on reccurent payment");
 
   _arguments() => {
     _orderId: orderId,
@@ -37,6 +42,7 @@ class OrderOptions {
     _title: title,
     _description: description,
     _reccurent: reccurentPayment ?? false,
+    _parentPaymentId: parentPaymentId
   };
 }
 
@@ -57,7 +63,7 @@ class CustomerOptions {
   CustomerOptions({
     @required this.customerKey,
     this.email,
-    this.checkType = CheckType.no,
+    this.checkType = CheckType.hold,
   }) :
       assert(checkType != null, "CheckType cannot be null");
 
@@ -71,21 +77,18 @@ class CustomerOptions {
 /// [FeaturesOptions] - Настройки визуального отображения и функций экрана оплаты.
 /// [FeaturesOptions.sbpEnabled] - Флаг подлючения СБП.
 /// [FeaturesOptions.useSecureKeyboard] - Флаг использования безопасной клавиатуры (Android only).
-/// [FeaturesOptions.localizationSource] - Языковая локализация экрана.
 /// [FeaturesOptions.handleCardListErrorInSdk] - Флаг, указывающий где обрабатывать ошибки получения списка карт.
 /// [FeaturesOptions.enableCameraCardScanner] - Обработчик сканирования карты с помощью камеры телефона (не работает на симуляторе iOS).
 /// [FeaturesOptions.darkThemeMode] - Тема экрана оплаты.
 class FeaturesOptions {
   static const String _fpsEnabled = 'fpsEnabled';
   static const String _useSecureKeyboard = 'useSecureKeyboard';
-  static const String _localizationSource = 'localizationSource';
   static const String _handleCardListErrorInSdk = 'handleCardListErrorInSdk';
   static const String _cameraCardScanner = 'enableCameraCardScanner';
   static const String _darkThemeMode = 'darkThemeMode';
 
   final bool sbpEnabled;
   final bool useSecureKeyboard;
-  final LocalizationSource localizationSource;
   final bool handleCardListErrorInSdk;
   final bool enableCameraCardScanner;
   final DarkThemeMode darkThemeMode;
@@ -93,14 +96,12 @@ class FeaturesOptions {
   FeaturesOptions({
     this.sbpEnabled = false,
     this.useSecureKeyboard = true,
-    this.localizationSource = LocalizationSource.ru,
     this.handleCardListErrorInSdk = true,
     this.enableCameraCardScanner = false,
     this.darkThemeMode = DarkThemeMode.auto,
   }) : 
       assert(sbpEnabled != null, 'SBP boolean cannot be null'),
       assert(useSecureKeyboard != null, 'SecureKeyboard boolean cannot be null'),
-      assert(localizationSource != null, 'LocalizationSource cannot be null'),
       assert(handleCardListErrorInSdk != null, 'HandleError boolean cannot be null'),
       assert(enableCameraCardScanner != null, 'EnableCamera boolean cannot be null'),
       assert(darkThemeMode != null, 'DarkThemeMode cannot be null');
@@ -108,9 +109,8 @@ class FeaturesOptions {
   _arguments() => {
     _fpsEnabled: sbpEnabled ?? false,
     _useSecureKeyboard: useSecureKeyboard ?? true,
-    _localizationSource: _LocalizationSource(localizationSource).toString(),
     _handleCardListErrorInSdk: handleCardListErrorInSdk ?? true,
-    //_cameraCardScanner: enableCameraCardScanner ?? false, TODO: camera flag
+    _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
     _darkThemeMode: _DarkThemeMode(darkThemeMode).toString(),
   };
 }
@@ -173,8 +173,11 @@ class _DarkThemeMode {
 /// [CheckType] используется для создания платежа и привязки карты.
 ///
 /// [CheckType.no] – Сохранить карту без проверок.
+/// Если у пользователя нет сохраненных карт, то
+/// в [TinkoffSdk.openAttachCardScreen] данный тип привязки может привести к ошибке.
 ///
 /// [CheckType.hold] – При сохранении сделать списание и затем отмену на 1 руб.
+/// Используется по умолчанию.
 ///
 /// [CheckType.threeDS] (3DS) – При сохранении карты выполнить проверку 3DS.
 /// Если карта поддерживает 3DS, выполняется списание и последующая отмена на 1 руб.

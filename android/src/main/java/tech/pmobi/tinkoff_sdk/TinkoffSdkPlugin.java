@@ -46,14 +46,38 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private Result result;
 
     private TinkoffAcquiring tinkoffAcquiring;
+    private String activeLanguage;
 
+    private PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
+        @Override
+        public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (result != null) {
+                if (requestCode == PAYMENT_REQUEST_CODE) {
+                    result.success(resultCode == -1);
+                    result = null;
+                } else if (requestCode == ATTACH_CARD_REQUEST_CODE) {
+                    result.success(resultCode == -1);
+                    result = null;
+                } else if (requestCode == QR_REQUEST_CODE) {
+                    result.success(null);
+                    result = null;
+                }
+            }
+            return false;
+        }
+    };
+
+    // Supporting FlutterEmbedding v1
     public static void registerWith(Registrar registrar) {
         final TinkoffSdkPlugin instance = new TinkoffSdkPlugin();
+        registrar.addActivityResultListener(instance.activityResultListener);
+        instance.activity = registrar.activity();
         instance.onAttachedToEngine(registrar.context(), registrar.messenger());
     }
 
     @Override
     public void onMethodCall(MethodCall call, Result result) {
+        if (this.result != null) return;
         if (!(activity instanceof FragmentActivity)) {
             result.error(
             "no_fragment_activity",
@@ -75,7 +99,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
                 handleAttachCardScreen(call);
                 break;
             case "showQrScreen":
-                handleShowQrScreen(call);
+                handleShowQrScreen();
                 break;
             default:
                 result.notImplemented();
@@ -93,13 +117,14 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             final String publicKey = (String) arguments.get("publicKey");
             final boolean isDeveloperMode = (boolean) arguments.get("isDeveloperMode");
             final boolean isDebug = (boolean) arguments.get("isDebug");
+            final String language = (String) arguments.get("language");
 
             AcquiringSdk.AsdkLogger.setDeveloperMode(isDeveloperMode);
             AcquiringSdk.AsdkLogger.setDebug(isDebug);
+            activeLanguage = language;
 
             tinkoffAcquiring = new TinkoffAcquiring(terminalKey, password, publicKey);
             result.success(true);
-
         } catch (Exception e) {
             result.success(false);
         }
@@ -171,44 +196,32 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             );
         } catch (Exception e) {
             result.error("Error opening AttachCardScreen", e.getMessage(), null);
+            result = null;
         }
     }
 
-    private void handleShowQrScreen(MethodCall call) {
+    private void handleShowQrScreen() {
         try {
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-            final String localizationSource = (String) arguments.get("localizationSource");
-
-            Language language;
-            switch (localizationSource) {
-                case "EN":
-                    language = Language.EN;
-                    break;
-                case "RU":
-                default:
-                    language = Language.RU;
-                    break;
-            }
-
             tinkoffAcquiring.openStaticQrScreen(
                 (FragmentActivity) activity,
-                new AsdkSource(language),
+                new AsdkSource(parseLocalization(activeLanguage)),
                 QR_REQUEST_CODE
             );
         } catch (Exception e) {
             result.error("Error opening QRScreen", e.getMessage(), null);
+            result = null;
         }
     }
 
     private OrderOptions parseOrderOptions(Map<String, Object> arguments) {
+        final OrderOptions orderOptions = new OrderOptions();
+
         final String orderId = String.valueOf(arguments.get("orderId"));
         final long coins = Long.valueOf((int) arguments.get("amount"));
         final String title = (String) arguments.get("title");
         final String description = (String) arguments.get("description");
         final boolean reccurentPayment = (boolean) arguments.get("reccurentPayment");
 
-        final OrderOptions orderOptions = new OrderOptions();
         orderOptions.setOrderId(orderId);
         orderOptions.setAmount(Money.Companion.ofCoins(coins));
         orderOptions.setTitle(title);
@@ -234,21 +247,10 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private FeaturesOptions parseFeatureOptions(Map<String, Object> arguments) {
         final boolean fpsEnabled = (boolean) arguments.get("fpsEnabled");
         final boolean useSecureKeyboard = (boolean) arguments.get("useSecureKeyboard");
-        final String localizationSource = (String) arguments.get("localizationSource");
         final boolean handleCardListErrorInSdk = (boolean) arguments.get("handleCardListErrorInSdk");
         final boolean enableCameraCardScanner = (boolean) arguments.get("enableCameraCardScanner");
         final String darkThemeMode = (String) arguments.get("darkThemeMode");
 
-        Language language;
-        switch (localizationSource) {
-            case "EN":
-                language = Language.EN;
-                break;
-            case "RU":
-            default:
-                language = Language.RU;
-                break;
-        }
         DarkThemeMode darkMode;
         switch (darkThemeMode) {
             case "ENABLED":
@@ -267,34 +269,29 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
 
         featuresOptions.setFpsEnabled(fpsEnabled);
         featuresOptions.setUseSecureKeyboard(useSecureKeyboard);
-        featuresOptions.setLocalizationSource(new AsdkSource(language));
+        featuresOptions.setLocalizationSource(new AsdkSource(parseLocalization(activeLanguage)));
         featuresOptions.setHandleCardListErrorInSdk(handleCardListErrorInSdk);
         if (enableCameraCardScanner) {
-            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(localizationSource));
+            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(activeLanguage));
         }
         featuresOptions.setDarkThemeMode(darkMode);
         return featuresOptions;
     }
+
+    private Language parseLocalization(String localization) {
+        switch (localization) {
+            case "EN":
+                return Language.EN;
+            case "RU":
+            default:
+                return Language.RU;
+        }
+    }
+
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
-        binding.addActivityResultListener(new PluginRegistry.ActivityResultListener() {
-            @Override
-            public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-                if (requestCode == PAYMENT_REQUEST_CODE) {
-                    result.success(resultCode == -1);
-                    result = null;
-                } else if (requestCode == ATTACH_CARD_REQUEST_CODE) {
-                    result.success(resultCode == -1);
-                    result = null;
-                } else if (requestCode == QR_REQUEST_CODE) {
-                    result.success(null);
-                    result = null;
-                }
-
-                return false;
-            }
-        });
+        binding.addActivityResultListener(activityResultListener);
         methodChannel.setMethodCallHandler(this);
     }
 

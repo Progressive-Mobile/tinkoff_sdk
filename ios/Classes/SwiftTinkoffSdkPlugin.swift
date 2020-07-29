@@ -6,6 +6,7 @@ import TinkoffASDKCore
 
 public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private var acquiring: AcquiringUISDK!
+    private var language: String!
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "tinkoff_sdk", binaryMessenger: registrar.messenger())
@@ -41,6 +42,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let logging = args!["isDebug"] as! Bool
         let isDeveloperMode = args!["isDeveloperMode"] as! Bool
         
+        self.language = (args!["language"] as! String).lowercased()
+        
         let credential = AcquiringSdkCredential(
             terminalKey: terminalKey,
             password: password,
@@ -59,11 +62,12 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         if (logging) {
             configuration.logger = AcquiringLoggerDefault()
         }
+        configuration.showErrorAlert = isDeveloperMode
         configuration.fpsEnabled = true
         
         if let sdk = try? AcquiringUISDK.init(
             configuration: configuration
-            ) {
+        ) {
             self.acquiring = sdk
             result(true)
         } else {
@@ -88,10 +92,10 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         
         let featuresOprionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
         let fpsEnabled = featuresOprionsArgs!["fpsEnabled"] as! Bool
-        let useSecureKeyboard = featuresOprionsArgs!["useSecureKeyboard"] as! Bool
-        let localization = featuresOprionsArgs!["localizationSource"] as! String
         let cameraCardScannerEnabled = featuresOprionsArgs!["enableCameraCardScanner"] as! Bool
-        let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
+        
+//        let useSecureKeyboard = featuresOprionsArgs!["useSecureKeyboard"] as! Bool
+//        let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
         
         let paymentData = PaymentInitData(
             amount: coins,
@@ -105,23 +109,22 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             description: description,
             amount: coins,
             enableSPB: fpsEnabled,
-            language: localization,
             email: email
         )
         
         let topViewController : UIViewController = Utils.getView()
         
+        
         if reccurentPayment {
-            ///  TODO: Реализация рекуррентного платежа
-            
-            //            self.acquiring.presentPaymentView(
-            //                on: topViewController,
-            //                paymentData: paymentData,
-            //                parentPatmentId: T##Int64,
-            //                configuration: viewConfiguration) {
-            //                    [weak self] (response) in self?.responseReviewing(response, flutterResult: result)
-            //                }
-            result(false)
+            let parentPaymentId = orderOprionsArgs!["parentPaymentId"] as! Int64
+
+            self.acquiring.presentPaymentView(
+                on: topViewController,
+                paymentData: paymentData,
+                parentPatmentId: parentPaymentId,
+                configuration: viewConfiguration,
+                completionHandler: setPaymentHandler(flutterResult: result)!
+            )
         } else {
             self.acquiring.presentPaymentView(
                 on: topViewController,
@@ -130,6 +133,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
                 completionHandler: setPaymentHandler(flutterResult: result)!
             )
         }
+                
         acquiring.addCardNeedSetCheckTypeHandler = {
             return PaymentCardCheckType.init(rawValue: checkType)
         }
@@ -143,9 +147,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let checkType = customerOprionsArgs!["checkType"] as! String
         
         let featuresOprionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-        let localization = featuresOprionsArgs!["localizationSource"] as! String
         let cameraCardScannerEnabled = featuresOprionsArgs!["enableCameraCardScanner"] as! Bool
-        let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
+        //let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
         
         let cardListViewConfigration = AcquiringViewConfigration.init()
         cardListViewConfigration.viewTitle = NSLocalizedString("title.paymentCardList", comment: "Список карт")
@@ -153,8 +156,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         if (cameraCardScannerEnabled) {
             cardListViewConfigration.scaner = self
         }
-        cardListViewConfigration.alertViewHelper = self
-        cardListViewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: localization.lowercased())
+
+        cardListViewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: self.language)
         
         self.acquiring.presentCardList(
             on: Utils.getView(),
@@ -180,7 +183,6 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         description: String,
         amount: Int64,
         enableSPB: Bool,
-        language: String,
         email: String?
     ) -> AcquiringViewConfigration {
         //!TODO: Локализация экрана оплаты
@@ -255,6 +257,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         }
         
         viewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: language.lowercased())
+        viewConfigration.alertViewHelper = nil
         
         return viewConfigration
     }
@@ -287,7 +290,8 @@ extension SwiftTinkoffSdkPlugin: AcquiringAlertViewProtocol {
 
 extension SwiftTinkoffSdkPlugin: AcquiringScanerProtocol {
     public func presentScanner(completion: @escaping (_ number: String?, _ yy: Int?, _ mm: Int?) -> Void) -> UIViewController? {
-        if let viewController = UIStoryboard(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "TinkoffSDKCardScanner") as? TinkoffSDKCardScanner {
+        if let viewController = UIStoryboard.init(name: "Tinkoff", bundle: Bundle.init(for: TinkoffSDKCardScanner.self))
+            .instantiateViewController(withIdentifier: "TinkoffSDKCardScanner") as? TinkoffSDKCardScanner {
             viewController.onScannerResult = { (numbres) in
                 completion(numbres, nil, nil)
             }

@@ -32,6 +32,7 @@ class _MyAppState extends State<MyApp> {
   final TextEditingController _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
   final TextEditingController _passwordController = TextEditingController(text: _PASSWORD);
   final TextEditingController _publicKeyController = TextEditingController(text: _PUBLIC_KEY);
+  final locale = ValueNotifier<LocalizationSource>(LocalizationSource.ru);
 
   OrderOptions _orderOptions;
   CustomerOptions _customerOptions;
@@ -59,7 +60,27 @@ class _MyAppState extends State<MyApp> {
             _getCardAttachAction(),
             _getSBPShowQRAction()
           ]
-        : null
+        : [
+            ValueListenableBuilder<LocalizationSource>(
+              valueListenable: locale,
+              builder: (context, value, _) => DropdownButton<LocalizationSource>(
+                  value: value,
+                  items: [
+                    DropdownMenuItem(
+                      value: LocalizationSource.ru,
+                      child: Text('RU'),
+                    ),
+                    DropdownMenuItem(
+                        value: LocalizationSource.en,
+                        child: Text('EN')
+                    ),
+                  ],
+                  onChanged: (value) {
+                    locale.value = value;
+                  }
+              ),
+            ),
+          ]
     );
   }
 
@@ -88,7 +109,8 @@ class _MyAppState extends State<MyApp> {
                 password: _passwordController.text,
                 publicKey: _publicKeyController.text,
                 logging: true,
-                isDeveloperMode: false
+                isDeveloperMode: false,
+                language: locale.value
               ).then((_) {
                   if (mounted) setState((){});
                 }).catchError(_showErrorDialog);
@@ -131,7 +153,8 @@ class _MyAppState extends State<MyApp> {
               _getEntryText('Заголовок', _orderOptions.title, required: true),
               _getEntryText('Описание', _orderOptions.description, required: true),
               _getEntryText('Сумма (в копейках)', _orderOptions.amount),
-              _getEntryText('Реккурентный платеж', _orderOptions.reccurentPayment)
+              if (_orderOptions.reccurentPayment) _getEntryText('ID родительского платежа', _orderOptions.parentPaymentId, required: true),
+              _getEntryText('Рекуррентный платеж', _orderOptions.reccurentPayment)
             ],
           )
         : Text('Нажмите чтобы заполнить'),
@@ -165,7 +188,6 @@ class _MyAppState extends State<MyApp> {
           _getEntryText('Сканер карт включён', _featuresOptions.enableCameraCardScanner),
           _getEntryText('Обработка ошибок', _featuresOptions.handleCardListErrorInSdk),
           _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
-          _getEntryText('Язык', _featuresOptions.localizationSource)
         ],
       ),
       onTap: _showFeatureOptionsDialog
@@ -300,6 +322,7 @@ class _MyAppState extends State<MyApp> {
     final titleController = TextEditingController(text: _orderOptions?.title ?? '');
     final descriptionController = TextEditingController(text: _orderOptions?.description ?? '');
     final amountController = TextEditingController(text: _orderOptions?.amount?.toString() ?? '');
+    final parentIdController = TextEditingController(text: _orderOptions?.parentPaymentId?.toString() ?? '');
     final ValueNotifier<bool> reccurent = ValueNotifier(_orderOptions?.reccurentPayment ?? false);
 
     await showDialog(
@@ -314,6 +337,7 @@ class _MyAppState extends State<MyApp> {
               _getTextForm(
                 'ID заказа',
                 orderIdController,
+                keyboardType: TextInputType.number,
                 isDialog: true
               ),
               _getTextForm(
@@ -331,19 +355,31 @@ class _MyAppState extends State<MyApp> {
                 amountController, keyboardType: TextInputType.number,
                 isDialog: true
               ),
-              _getCheckboxRow('Реккурентный платеж', reccurent),
+              ValueListenableBuilder<bool>(
+                valueListenable: reccurent,
+                builder: (context, value, child) => value ? child : SizedBox(),
+                child: _getTextForm(
+                  'ID родительского платежа',
+                  parentIdController,
+                  keyboardType: TextInputType.number,
+                  isDialog: true
+                )
+              ),
+              _getCheckboxRow('Рекуррентный платеж', reccurent),
             ],
           ),
         ),
       )
     );
     final orderId = _emptyStringToNull(orderIdController.text);
+    final parentId = _emptyStringToNull(parentIdController.text);
     setState(() {
       _orderOptions = OrderOptions(
         orderId: orderId != null ? int.tryParse(orderId) : null,
         amount: int.tryParse(amountController.text),
         title: titleController.text,
         description: descriptionController.text,
+        parentPaymentId: parentId != null ? int.tryParse(parentId) : null,
         reccurentPayment: reccurent.value,
       );
     });
@@ -427,7 +463,6 @@ class _MyAppState extends State<MyApp> {
     final scanner = ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
     final errorHandle = ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
     final darkTheme = ValueNotifier<DarkThemeMode>(_featuresOptions.darkThemeMode);
-    final locale = ValueNotifier<LocalizationSource>(_featuresOptions.localizationSource);
 
     await showDialog(
         context: context,
@@ -471,31 +506,6 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ],
                 ),
-                Row(
-                  children: <Widget>[
-                    Text('Язык'),
-                    Spacer(),
-                    ValueListenableBuilder(
-                      valueListenable: locale,
-                      builder: (context, value, _) => DropdownButton<LocalizationSource>(
-                          value: value,
-                          items: [
-                            DropdownMenuItem(
-                              value: LocalizationSource.ru,
-                              child: Text('RU'),
-                            ),
-                            DropdownMenuItem(
-                              value: LocalizationSource.en,
-                              child: Text('EN')
-                            ),
-                          ],
-                          onChanged: (value) {
-                            locale.value = value;
-                          }
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -508,7 +518,6 @@ class _MyAppState extends State<MyApp> {
         enableCameraCardScanner: scanner.value,
         handleCardListErrorInSdk: errorHandle.value,
         darkThemeMode: darkTheme.value,
-        localizationSource: locale.value
       );
     });
   }
@@ -550,9 +559,9 @@ class _MyAppState extends State<MyApp> {
           Icon(Icons.camera_alt, size: 7.0, color: Colors.grey)
         ],
       ),
-      onPressed: () async {
+      onPressed: null /*() async {
         await acquiring.showSBPQrScreen();
-      },
+      },*/
     );
   }
 }

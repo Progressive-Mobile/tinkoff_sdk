@@ -8,6 +8,6 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 
 class MainActivity: FlutterFragmentActivity() {
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
-        GeneratedPluginRegistrant.registerWith(flutterEngine);
+        GeneratedPluginRegistrant.registerWith(flutterEngine)
     }
 }

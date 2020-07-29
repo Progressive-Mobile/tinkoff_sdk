@@ -27,6 +27,8 @@ class TinkoffSdk {
   /// [publicKey] - Публичный ключ. Используется для шифрования данных.
   ///               Необходим для интеграции вашего приложения с интернет-эквайрингом Тинькофф.
   ///
+  /// [language] - Язык
+  ///
   /// Флаги ниже используются для тестирования настроек эквайринга:
   /// [isDeveloperMode] - Тестовый URL (в этом режиме деньги с карт не списываются).
   /// [logging] - Логирование запросов.
@@ -37,6 +39,7 @@ class TinkoffSdk {
     
     bool isDeveloperMode = false,
     bool logging = false,
+    LocalizationSource language = LocalizationSource.ru,
   }) async {
     final method = _Method.activate;
 
@@ -47,11 +50,12 @@ class TinkoffSdk {
 
       method.isDeveloperMode: isDeveloperMode,
       method.isDebug: logging,
+      method.language: _LocalizationSource(language).toString()
     };
 
     final activated = await _channel.invokeMethod<bool>(
       method.name,
-      _checkNullArguments(arguments)
+      _checkNullArguments(arguments, ignore: [method.language])
     );
 
     if (activated)
@@ -81,9 +85,19 @@ class TinkoffSdk {
     final method = _Method.openPaymentScreen;
 
     final arguments = <String, dynamic> {
-      method.orderOptions: _checkNullArguments(orderOptions._arguments()),
-      method.customerOptions: customerOptions._arguments(),
-      method.featuresOptions: _featuresOptions._arguments()
+      method.orderOptions: _checkNullArguments(
+          orderOptions._arguments(),
+          ignore: orderOptions.reccurentPayment
+            ? []
+            : [OrderOptions._parentPaymentId]
+      ),
+      method.customerOptions: _checkNullArguments(
+          customerOptions._arguments(),
+          ignore: [CustomerOptions._email]
+      ),
+      method.featuresOptions: _checkNullArguments(
+          _featuresOptions._arguments()
+      )
     };
 
     return _channel.invokeMethod<bool>(
@@ -124,24 +138,13 @@ class TinkoffSdk {
 
   /// Экран приема оплаты по QR коду через СПБ.
   ///
-  /// [localization] - Для локализации сообщений на экране.
-  ///
   /// Результат оплаты товара покупателем по статическому QR коду не отслеживается в SDK,
   /// соответственно [Completer] завершается только при ошибке либо отмене (закрытии экрана).
-  Future<void> showSBPQrScreen({
-    LocalizationSource localization = LocalizationSource.ru
-  }) async {
+  Future<void> showSBPQrScreen() async {
     _checkActivated();
     final method = _Method.showQrScreen;
 
-    final arguments = <String, dynamic> {
-      method.localization: _LocalizationSource(localization).toString()
-    };
-
-    return _channel.invokeMethod<void>(
-      method.name,
-      _checkNullArguments(arguments)
-    );
+    return _channel.invokeMethod<void>(method.name);
   }
 
 
@@ -158,10 +161,11 @@ class TinkoffSdk {
     );
   }
 
-  Map<String, dynamic> _checkNullArguments(Map<String, dynamic> arguments) {
+  Map<String, dynamic> _checkNullArguments(Map<String, dynamic> arguments, {List<String> ignore = const []}) {
     for (final argument in arguments.entries) {
       if (argument.value == null) {
-        throw ArgumentError.notNull(argument.key);
+        if (!ignore.contains(argument.key))
+          throw ArgumentError.notNull(argument.key);
       }
     }
     return arguments;

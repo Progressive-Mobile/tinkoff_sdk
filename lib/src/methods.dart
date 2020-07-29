@@ -23,6 +23,7 @@ class _Activate {
 
   String get isDeveloperMode => 'isDeveloperMode';
   String get isDebug => 'isDebug';
+  String get language => 'language';
 }
 
 class _OpenPaymentScreen {
