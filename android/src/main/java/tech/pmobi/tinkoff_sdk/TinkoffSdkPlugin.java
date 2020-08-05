@@ -117,7 +117,13 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
                 handleAttachCardScreen(call);
                 break;
             case "showQrScreen":
-                handleShowQrScreen();
+                handleShowQrScreen(call);
+                break;
+            case "openNativePayment":
+                handleOpenNativePayment(call);
+                break;
+            case "startCharge":
+                handleStartCharge(call);
                 break;
             default:
                 result.notImplemented();
@@ -218,33 +224,45 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
         }
     }
 
-    private void handleShowQrScreen() {
-        try {
-            tinkoffAcquiring.openStaticQrScreen(
-                (FragmentActivity) activity,
-                new AsdkSource(parseLocalization(activeLanguage)),
-                QR_REQUEST_CODE
-            );
-        } catch (Exception e) {
-            result.error("Error opening QRScreen", e.getMessage(), null);
-            result = null;
-        }
+    private void handleShowQrScreen(MethodCall call) {
+        //TODO: implement method
+        result.notImplemented();
+//        try {
+//            tinkoffAcquiring.openStaticQrScreen(
+//                (FragmentActivity) activity,
+//                new AsdkSource(parseLocalization(activeLanguage)),
+//                QR_REQUEST_CODE
+//            );
+//        } catch (Exception e) {
+//            result.error("Error opening QRScreen", e.getMessage(), null);
+//            result = null;
+//        }
+    }
+
+    private void handleOpenNativePayment(MethodCall call) {
+        //TODO: implement method
+        result.notImplemented();
+    }
+
+    private void handleStartCharge(MethodCall call) {
+        //TODO: implement method
+        result.notImplemented();
     }
 
     private OrderOptions parseOrderOptions(Map<String, Object> arguments) {
         final OrderOptions orderOptions = new OrderOptions();
 
-        final String orderId = String.valueOf(arguments.get("orderId"));
-        final long coins = Long.valueOf((int) arguments.get("amount"));
+        final Integer orderId = (Integer) arguments.get("orderId");
+        final long coins = (int) arguments.get("amount");
         final String title = (String) arguments.get("title");
         final String description = (String) arguments.get("description");
         final boolean reccurentPayment = (boolean) arguments.get("reccurentPayment");
 
-        orderOptions.setOrderId(orderId);
+        orderOptions.setOrderId(String.valueOf(orderId));
+        orderOptions.setRecurrentPayment(reccurentPayment);
         orderOptions.setAmount(Money.Companion.ofCoins(coins));
         orderOptions.setTitle(title);
         orderOptions.setDescription(description);
-        orderOptions.setRecurrentPayment(reccurentPayment);
 
         return orderOptions;
     }

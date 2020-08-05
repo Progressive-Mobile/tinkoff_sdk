@@ -24,7 +24,6 @@ import TinkoffASDKCore
 
 public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private var acquiring: AcquiringUISDK!
-    private var language: String!
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "tinkoff_sdk", binaryMessenger: registrar.messenger())
@@ -39,13 +38,19 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             break
         case "openPaymentScreen":
             handleOpenPaymentScreen(call, result: result)
-            break;
+            break
         case "attachCardScreen":
             handleAttachCardScreen(call, result: result);
-            break;
+            break
         case "showQrScreen":
             handleShowQrScreen(call, result: result);
-            break;
+            break
+        case "openNativePayment":
+            handleOpenNativePayment(call, result: result);
+            break
+        case "startCharge":
+            handleStartCharge(call, result: result);
+            break
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -60,7 +65,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let logging = args!["isDebug"] as! Bool
         let isDeveloperMode = args!["isDeveloperMode"] as! Bool
         
-        self.language = (args!["language"] as! String).lowercased()
+        Utils.setLanguage((args!["language"] as! String).lowercased())
         
         let credential = AcquiringSdkCredential(
             terminalKey: terminalKey,
@@ -80,6 +85,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         if (logging) {
             configuration.logger = AcquiringLoggerDefault()
         }
+
         configuration.showErrorAlert = isDeveloperMode
         configuration.fpsEnabled = true
         
@@ -115,14 +121,14 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
 //        let useSecureKeyboard = featuresOprionsArgs!["useSecureKeyboard"] as! Bool
 //        let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
         
-        let paymentData = PaymentInitData(
+        var paymentData = PaymentInitData(
             amount: coins,
             orderId: orderId,
             customerKey: customerKey
         )
+        paymentData.savingAsParentPayment = reccurentPayment
         
-        let viewConfiguration = getViewConfiguration(
-            enableCardScanner: cameraCardScannerEnabled,
+        let viewConfiguration = Utils.getViewConfiguration(
             title: title,
             description: description,
             amount: coins,
@@ -130,27 +136,20 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             email: email
         )
         
-        let topViewController : UIViewController = Utils.getView()
-        
-        
-        if reccurentPayment {
-            let parentPaymentId = orderOprionsArgs!["parentPaymentId"] as! Int64
-
-            self.acquiring.presentPaymentView(
-                on: topViewController,
-                paymentData: paymentData,
-                parentPatmentId: parentPaymentId,
-                configuration: viewConfiguration,
-                completionHandler: setPaymentHandler(flutterResult: result)!
-            )
-        } else {
-            self.acquiring.presentPaymentView(
-                on: topViewController,
-                paymentData: paymentData,
-                configuration: viewConfiguration,
-                completionHandler: setPaymentHandler(flutterResult: result)!
-            )
+        if cameraCardScannerEnabled {
+            viewConfiguration.scaner = self
         }
+        
+        let view = Utils.getView();
+        
+        self.acquiring.presentPaymentView(
+            on: view,
+            paymentData: paymentData,
+            configuration: viewConfiguration,
+            completionHandler: setPaymentHandler(flutterResult: result) {
+                view.dismiss(animated: true, completion: nil)
+            }!
+        )
                 
         acquiring.addCardNeedSetCheckTypeHandler = {
             return PaymentCardCheckType.init(rawValue: checkType)
@@ -175,7 +174,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             cardListViewConfigration.scaner = self
         }
 
-        cardListViewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: self.language)
+        cardListViewConfigration.localizableInfo = Utils.getLanguage()
         
         self.acquiring.presentCardList(
             on: Utils.getView(),
@@ -190,94 +189,18 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleShowQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        
-        result(nil)
+        //TODO: implement method
+        result(FlutterMethodNotImplemented)
     }
     
-    ///
-    private func getViewConfiguration(
-        enableCardScanner: Bool,
-        title: String,
-        description: String,
-        amount: Int64,
-        enableSPB: Bool,
-        email: String?
-    ) -> AcquiringViewConfigration {
-        //!TODO: Локализация экрана оплаты
-        
-        let viewConfigration = AcquiringViewConfigration.init()
-        if (enableCardScanner) {
-            viewConfigration.scaner = self
-        }
-        
-        viewConfigration.viewTitle = "Оплата"
-        
-        viewConfigration.fields = []
-        // InfoFields.amount
-        let paymentTitle = NSAttributedString.init(
-            string: "Оплата",
-            attributes: [
-                .font: UIFont.boldSystemFont(ofSize: 22)
-            ]
-        )
-        let amountString = Utils.formatAmount(NSDecimalNumber.init(floatLiteral: Double(amount)/100))
-        let amountTitle = NSAttributedString.init(
-            string: "на сумму \(amountString)",
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 17)
-            ]
-        )
-        
-        // Добавление заголовка
-        viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.amount(
-                title: paymentTitle,
-                amount: amountTitle
-            )
-        )
-        
-        let productDetail = NSMutableAttributedString.init()
-        let titleString = NSAttributedString.init(
-            string: title + "\n",
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 17)
-            ]
-        )
-        let descriptionString = NSAttributedString.init(
-            string: description,
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 13),
-                .foregroundColor: UIColor(red: 0.573, green: 0.6, blue: 0.635, alpha: 1)
-            ]
-        )
-        
-        productDetail.append(titleString)
-        productDetail.append(descriptionString)
-        
-        /// Добавление поля для описания покупки
-        viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.detail(
-                title: productDetail
-            )
-        )
-        
-        /// Добавление поля для ввода E-mail адреса
-        viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.email(
-                value: email,
-                placeholder: "E-mail для получения квитанции"
-            )
-        )
-        
-        /// Добавление кнопки "Оплатить с помощью СПБ"
-        if (enableSPB) {
-            viewConfigration.fields.append(AcquiringViewConfigration.InfoFields.buttonPaySPB)
-        }
-        
-        viewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: language.lowercased())
-        viewConfigration.alertViewHelper = nil
-        
-        return viewConfigration
+    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        //TODO: implement method
+        result(FlutterMethodNotImplemented)
+    }
+    
+    private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        //TODO: implement method
+        result(FlutterMethodNotImplemented)
     }
     
     private func setPaymentHandler(flutterResult: @escaping FlutterResult) -> PaymentCompletionHandler? {
@@ -285,6 +208,14 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         return handler
     }
     
+    private func setPaymentHandler(flutterResult: @escaping FlutterResult, additional: @escaping () -> Void) -> PaymentCompletionHandler? {
+        let handler: PaymentCompletionHandler? = {
+            [weak self] (response) in self?.responseReviewing(response, flutterResult: flutterResult)
+            additional()
+        }
+        return handler
+    }
+
     private func responseReviewing(_ response: Result<PaymentStatusResponse, Error>, flutterResult: @escaping FlutterResult) {
         switch response {
         case .success(let result):

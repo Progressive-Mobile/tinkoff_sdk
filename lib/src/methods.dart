@@ -27,6 +27,7 @@ class _Method {
   static const _AttachCardScreen attachCardScreen = const _AttachCardScreen();
   static const _ShowQrScreen showQrScreen = const _ShowQrScreen();
   static const _OpenNativePayment openNativePayment = const _OpenNativePayment();
+  static const _StartCharge startCharge = const _StartCharge();
 }
 
 class _Activate {
@@ -74,4 +75,10 @@ class _OpenNativePayment {
   const _OpenNativePayment();
 
   String get name => 'openNativePayment';
+}
+
+class _StartCharge {
+  const _StartCharge();
+
+  String get name => 'startCharge';
 }

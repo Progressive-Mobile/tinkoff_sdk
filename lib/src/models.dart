@@ -25,41 +25,35 @@ part of tinkoff_sdk;
 /// [OrderOptions.amount] - Сумма для оплаты в копейках.
 /// [OrderOptions.title] - Название платежа, видимое пользователю.
 /// [OrderOptions.description] - Описание платежа, видимое пользователю.
-/// [OrderOptions.reccurentPayment] - Флаг определяющий является ли платеж рекуррентным.
-/// [OrderOptions.parentPaymentId] - ID родительского заказа для рекуррентного платежа.
+/// [OrderOptions.saveAsParent] - Флаг определяющий является ли платеж рекуррентным.
 class OrderOptions {
   static const String _orderId = 'orderId';
   static const String _amount = 'amount';
   static const String _title = 'title';
   static const String _description = 'description';
-  static const String _parentPaymentId = 'parentPaymentId';
   static const String _reccurent = 'reccurentPayment';
 
   final int orderId;
   final int amount;
   final String title;
   final String description;
-  final int parentPaymentId;
-  final bool reccurentPayment;
+  final bool saveAsParent;
 
   OrderOptions({
     @required this.orderId,
     @required this.amount,
     @required this.title,
     @required this.description,
-    this.parentPaymentId,
-    this.reccurentPayment = false,
+    this.saveAsParent = false,
   }) :
-      assert(reccurentPayment != null, "ReccurentPayment cannot be null"),
-      assert(!reccurentPayment || reccurentPayment && parentPaymentId != null, "ParentPaymentId cannot be null on reccurent payment");
+      assert(saveAsParent != null, "SaveAsParent cannot be null");
 
   _arguments() => {
     _orderId: orderId,
     _amount: amount,
     _title: title,
     _description: description,
-    _reccurent: reccurentPayment ?? false,
-    _parentPaymentId: parentPaymentId
+    _reccurent: saveAsParent ?? false
   };
 }
 

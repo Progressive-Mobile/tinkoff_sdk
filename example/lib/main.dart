@@ -171,8 +171,7 @@ class _MyAppState extends State<MyApp> {
               _getEntryText('Заголовок', _orderOptions.title, required: true),
               _getEntryText('Описание', _orderOptions.description, required: true),
               _getEntryText('Сумма (в копейках)', _orderOptions.amount),
-              if (_orderOptions.reccurentPayment) _getEntryText('ID родительского платежа', _orderOptions.parentPaymentId, required: true),
-              _getEntryText('Рекуррентный платеж', _orderOptions.reccurentPayment)
+              _getEntryText('Рекуррентный платеж', _orderOptions.saveAsParent)
             ],
           )
         : Text('Нажмите чтобы заполнить'),
@@ -340,8 +339,7 @@ class _MyAppState extends State<MyApp> {
     final titleController = TextEditingController(text: _orderOptions?.title ?? '');
     final descriptionController = TextEditingController(text: _orderOptions?.description ?? '');
     final amountController = TextEditingController(text: _orderOptions?.amount?.toString() ?? '');
-    final parentIdController = TextEditingController(text: _orderOptions?.parentPaymentId?.toString() ?? '');
-    final ValueNotifier<bool> reccurent = ValueNotifier(_orderOptions?.reccurentPayment ?? false);
+    final ValueNotifier<bool> reccurent = ValueNotifier(_orderOptions?.saveAsParent ?? false);
 
     await showDialog(
       context: context,
@@ -373,16 +371,6 @@ class _MyAppState extends State<MyApp> {
                 amountController, keyboardType: TextInputType.number,
                 isDialog: true
               ),
-              ValueListenableBuilder<bool>(
-                valueListenable: reccurent,
-                builder: (context, value, child) => value ? child : SizedBox(),
-                child: _getTextForm(
-                  'ID родительского платежа',
-                  parentIdController,
-                  keyboardType: TextInputType.number,
-                  isDialog: true
-                )
-              ),
               _getCheckboxRow('Рекуррентный платеж', reccurent),
             ],
           ),
@@ -390,15 +378,13 @@ class _MyAppState extends State<MyApp> {
       )
     );
     final orderId = _emptyStringToNull(orderIdController.text);
-    final parentId = _emptyStringToNull(parentIdController.text);
     setState(() {
       _orderOptions = OrderOptions(
         orderId: orderId != null ? int.tryParse(orderId) : null,
         amount: int.tryParse(amountController.text),
         title: titleController.text,
         description: descriptionController.text,
-        parentPaymentId: parentId != null ? int.tryParse(parentId) : null,
-        reccurentPayment: reccurent.value,
+        saveAsParent: reccurent.value,
       );
     });
   }

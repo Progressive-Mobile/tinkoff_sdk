@@ -104,10 +104,7 @@ class TinkoffSdk {
 
     final arguments = <String, dynamic> {
       method.orderOptions: _checkNullArguments(
-          orderOptions._arguments(),
-          ignore: orderOptions.reccurentPayment
-            ? []
-            : [OrderOptions._parentPaymentId]
+          orderOptions._arguments()
       ),
       method.customerOptions: _checkNullArguments(
           customerOptions._arguments(),
@@ -166,10 +163,23 @@ class TinkoffSdk {
   }
 
 
-  // TODO: ApplePay + GooglePay
+  // TODO: implement ApplePay + GooglePay
   Future<void> openNativePaymentScreen() async {
     _checkActivated();
     final method = _Method.openNativePayment;
+
+    final arguments = <String, dynamic> {};
+
+    return _channel.invokeMethod(
+      method.name,
+      _checkNullArguments(arguments)
+    );
+  }
+
+  // TODO: implement Charge
+  Future<void> startCharge() async {
+    _checkActivated();
+    final method = _Method.startCharge;
 
     final arguments = <String, dynamic> {};
 
