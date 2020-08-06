@@ -140,7 +140,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             viewConfiguration.scaner = self
         }
         
-        let view = Utils.getView();
+        let view = Utils.getView(true);
         
         self.acquiring.presentPaymentView(
             on: view,
@@ -150,7 +150,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
                 view.dismiss(animated: true, completion: nil)
             }!
         )
-                
+
         acquiring.addCardNeedSetCheckTypeHandler = {
             return PaymentCardCheckType.init(rawValue: checkType)
         }

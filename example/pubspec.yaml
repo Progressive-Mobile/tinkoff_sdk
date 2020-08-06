@@ -1,6 +1,6 @@
 name: tinkoff_sdk_example
 description: Demonstrates how to use the tinkoff_sdk plugin.
-version: 0.0.1
+version: 0.0.1+hotfix1
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

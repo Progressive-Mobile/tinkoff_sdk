@@ -42,20 +42,22 @@ class Utils {
        return AcquiringViewConfigration.LocalizableInfo.init(lang: self.language)
     }
     
-    static func getView() -> UIViewController {
+    static func getView(_ navigator: Bool = false) -> UIViewController {
         var topController: UIViewController = UIApplication.shared.keyWindow!.rootViewController!
         
         while (topController.presentedViewController != nil) {
             topController = topController.presentedViewController!
         }
         
-        let view = UINavigationController();
-        view.isToolbarHidden = true
-        view.isNavigationBarHidden = true
-        
-        topController.present(view, animated: true, completion: nil)
-                                
-        return view
+        if navigator {
+            let view = UINavigationController();
+            view.isNavigationBarHidden = true
+            view.addChild(UIViewController())
+            topController.present(view, animated: true, completion: nil)
+            return view
+        } else {
+            return topController
+        }
     }
     
     static func getViewConfiguration(
