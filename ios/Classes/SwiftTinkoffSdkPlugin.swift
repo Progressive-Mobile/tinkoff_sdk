@@ -24,6 +24,7 @@ import TinkoffASDKCore
 
 public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private var acquiring: AcquiringUISDK!
+    private var awaitingResult: Bool!
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "tinkoff_sdk", binaryMessenger: registrar.messenger())
@@ -32,6 +33,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        awaitingResult = true
         switch call.method {
         case "activate":
             handleActivate(call, result: result)
@@ -53,6 +55,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             break
         default:
             result(FlutterMethodNotImplemented)
+            awaitingResult = false
         }
     }
     
@@ -97,6 +100,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         } else {
             result(false)
         }
+        awaitingResult = false
     }
     
     private func handleOpenPaymentScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -140,7 +144,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             viewConfiguration.scaner = self
         }
         
-        let view = Utils.getView(true);
+        let view = Utils.getView(true)
         
         self.acquiring.presentPaymentView(
             on: view,
@@ -186,21 +190,25 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         }
         
         result(nil)
+        awaitingResult = false
     }
     
     private func handleShowQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
         result(FlutterMethodNotImplemented)
+        awaitingResult = false
     }
     
     private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
         result(FlutterMethodNotImplemented)
+        awaitingResult = false
     }
     
     private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
         result(FlutterMethodNotImplemented)
+        awaitingResult = false
     }
     
     private func setPaymentHandler(flutterResult: @escaping FlutterResult) -> PaymentCompletionHandler? {
@@ -217,12 +225,24 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
 
     private func responseReviewing(_ response: Result<PaymentStatusResponse, Error>, flutterResult: @escaping FlutterResult) {
+        var map = Dictionary<String, Any>()
         switch response {
         case .success(let result):
-            flutterResult(result.status != .cancelled)
-        case .failure(_):
-            flutterResult(false)
+            let success = result.status != .cancelled
+            map["success"] = success
+            map["isError"] = false
+            map["message"] = success ? "Оплата прошла успешно" : "Закрытие экрана оплаты"
+        case .failure(let result):
+            map["success"] = false
+            map["isError"] = true
+            map["message"] = result.localizedDescription.split(separator: "(").last?.split(separator: ".").first
         }
+        
+        let jsonData = try? JSONSerialization.data(withJSONObject: map, options: .prettyPrinted)
+        let json = String(data: jsonData!, encoding: .utf8)
+        
+        flutterResult(json)
+        awaitingResult = false
     }
 }
 

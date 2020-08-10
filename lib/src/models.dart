@@ -20,6 +20,26 @@ part of tinkoff_sdk;
 
 /// Models
 
+/// [TinkoffResult] - результат выполнения вызванного метода.
+/// [TinkoffResult.success] - true, если вызванный метод выполнил свою функцию.
+/// [TinkoffResult.isError] - Если для результата выполнения isError помечен как true,
+/// возможно, стоит показать сообщение пользователю.
+/// [TinkoffResult.message] - Результирующее сообщение.
+class TinkoffResult {
+  static const _success = 'success';
+  static const _isError = 'isError';
+  static const _message = 'message';
+
+  final bool success;
+  final bool isError;
+  final String message;
+
+  TinkoffResult.fromMap(Map<String, dynamic> map) :
+    this.success = map[_success],
+    this.isError = map[_isError],
+    this.message = map[_message] ?? '';
+}
+
 /// [OrderOptions] - Описание данных заказа.
 /// [OrderOptions.orderId] - ID заказа в вашей системе.
 /// [OrderOptions.amount] - Сумма для оплаты в копейках.
@@ -81,7 +101,7 @@ class CustomerOptions {
   _arguments() => {
     _customerKey: customerKey,
     _email: email,
-    _checkType: _CheckType(checkType).toString()
+    _checkType: checkTypeString(checkType)
   };
 }
 
@@ -110,7 +130,7 @@ class FeaturesOptions {
     this.handleCardListErrorInSdk = true,
     this.enableCameraCardScanner = false,
     this.darkThemeMode = DarkThemeMode.auto,
-  }) : 
+  }) :
       assert(sbpEnabled != null, 'SBP boolean cannot be null'),
       assert(useSecureKeyboard != null, 'SecureKeyboard boolean cannot be null'),
       assert(handleCardListErrorInSdk != null, 'HandleError boolean cannot be null'),
@@ -122,32 +142,13 @@ class FeaturesOptions {
     _useSecureKeyboard: useSecureKeyboard ?? true,
     _handleCardListErrorInSdk: handleCardListErrorInSdk ?? true,
     _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
-    _darkThemeMode: _DarkThemeMode(darkThemeMode).toString(),
+    _darkThemeMode: darkThemeString(darkThemeMode),
   };
 }
 
 /// [LocalizationSource] - Языковая локализация экрана.
 enum LocalizationSource {
   ru, en
-}
-
-class _LocalizationSource {
-  final LocalizationSource source;
-
-  _LocalizationSource(this.source);
-
-  @override
-  String toString() {
-    switch (source) {
-      case LocalizationSource.en: {
-        return 'EN';
-      }
-      case LocalizationSource.ru:
-      default: {
-        return 'RU';
-      }
-    }
-  }
 }
 
 /// [DarkThemeMode] - Режим включения темной темы.
@@ -157,28 +158,6 @@ class _LocalizationSource {
 /// [DarkThemeMode.disabled] - Темная тема всегда выключена.
 enum DarkThemeMode {
   auto, disabled, enabled
-}
-
-class _DarkThemeMode {
-  final DarkThemeMode mode;
-
-  _DarkThemeMode(this.mode);
-
-  @override
-  String toString() {
-    switch (mode) {
-      case DarkThemeMode.enabled: {
-        return 'ENABLED';
-      }
-      case DarkThemeMode.disabled: {
-        return 'DISABLED';
-      }
-      case DarkThemeMode.auto:
-      default: {
-        return 'AUTO';
-      }
-    }
-  }
 }
 
 /// [CheckType] используется для создания платежа и привязки карты.
@@ -205,28 +184,3 @@ enum CheckType {
   threeDS,
   threeDS_hold
 }
-
-class _CheckType {
-  final CheckType type;
-
-  _CheckType(this.type);
-  
-  @override
-  String toString() {
-    switch (type) {
-      case CheckType.hold: {
-        return 'HOLD';
-      }
-      case CheckType.threeDS: {
-        return '3DS';
-      }
-      case CheckType.threeDS_hold: {
-        return '3DSHOLD';
-      }
-      case CheckType.no:
-      default: {
-        return 'NO';
-      }
-    }
-  }
-} 

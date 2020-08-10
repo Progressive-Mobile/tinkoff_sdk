@@ -21,9 +21,13 @@ package tech.pmobi.tinkoff_sdk;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Map;
 
@@ -40,19 +44,13 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 import ru.tinkoff.acquiring.sdk.AcquiringSdk;
 import ru.tinkoff.acquiring.sdk.TinkoffAcquiring;
-import ru.tinkoff.acquiring.sdk.localization.AsdkSource;
-import ru.tinkoff.acquiring.sdk.localization.Language;
-import ru.tinkoff.acquiring.sdk.models.DarkThemeMode;
+import ru.tinkoff.acquiring.sdk.exceptions.AcquiringApiException;
 import ru.tinkoff.acquiring.sdk.models.DefaultState;
-import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions;
-import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions;
-import ru.tinkoff.acquiring.sdk.models.options.OrderOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions;
-import ru.tinkoff.acquiring.sdk.utils.Money;
 
 public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
-    private static final String TAG = "TinkoffSdkPlugin.java";
+    private static final String TAG = "tinkoff_sdk";
 
     private static final int PAYMENT_REQUEST_CODE = 1001;
     private static final int ATTACH_CARD_REQUEST_CODE = 1002;
@@ -64,17 +62,36 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private Result result;
 
     private TinkoffAcquiring tinkoffAcquiring;
-    private String activeLanguage;
+    private TinkoffSdkParser parser;
 
     private PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
         @Override
         public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
             if (result != null) {
+                JSONObject json = new JSONObject();
+                String message;
+                final boolean success = resultCode == -1;
+
+                if (data != null && !success) {
+                    final Bundle bundle = data.getExtras();
+                    final AcquiringApiException exception = (AcquiringApiException) bundle.get(TinkoffAcquiring.EXTRA_ERROR);
+                    message = exception.getLocalizedMessage();
+                } else {
+                    message = success ? "Оплата прошла успешно" : "Закрытие экрана оплаты";
+                }
+
                 if (requestCode == PAYMENT_REQUEST_CODE) {
-                    result.success(resultCode == -1);
+                    try {
+                        json.put("success", success);
+                        json.put("isError", resultCode > 0);
+                        json.put("message", message);
+                    } catch (JSONException ex) {
+                        ex.printStackTrace();
+                    }
+                    result.success(json.toString());
                     result = null;
                 } else if (requestCode == ATTACH_CARD_REQUEST_CODE) {
-                    result.success(resultCode == -1);
+                    result.success(null);
                     result = null;
                 } else if (requestCode == QR_REQUEST_CODE) {
                     result.success(null);
@@ -145,8 +162,8 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
 
             AcquiringSdk.AsdkLogger.setDeveloperMode(isDeveloperMode);
             AcquiringSdk.AsdkLogger.setDebug(isDebug);
-            activeLanguage = language;
 
+            parser = new TinkoffSdkParser(language);
             tinkoffAcquiring = new TinkoffAcquiring(terminalKey, password, publicKey);
             result.success(true);
         } catch (Exception e) {
@@ -157,28 +174,9 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
 
     private void handleOpenPaymentScreen(MethodCall call) {
         try {
-            final PaymentOptions paymentOptions = new PaymentOptions();
-
             @SuppressWarnings("unchecked")
             final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-
-            // Get payment parameters.
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> orderOptionsArguments = (Map<String, Object>) arguments.get("orderOptions");
-            final OrderOptions order = parseOrderOptions(orderOptionsArguments);
-            paymentOptions.setOrder(order);
-
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> customerOptionsArguments = (Map<String, Object>) arguments.get("customerOptions");
-            final CustomerOptions customer = parseCustomerOptions(customerOptionsArguments);
-            paymentOptions.setCustomer(customer);
-
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> featuresOptionsArguments = (Map<String, Object>) arguments.get("featuresOptions");
-            if (featuresOptionsArguments != null) {
-                final FeaturesOptions features = parseFeatureOptions(featuresOptionsArguments);
-                paymentOptions.setFeatures(features);
-            }
+            final PaymentOptions paymentOptions = parser.createPaymentOptions(arguments);
 
             tinkoffAcquiring.openPaymentScreen(
                 (FragmentActivity) activity,
@@ -196,22 +194,9 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
 
     private void handleAttachCardScreen(MethodCall call) {
         try {
-            final AttachCardOptions options = new AttachCardOptions();
-
             @SuppressWarnings("unchecked")
             final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> customerOptionsArguments = (Map<String, Object>) arguments.get("customerOptions");
-            final CustomerOptions customer = parseCustomerOptions(customerOptionsArguments);
-            options.setCustomer(customer);
-
-            @SuppressWarnings("unchecked")
-            final Map<String, Object> featuresOptionsArguments = (Map<String, Object>) arguments.get("featuresOptions");
-            if (featuresOptionsArguments != null) {
-                final FeaturesOptions features = parseFeatureOptions(featuresOptionsArguments);
-                options.setFeatures(features);
-            }
+            final AttachCardOptions options = parser.createAttachCardOptions(arguments);
 
             tinkoffAcquiring.openAttachCardScreen(
                 (FragmentActivity) activity,
@@ -227,16 +212,6 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private void handleShowQrScreen(MethodCall call) {
         //TODO: implement method
         result.notImplemented();
-//        try {
-//            tinkoffAcquiring.openStaticQrScreen(
-//                (FragmentActivity) activity,
-//                new AsdkSource(parseLocalization(activeLanguage)),
-//                QR_REQUEST_CODE
-//            );
-//        } catch (Exception e) {
-//            result.error("Error opening QRScreen", e.getMessage(), null);
-//            result = null;
-//        }
     }
 
     private void handleOpenNativePayment(MethodCall call) {
@@ -247,81 +222,6 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private void handleStartCharge(MethodCall call) {
         //TODO: implement method
         result.notImplemented();
-    }
-
-    private OrderOptions parseOrderOptions(Map<String, Object> arguments) {
-        final OrderOptions orderOptions = new OrderOptions();
-
-        final Integer orderId = (Integer) arguments.get("orderId");
-        final long coins = (int) arguments.get("amount");
-        final String title = (String) arguments.get("title");
-        final String description = (String) arguments.get("description");
-        final boolean reccurentPayment = (boolean) arguments.get("reccurentPayment");
-
-        orderOptions.setOrderId(String.valueOf(orderId));
-        orderOptions.setRecurrentPayment(reccurentPayment);
-        orderOptions.setAmount(Money.Companion.ofCoins(coins));
-        orderOptions.setTitle(title);
-        orderOptions.setDescription(description);
-
-        return orderOptions;
-    }
-
-    private CustomerOptions parseCustomerOptions(Map<String, Object> arguments) {
-        final String customerKey = (String) arguments.get("customerKey");
-        final String email = (String) arguments.get("email");
-        final String checkType = (String) arguments.get("checkType");
-
-        final CustomerOptions customerOptions = new CustomerOptions();
-        customerOptions.setCustomerKey(customerKey);
-        customerOptions.setEmail(email);
-        customerOptions.setCheckType(checkType);
-
-        return customerOptions;
-    }
-
-    private FeaturesOptions parseFeatureOptions(Map<String, Object> arguments) {
-        final boolean fpsEnabled = (boolean) arguments.get("fpsEnabled");
-        final boolean useSecureKeyboard = (boolean) arguments.get("useSecureKeyboard");
-        final boolean handleCardListErrorInSdk = (boolean) arguments.get("handleCardListErrorInSdk");
-        final boolean enableCameraCardScanner = (boolean) arguments.get("enableCameraCardScanner");
-        final String darkThemeMode = (String) arguments.get("darkThemeMode");
-
-        DarkThemeMode darkMode;
-        switch (darkThemeMode) {
-            case "ENABLED":
-                darkMode = DarkThemeMode.ENABLED;
-                break;
-            case "DISABLED":
-                darkMode = DarkThemeMode.DISABLED;
-                break;
-            case "AUTO":
-            default:
-                darkMode = DarkThemeMode.AUTO;
-                break;
-        }
-
-        final FeaturesOptions featuresOptions = new FeaturesOptions();
-
-        featuresOptions.setFpsEnabled(fpsEnabled);
-        featuresOptions.setUseSecureKeyboard(useSecureKeyboard);
-        featuresOptions.setLocalizationSource(new AsdkSource(parseLocalization(activeLanguage)));
-        featuresOptions.setHandleCardListErrorInSdk(handleCardListErrorInSdk);
-        if (enableCameraCardScanner) {
-            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(activeLanguage));
-        }
-        featuresOptions.setDarkThemeMode(darkMode);
-        return featuresOptions;
-    }
-
-    private Language parseLocalization(String localization) {
-        switch (localization) {
-            case "EN":
-                return Language.EN;
-            case "RU":
-            default:
-                return Language.RU;
-        }
     }
 
     @Override
@@ -352,7 +252,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     }
 
     private void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
-        methodChannel = new MethodChannel(messenger, "tinkoff_sdk");
+        methodChannel = new MethodChannel(messenger, TAG);
         methodChannel.setMethodCallHandler(this);
     }
 

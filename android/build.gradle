@@ -36,6 +36,6 @@ android {
 
 dependencies {
     // Tinkoff SDK
-    implementation "ru.tinkoff.acquiring:ui:2.0.1"
+    implementation "ru.tinkoff.acquiring:ui:2.0.2"
     implementation "ru.tinkoff.acquiring:card-io:1.7.3"
 }

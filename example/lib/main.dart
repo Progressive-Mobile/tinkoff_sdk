@@ -220,7 +220,7 @@ class _MyAppState extends State<MyApp> {
                 customerOptions: _customerOptions,
                 featuresOptions: _featuresOptions
             )
-            .then((value) => print(value ? 'PaymentSuccess' : 'PaymentErrorOrCancel'))
+            .then(_showResultDialog)
             .catchError(_showErrorDialog);
           }
         : null,
@@ -314,6 +314,31 @@ class _MyAppState extends State<MyApp> {
       return null;
     else
       return text;
+  }
+
+  Future<Null> _showResultDialog(TinkoffResult result) async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Результат'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text('Success: ' + result.success.toString()),
+              Text('isError: ' + result.isError.toString()),
+              Text('Message: ' + result.message.toString()),
+            ],
+          ),
+          actions: [
+            RaisedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Ok'),
+            )
+          ],
+        )
+    );
   }
 
   Future<Null> _showErrorDialog(error) async {

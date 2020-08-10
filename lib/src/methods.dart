@@ -16,22 +16,20 @@
 
 */
 
-part of tinkoff_sdk;
-
 /// Methods
 
-class _Method {
+class Method {
   static const channel = 'tinkoff_sdk';
-  static const _Activate activate = const _Activate();
-  static const _OpenPaymentScreen openPaymentScreen = const _OpenPaymentScreen();
-  static const _AttachCardScreen attachCardScreen = const _AttachCardScreen();
-  static const _ShowQrScreen showQrScreen = const _ShowQrScreen();
-  static const _OpenNativePayment openNativePayment = const _OpenNativePayment();
-  static const _StartCharge startCharge = const _StartCharge();
+  static const Activate activate = const Activate();
+  static const OpenPaymentScreen openPaymentScreen = const OpenPaymentScreen();
+  static const AttachCardScreen attachCardScreen = const AttachCardScreen();
+  static const ShowQrScreen showQrScreen = const ShowQrScreen();
+  static const OpenNativePayment openNativePayment = const OpenNativePayment();
+  static const StartCharge startCharge = const StartCharge();
 }
 
-class _Activate {
-  const _Activate();
+class Activate {
+  const Activate();
 
   String get name => 'activate';
 
@@ -44,8 +42,8 @@ class _Activate {
   String get language => 'language';
 }
 
-class _OpenPaymentScreen {
-  const _OpenPaymentScreen();
+class OpenPaymentScreen {
+  const OpenPaymentScreen();
 
   String get name => 'openPaymentScreen';
 
@@ -54,8 +52,8 @@ class _OpenPaymentScreen {
   String get featuresOptions => 'featuresOptions';
 }
 
-class _AttachCardScreen {
-  const _AttachCardScreen();
+class AttachCardScreen {
+  const AttachCardScreen();
 
   String get name => 'attachCardScreen';
 
@@ -63,22 +61,22 @@ class _AttachCardScreen {
   String get featuresOptions => 'featuresOptions';
 }
 
-class _ShowQrScreen {
-  const _ShowQrScreen();
+class ShowQrScreen {
+  const ShowQrScreen();
 
   String get name => 'showQrScreen';
 
   String get localization => 'localizationSource';
 }
 
-class _OpenNativePayment {
-  const _OpenNativePayment();
+class OpenNativePayment {
+  const OpenNativePayment();
 
   String get name => 'openNativePayment';
 }
 
-class _StartCharge {
-  const _StartCharge();
+class StartCharge {
+  const StartCharge();
 
   String get name => 'startCharge';
 }

@@ -50,7 +50,8 @@ class Utils {
         }
         
         if navigator {
-            let view = UINavigationController();
+            let view = UINavigationController()
+            view.navigationBar.backgroundColor = UIColor.white
             view.isNavigationBarHidden = true
             view.addChild(UIViewController())
             topController.present(view, animated: true, completion: nil)
