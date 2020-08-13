@@ -130,6 +130,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             orderId: orderId,
             customerKey: customerKey
         )
+        paymentData.description = description
         paymentData.savingAsParentPayment = reccurentPayment
         
         let viewConfiguration = Utils.getViewConfiguration(
