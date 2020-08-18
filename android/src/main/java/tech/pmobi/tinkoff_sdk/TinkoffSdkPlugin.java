@@ -29,6 +29,7 @@ import androidx.fragment.app.FragmentActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import io.flutter.Log;
@@ -42,12 +43,16 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
+import kotlin.Unit;
 import ru.tinkoff.acquiring.sdk.AcquiringSdk;
 import ru.tinkoff.acquiring.sdk.TinkoffAcquiring;
 import ru.tinkoff.acquiring.sdk.exceptions.AcquiringApiException;
+import ru.tinkoff.acquiring.sdk.models.Card;
 import ru.tinkoff.acquiring.sdk.models.DefaultState;
-import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions;
+import ru.tinkoff.acquiring.sdk.models.enums.CardStatus;
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions;
+import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions;
+import ru.tinkoff.acquiring.sdk.requests.GetCardListRequest;
 
 public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
     private static final String TAG = "tinkoff_sdk";
@@ -62,6 +67,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private Result result;
 
     private TinkoffAcquiring tinkoffAcquiring;
+    private AcquiringSdk sdk;
     private TinkoffSdkParser parser;
 
     private PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
@@ -127,6 +133,9 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             case "activate":
                 handleActivate(call);
                 break;
+            case "cardList":
+                handleCardList(call);
+                break;
             case "openPaymentScreen":
                 handleOpenPaymentScreen(call);
                 break;
@@ -165,11 +174,70 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
 
             parser = new TinkoffSdkParser(language);
             tinkoffAcquiring = new TinkoffAcquiring(terminalKey, password, publicKey);
+            sdk = new AcquiringSdk(terminalKey, password, publicKey);
+                sdk.init(initRequest -> Unit.INSTANCE);
+
             result.success(true);
         } catch (Exception e) {
             result.success(false);
         }
         result = null;
+    }
+
+    private void handleCardList(MethodCall call) {
+        try {
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+            final String customerKey = (String) arguments.get("customerKey");
+
+            final GetCardListRequest request = sdk.getCardList(r -> {
+                r.setCustomerKey(customerKey);
+                return Unit.INSTANCE;
+            });
+
+            Thread thread = new Thread(() -> {
+                request.execute(
+                    response -> {
+                        activity.runOnUiThread(() -> {
+                            final Card[] cards = response.getCards();
+                            final ArrayList<String> cardsList = new ArrayList();
+
+                            for (final Card card : cards) {
+                                if (card.getStatus() == CardStatus.ACTIVE) {
+                                    JSONObject json = new JSONObject();
+                                    try {
+                                        json.put("cardId", card.getCardId());
+                                        json.put("pan", card.getPan());
+                                        json.put("expDate", card.getExpDate());
+                                        cardsList.add(json.toString());
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }
+
+                            result.success(cardsList);
+                            result = null;
+                        });
+                        return Unit.INSTANCE;
+                    },
+                    e -> {
+                        activity.runOnUiThread(() -> {
+                            result.success(new ArrayList());
+                            result = null;
+                        });
+
+                        return Unit.INSTANCE;
+                    }
+                );
+            });
+            thread.start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.success(new ArrayList());
+            result = null;
+        }
     }
 
     private void handleOpenPaymentScreen(MethodCall call) {
@@ -196,9 +264,9 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
         try {
             @SuppressWarnings("unchecked")
             final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
-            final AttachCardOptions options = parser.createAttachCardOptions(arguments);
+            final SavedCardsOptions options = parser.createSavedCardOptions(arguments);
 
-            tinkoffAcquiring.openAttachCardScreen(
+            tinkoffAcquiring.openSavedCardsScreen(
                 (FragmentActivity) activity,
                 options,
                 ATTACH_CARD_REQUEST_CODE

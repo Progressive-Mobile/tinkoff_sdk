@@ -40,6 +40,26 @@ class TinkoffResult {
     this.message = map[_message] ?? '';
 }
 
+class CardData {
+  static const _cardId = 'cardId';
+  static const _pan = 'pan';
+  static const _expDate = 'expDate';
+
+  final String cardId;
+  final String pan;
+  final String expDate;
+
+  CardData.fromMap(Map<String, dynamic> map) :
+    this.cardId = map[_cardId],
+    this.pan = map[_pan],
+    this.expDate = map[_expDate];
+
+  @override
+  String toString() {
+    return '$runtimeType("cardId":$cardId, "pan":$pan, "expDate":$expDate)';
+  }
+}
+
 /// [OrderOptions] - Описание данных заказа.
 /// [OrderOptions.orderId] - ID заказа в вашей системе.
 /// [OrderOptions.amount] - Сумма для оплаты в копейках.

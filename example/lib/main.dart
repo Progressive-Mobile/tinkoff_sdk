@@ -157,6 +157,7 @@ class _MyAppState extends State<MyApp> {
         _getFeatureCard(),
         SizedBox(height: 8.0),
         _getPaymentAction(),
+        _getCardsAction(),
       ],
     );
   }
@@ -225,6 +226,17 @@ class _MyAppState extends State<MyApp> {
           }
         : null,
       child: Text('Тестовая оплата'),
+    );
+  }
+
+  Widget _getCardsAction() {
+    return RaisedButton(
+      onPressed: _customerOptions?.customerKey != null
+        ? () {
+            acquiring.getCardList(_customerOptions.customerKey);
+          }
+        : null,
+      child: Text('Список карт'),
     );
   }
 

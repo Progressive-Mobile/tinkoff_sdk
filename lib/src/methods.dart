@@ -26,6 +26,7 @@ class Method {
   static const ShowQrScreen showQrScreen = const ShowQrScreen();
   static const OpenNativePayment openNativePayment = const OpenNativePayment();
   static const StartCharge startCharge = const StartCharge();
+  static const GetCardList getCardList = const GetCardList();
 }
 
 class Activate {
@@ -79,4 +80,12 @@ class StartCharge {
   const StartCharge();
 
   String get name => 'startCharge';
+}
+
+class GetCardList {
+  const GetCardList();
+
+  String get name => 'cardList';
+
+  String get customerKey => 'customerKey';
 }

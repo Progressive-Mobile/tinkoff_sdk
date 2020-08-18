@@ -50,7 +50,7 @@ class TinkoffSdk {
   /// Флаги ниже используются для тестирования настроек эквайринга:
   /// [isDeveloperMode] - Тестовый URL (в этом режиме деньги с карт не списываются).
   /// [logging] - Логирование запросов.
-  Future<void> activate({
+  Future<bool> activate({
     @required String terminalKey,
     @required String password,
     @required String publicKey,
@@ -81,6 +81,22 @@ class TinkoffSdk {
     else
       throw 'Cannot activate TinkoffSDK.'
             '\nOne or more of parameters are invalid.';
+
+    return activated;
+  }
+
+  Future<List<CardData>> getCardList(String customerKey) async {
+    _checkActivated();
+
+    final method = Method.getCardList;
+
+    final arguments = <String, dynamic> {
+      method.customerKey: customerKey
+    };
+
+    return _channel
+        .invokeMethod(method.name, checkNullArguments(arguments))
+        .then(parseCardListResult);
   }
 
   /// Открытие экрана оплаты.
@@ -121,9 +137,6 @@ class TinkoffSdk {
   }
 
   /// Открытие экрана привязки карт.
-  ///
-  /// iOS - [Completer] завершается сразу после вызова экрана.
-  /// Android - [Completer] завершается после закрытия экрана.
   ///
   /// Подробное описание параметров см. в реализации
   /// [CustomerOptions], [FeaturesOptions].

@@ -38,8 +38,8 @@ class Utils {
         self.language = language
     }
     
-    static func getLanguage() -> AcquiringViewConfigration.LocalizableInfo! {
-       return AcquiringViewConfigration.LocalizableInfo.init(lang: self.language)
+    static func getLanguage() -> AcquiringViewConfiguration.LocalizableInfo! {
+       return AcquiringViewConfiguration.LocalizableInfo.init(lang: self.language)
     }
     
     static func getView(_ navigator: Bool = false) -> UIViewController {
@@ -68,10 +68,10 @@ class Utils {
         enableSPB: Bool,
         email: String? = nil,
         _ scanner: AcquiringScanerProtocol? = nil
-    ) -> AcquiringViewConfigration {
+    ) -> AcquiringViewConfiguration {
         //!TODO: Локализация экрана оплаты
         
-        let viewConfigration = AcquiringViewConfigration.init()
+        let viewConfigration = AcquiringViewConfiguration.init()
 
         viewConfigration.scaner = scanner
 
@@ -95,7 +95,7 @@ class Utils {
         
         // Добавление заголовка
         viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.amount(
+            AcquiringViewConfiguration.InfoFields.amount(
                 title: paymentTitle,
                 amount: amountTitle
             )
@@ -121,14 +121,14 @@ class Utils {
         
         /// Добавление поля для описания покупки
         viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.detail(
+            AcquiringViewConfiguration.InfoFields.detail(
                 title: productDetail
             )
         )
         
         /// Добавление поля для ввода E-mail адреса
         viewConfigration.fields.append(
-            AcquiringViewConfigration.InfoFields.email(
+            AcquiringViewConfiguration.InfoFields.email(
                 value: email,
                 placeholder: "E-mail для получения квитанции"
             )
@@ -136,12 +136,18 @@ class Utils {
         
         /// Добавление кнопки "Оплатить с помощью СПБ"
         if (enableSPB) {
-            viewConfigration.fields.append(AcquiringViewConfigration.InfoFields.buttonPaySPB)
+            viewConfigration.fields.append(AcquiringViewConfiguration.InfoFields.buttonPaySPB)
         }
         
-        viewConfigration.localizableInfo = AcquiringViewConfigration.LocalizableInfo.init(lang: language.lowercased())
+        viewConfigration.localizableInfo = AcquiringViewConfiguration.LocalizableInfo.init(lang: language.lowercased())
         viewConfigration.alertViewHelper = nil
         
         return viewConfigration
+    }
+    
+    static func prepareJson(_ dictionary: Dictionary<String, Any>) -> String? {
+        let jsonData = try? JSONSerialization.data(withJSONObject: dictionary, options: .prettyPrinted)
+        let json = String(data: jsonData!, encoding: .utf8)
+        return json
     }
 }

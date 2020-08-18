@@ -28,6 +28,7 @@ import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions;
 import ru.tinkoff.acquiring.sdk.models.options.OrderOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions;
+import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions;
 import ru.tinkoff.acquiring.sdk.utils.Money;
 
 class TinkoffSdkParser {
@@ -37,8 +38,8 @@ class TinkoffSdkParser {
         this.language = language;
     }
 
-    AttachCardOptions createAttachCardOptions(Map<String, Object> arguments) {
-        final AttachCardOptions options = new AttachCardOptions();
+    SavedCardsOptions createSavedCardOptions(Map<String, Object> arguments) {
+        final SavedCardsOptions options = new SavedCardsOptions();
 
         @SuppressWarnings("unchecked")
         final Map<String, Object> customerOptionsArguments = (Map<String, Object>) arguments.get("customerOptions");

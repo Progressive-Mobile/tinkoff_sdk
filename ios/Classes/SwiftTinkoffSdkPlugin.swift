@@ -24,6 +24,7 @@ import TinkoffASDKCore
 
 public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private var acquiring: AcquiringUISDK!
+    private var sdk: AcquiringSdk!
     private var awaitingResult: Bool!
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -37,6 +38,9 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "activate":
             handleActivate(call, result: result)
+            break
+        case "cardList":
+            handleCardList(call, result: result)
             break
         case "openPaymentScreen":
             handleOpenPaymentScreen(call, result: result)
@@ -97,33 +101,62 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         ) {
             self.acquiring = sdk
             result(true)
+            self.sdk = try! AcquiringSdk.init(configuration: configuration)
         } else {
             result(false)
         }
         awaitingResult = false
     }
     
+    private func handleCardList(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args = call.arguments as? Dictionary<String, Any>
+        let customerKey = args!["customerKey"] as! String
+        
+        let provider = CardListDataProvider.init(sdk: sdk, customerKey: customerKey)
+        
+        var cardList = [] as [String?]
+
+        provider.fetch(startHandler: nil) { (cards, _) in
+            if cards != nil {
+                let cardsAmount = cards!.count
+                if (cardsAmount > 0) {
+                    for index in 0...cardsAmount-1 {
+                        var map = Dictionary<String, Any>()
+                        let card = provider.item(at: index)
+                        map["cardId"] = card.cardId
+                        map["pan"] = card.pan
+                        map["expDate"] = card.expDate
+                        cardList.append(Utils.prepareJson(map))
+                    }
+                }
+            }
+            
+            result(cardList)
+            self.awaitingResult = false
+        }
+    }
+    
     private func handleOpenPaymentScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         
-        let orderOprionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
-        let orderId = orderOprionsArgs!["orderId"] as! Int64
-        let coins = orderOprionsArgs!["amount"] as! Int64
-        let title = orderOprionsArgs!["title"] as! String
-        let description = orderOprionsArgs!["description"] as! String
-        let reccurentPayment = orderOprionsArgs!["reccurentPayment"] as! Bool
+        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
+        let orderId = orderOptionsArgs!["orderId"] as! Int64
+        let coins = orderOptionsArgs!["amount"] as! Int64
+        let title = orderOptionsArgs!["title"] as! String
+        let description = orderOptionsArgs!["description"] as! String
+        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
         
-        let customerOprionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
-        let customerKey = customerOprionsArgs?["customerKey"] as! String
-        let email = customerOprionsArgs?["email"] as? String
-        let checkType = customerOprionsArgs!["checkType"] as! String
+        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
+        let customerKey = customerOptionsArgs?["customerKey"] as! String
+        let email = customerOptionsArgs?["email"] as? String
+        let checkType = customerOptionsArgs!["checkType"] as! String
         
-        let featuresOprionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-        let fpsEnabled = featuresOprionsArgs!["fpsEnabled"] as! Bool
-        let cameraCardScannerEnabled = featuresOprionsArgs!["enableCameraCardScanner"] as! Bool
+        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
+        let fpsEnabled = featuresOptionsArgs!["fpsEnabled"] as! Bool
+        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
         
-//        let useSecureKeyboard = featuresOprionsArgs!["useSecureKeyboard"] as! Bool
-//        let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
+//        let useSecureKeyboard = featuresOptionsArgs!["useSecureKeyboard"] as! Bool
+//        let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
         
         var paymentData = PaymentInitData(
             amount: coins,
@@ -164,34 +197,46 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleAttachCardScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         
-        let customerOprionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
-        let customerKey = customerOprionsArgs?["customerKey"] as! String
-        let checkType = customerOprionsArgs!["checkType"] as! String
+        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
+        let customerKey = customerOptionsArgs?["customerKey"] as! String
+        let checkType = customerOptionsArgs!["checkType"] as! String
         
-        let featuresOprionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-        let cameraCardScannerEnabled = featuresOprionsArgs!["enableCameraCardScanner"] as! Bool
-        //let darkThemeMode = featuresOprionsArgs!["darkThemeMode"] as! String
+        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
+        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
+        //let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
         
-        let cardListViewConfigration = AcquiringViewConfigration.init()
-        cardListViewConfigration.viewTitle = NSLocalizedString("title.paymentCardList", comment: "Список карт")
+        let cardListViewConfiguration = AcquiringViewConfiguration.init()
         
         if (cameraCardScannerEnabled) {
-            cardListViewConfigration.scaner = self
+            cardListViewConfiguration.scaner = self
         }
 
-        cardListViewConfigration.localizableInfo = Utils.getLanguage()
-        
+        cardListViewConfiguration.localizableInfo = Utils.getLanguage()
+        let controller = Utils.getView()
         self.acquiring.presentCardList(
             on: Utils.getView(),
             customerKey: customerKey,
-            configuration: cardListViewConfigration
+            configuration: cardListViewConfiguration
         )
+
+        checkForDismiss(controller, result: result)
+
         acquiring.addCardNeedSetCheckTypeHandler = {
             return PaymentCardCheckType.init(rawValue: checkType)
         }
+    }
+    
+    private func checkForDismiss(_ controller: UIViewController, result: @escaping FlutterResult) {
+        let showing = controller.presentedViewController != nil
         
-        result(nil)
-        awaitingResult = false
+        if (showing) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                self.checkForDismiss(controller, result: result)
+            }
+        } else {
+            result(nil)
+            awaitingResult = false
+        }
     }
     
     private func handleShowQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -239,10 +284,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             map["message"] = result.localizedDescription.split(separator: "(").last?.split(separator: ".").first
         }
         
-        let jsonData = try? JSONSerialization.data(withJSONObject: map, options: .prettyPrinted)
-        let json = String(data: jsonData!, encoding: .utf8)
-        
-        flutterResult(json)
+        flutterResult(Utils.prepareJson(map))
         awaitingResult = false
     }
 }
