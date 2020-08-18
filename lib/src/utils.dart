@@ -38,7 +38,7 @@ List<CardData> parseCardListResult(dynamic result) {
       cards.add(card);
     }
   }
-  print(cards);
+
   return cards;
 }
 
