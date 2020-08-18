@@ -178,15 +178,13 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             viewConfiguration.scaner = self
         }
         
-        let view = Utils.getView(true)
+        let view = Utils.getView()
         
         self.acquiring.presentPaymentView(
             on: view,
             paymentData: paymentData,
             configuration: viewConfiguration,
-            completionHandler: setPaymentHandler(flutterResult: result) {
-                view.dismiss(animated: true, completion: nil)
-            }!
+            completionHandler: setPaymentHandler(flutterResult: result)!
         )
 
         acquiring.addCardNeedSetCheckTypeHandler = {
