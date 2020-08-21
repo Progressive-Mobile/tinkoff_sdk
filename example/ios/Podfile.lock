@@ -2,10 +2,10 @@ PODS:
   - Flutter (1.0.0)
   - tinkoff_sdk (0.0.1):
     - Flutter
-    - TinkoffASDKCore (= 2.0.2)
-    - TinkoffASDKUI (= 2.0.2)
-  - TinkoffASDKCore (2.0.2)
-  - TinkoffASDKUI (2.0.2):
+    - TinkoffASDKCore (= 2.0.3)
+    - TinkoffASDKUI (= 2.0.3)
+  - TinkoffASDKCore (2.0.3)
+  - TinkoffASDKUI (2.0.3):
     - TinkoffASDKCore
 
 DEPENDENCIES:
@@ -25,9 +25,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  tinkoff_sdk: 79417cf360348b5b280bf4f6326830a5d0e53878
-  TinkoffASDKCore: c03e116cce0a5fb9274216b2f4268866d55045b2
-  TinkoffASDKUI: b947063a1e53630f0ea57c26a42880d575867483
+  tinkoff_sdk: dc0204d6228f47372f04cd90e0999c68f9bfeed6
+  TinkoffASDKCore: 6c68273c6fdc61f14c8ec69c6e630304bf398565
+  TinkoffASDKUI: 331c3cf67982dff2ee663505245f3eda6afa1122
 
 PODFILE CHECKSUM: 03ca1bf1c64dc8b19c6e4677c8bd060771e18859
 
