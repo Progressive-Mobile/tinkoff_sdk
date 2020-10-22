@@ -140,7 +140,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         
         let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
-        let orderId = orderOptionsArgs!["orderId"] as! Int64
+        let orderId = orderOptionsArgs!["orderId"] as! String
         let coins = orderOptionsArgs!["amount"] as! Int64
         let title = orderOptionsArgs!["title"] as! String
         let description = orderOptionsArgs!["description"] as! String
@@ -165,6 +165,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         )
         paymentData.description = description
         paymentData.savingAsParentPayment = reccurentPayment
+        paymentData.payType = .twoStage
         
         let viewConfiguration = Utils.getViewConfiguration(
             title: title,

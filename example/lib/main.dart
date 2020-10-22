@@ -417,7 +417,7 @@ class _MyAppState extends State<MyApp> {
     final orderId = _emptyStringToNull(orderIdController.text);
     setState(() {
       _orderOptions = OrderOptions(
-        orderId: orderId != null ? int.tryParse(orderId) : null,
+        orderId: orderId,
         amount: int.tryParse(amountController.text),
         title: titleController.text,
         description: descriptionController.text,

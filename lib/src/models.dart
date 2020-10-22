@@ -73,7 +73,7 @@ class OrderOptions {
   static const String _description = 'description';
   static const String _reccurent = 'reccurentPayment';
 
-  final int orderId;
+  final String orderId;
   final int amount;
   final String title;
   final String description;

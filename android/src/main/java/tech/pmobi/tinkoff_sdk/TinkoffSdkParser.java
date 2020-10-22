@@ -82,13 +82,13 @@ class TinkoffSdkParser {
     OrderOptions parseOrderOptions(Map<String, Object> arguments) {
         final OrderOptions orderOptions = new OrderOptions();
 
-        final Integer orderId = (Integer) arguments.get("orderId");
+        final String orderId = (String) arguments.get("orderId");
         final long coins = (int) arguments.get("amount");
         final String title = (String) arguments.get("title");
         final String description = (String) arguments.get("description");
         final boolean reccurentPayment = (boolean) arguments.get("reccurentPayment");
 
-        orderOptions.setOrderId(String.valueOf(orderId));
+        orderOptions.setOrderId(orderId);
         orderOptions.setRecurrentPayment(reccurentPayment);
         orderOptions.setAmount(Money.Companion.ofCoins(coins));
         orderOptions.setTitle(title);
