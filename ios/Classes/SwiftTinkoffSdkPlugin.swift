@@ -46,16 +46,19 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             handleOpenPaymentScreen(call, result: result)
             break
         case "attachCardScreen":
-            handleAttachCardScreen(call, result: result);
+            handleAttachCardScreen(call, result: result)
             break
         case "showQrScreen":
-            handleShowQrScreen(call, result: result);
+            handleShowQrScreen(call, result: result)
+            break
+        case "isNativePayAvailable":
+            handleIsNativePayAvailable(call, result: result)
             break
         case "openNativePayment":
-            handleOpenNativePayment(call, result: result);
+            handleOpenNativePayment(call, result: result)
             break
         case "startCharge":
-            handleStartCharge(call, result: result);
+            handleStartCharge(call, result: result)
             break
         default:
             result(FlutterMethodNotImplemented)
@@ -100,8 +103,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             configuration: configuration
         ) {
             self.acquiring = sdk
-            result(true)
             self.sdk = try! AcquiringSdk.init(configuration: configuration)
+            result(true)
         } else {
             result(false)
         }
@@ -165,7 +168,9 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         )
         paymentData.description = description
         paymentData.savingAsParentPayment = reccurentPayment
-        paymentData.payType = .twoStage
+        if (reccurentPayment) {
+            paymentData.payType = .twoStage
+        }
         
         let viewConfiguration = Utils.getViewConfiguration(
             title: title,
@@ -174,6 +179,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             enableSPB: fpsEnabled,
             email: email
         )
+        viewConfiguration.localizableInfo = Utils.getLanguage()
         
         if cameraCardScannerEnabled {
             viewConfiguration.scaner = self
@@ -185,7 +191,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             on: view,
             paymentData: paymentData,
             configuration: viewConfiguration,
-            completionHandler: setPaymentHandler(flutterResult: result)!
+            completionHandler: setPaymentHandler(view, flutterResult: result)
         )
 
         acquiring.addCardNeedSetCheckTypeHandler = {
@@ -213,7 +219,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         cardListViewConfiguration.localizableInfo = Utils.getLanguage()
         let controller = Utils.getView()
         self.acquiring.presentCardList(
-            on: Utils.getView(),
+            on: controller,
             customerKey: customerKey,
             configuration: cardListViewConfiguration
         )
@@ -244,10 +250,52 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         awaitingResult = false
     }
     
-    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        //TODO: implement method
-        result(FlutterMethodNotImplemented)
+    private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
+        let initializated = self.acquiring != nil && self.sdk != nil
+        result(initializated)
         awaitingResult = false
+    }
+    
+    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args = call.arguments as? Dictionary<String, Any>
+        
+        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
+        let orderId = orderOptionsArgs!["orderId"] as! String
+        let coins = orderOptionsArgs!["amount"] as! Int64
+        let title = orderOptionsArgs!["title"] as! String
+        let description = orderOptionsArgs!["description"] as! String
+        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
+        
+        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
+        let customerKey = customerOptionsArgs?["customerKey"] as! String
+        let email = customerOptionsArgs?["email"] as? String
+        
+        var paymentData = PaymentInitData(
+            amount: coins,
+            orderId: orderId,
+            customerKey: customerKey
+        )
+        paymentData.description = description
+        paymentData.savingAsParentPayment = reccurentPayment
+        if (reccurentPayment) {
+            paymentData.payType = .twoStage
+        }
+        
+        let viewConfiguration = Utils.getViewConfiguration(
+            title: title,
+            description: description,
+            amount: coins,
+            email: email
+        )
+        viewConfiguration.localizableInfo = Utils.getLanguage()
+        
+        let view = Utils.getView()
+        
+        self.acquiring.presentPaymentApplePay(on: view,
+                                              paymentData: paymentData,
+                                              viewConfiguration: viewConfiguration,
+                                              paymentConfiguration: .init(),
+                                              completionHandler: setPaymentHandler(view, flutterResult: result))
     }
     
     private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -256,20 +304,24 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         awaitingResult = false
     }
     
-    private func setPaymentHandler(flutterResult: @escaping FlutterResult) -> PaymentCompletionHandler? {
-        let handler: PaymentCompletionHandler? = {[weak self] (response) in self?.responseReviewing(response, flutterResult: flutterResult)}
-        return handler
+    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult) -> PaymentCompletionHandler {
+        return setPaymentHandler(view, flutterResult: flutterResult) {}
     }
     
-    private func setPaymentHandler(flutterResult: @escaping FlutterResult, additional: @escaping () -> Void) -> PaymentCompletionHandler? {
-        let handler: PaymentCompletionHandler? = {
-            [weak self] (response) in self?.responseReviewing(response, flutterResult: flutterResult)
-            additional()
+    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult, additional: @escaping () -> Void) -> PaymentCompletionHandler {
+        let handler: PaymentCompletionHandler = {[weak self] (response) in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                if (view.presentedViewController == nil) {
+                    self?.responseReviewing(response, flutterResult: flutterResult)
+                    additional()
+                }
+            }
         }
         return handler
     }
 
-    private func responseReviewing(_ response: Result<PaymentStatusResponse, Error>, flutterResult: @escaping FlutterResult) {
+    private func responseReviewing(_ response: Result<PaymentStatusResponse, Error>,
+                                   flutterResult: FlutterResult) {
         var map = Dictionary<String, Any>()
         switch response {
         case .success(let result):

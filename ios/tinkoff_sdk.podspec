@@ -9,8 +9,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'TinkoffASDKCore', '2.1.1'
-  s.dependency 'TinkoffASDKUI', '2.1.1'
+  s.dependency 'TinkoffASDKCore', '2.2.2'
+  s.dependency 'TinkoffASDKUI', '2.2.2'
   s.platform = :ios, '11.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }

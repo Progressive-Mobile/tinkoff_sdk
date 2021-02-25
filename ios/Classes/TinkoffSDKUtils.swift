@@ -65,9 +65,9 @@ class Utils {
         title: String,
         description: String,
         amount: Int64,
-        enableSPB: Bool,
+        enableSPB: Bool = false,
         email: String? = nil,
-        _ scanner: AcquiringScanerProtocol? = nil
+        scanner: AcquiringScanerProtocol? = nil
     ) -> AcquiringViewConfiguration {
         //!TODO: Локализация экрана оплаты
         
