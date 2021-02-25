@@ -251,8 +251,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
-        let initializated = self.acquiring != nil && self.sdk != nil
-        result(initializated)
+        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: .init()) ?? false
+        result(canMakePayments)
         awaitingResult = false
     }
     
