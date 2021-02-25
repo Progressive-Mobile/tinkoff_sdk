@@ -137,9 +137,9 @@ class TinkoffSdkParser {
         featuresOptions.setUseSecureKeyboard(useSecureKeyboard);
         featuresOptions.setLocalizationSource(new AsdkSource(parseLocalization(language)));
         featuresOptions.setHandleCardListErrorInSdk(handleCardListErrorInSdk);
-        if (enableCameraCardScanner) {
-            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(language));
-        }
+//        if (enableCameraCardScanner) {
+//            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(language));
+//        }
         featuresOptions.setDarkThemeMode(darkMode);
         return featuresOptions;
     }

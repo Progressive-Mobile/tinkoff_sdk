@@ -45,6 +45,7 @@ class TinkoffSdk {
   /// [publicKey] - Публичный ключ. Используется для шифрования данных.
   ///               Необходим для интеграции вашего приложения с интернет-эквайрингом Тинькофф.
   ///
+  /// [configureNativePay] отвечает за возможность проведения оплат через Google Pay / ApplePay.
   /// [language] - Язык
   ///
   /// Флаги ниже используются для тестирования настроек эквайринга:
@@ -54,10 +55,11 @@ class TinkoffSdk {
     @required String terminalKey,
     @required String password,
     @required String publicKey,
-    
+    bool configureNativePay = false,
+    LocalizationSource language = LocalizationSource.ru,
+
     bool isDeveloperMode = false,
     bool logging = false,
-    LocalizationSource language = LocalizationSource.ru,
   }) async {
     final method = Method.activate;
 
@@ -65,7 +67,8 @@ class TinkoffSdk {
       method.terminalKey: terminalKey,
       method.password: password,
       method.publicKey: publicKey,
-
+      method.nativePay: configureNativePay,
+      
       method.isDeveloperMode: isDeveloperMode,
       method.isDebug: logging,
       method.language: localizationString(language)
@@ -174,13 +177,31 @@ class TinkoffSdk {
         .then(parseTinkoffResult);
   }
 
+  Future<bool> get isNativePayAvailable async {
+    _checkActivated();
+    return _channel.invokeMethod(Method.isNativePayAvailable.name);
+  }
 
   // TODO: implement ApplePay + GooglePay
-  Future<TinkoffResult> openNativePaymentScreen() async {
+  Future<TinkoffResult> openNativePaymentScreen({
+    @required OrderOptions orderOptions,
+    @required CustomerOptions customerOptions,
+  }) async {
     _checkActivated();
+    if (!await isNativePayAvailable)
+      throw "Native payments isn't available.";
+    
     final method = Method.openNativePayment;
 
-    final arguments = <String, dynamic> {};
+    final arguments = <String, dynamic> {
+      method.orderOptions: checkNullArguments(
+          orderOptions._arguments()
+      ),
+      method.customerOptions: checkNullArguments(
+          customerOptions._arguments(),
+          ignore: [CustomerOptions._email]
+      ),
+    };
 
     return _channel
         .invokeMethod(method.name, arguments)

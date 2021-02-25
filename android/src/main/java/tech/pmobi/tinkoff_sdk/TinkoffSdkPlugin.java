@@ -26,6 +26,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.wallet.WalletConstants;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -47,12 +51,17 @@ import kotlin.Unit;
 import ru.tinkoff.acquiring.sdk.AcquiringSdk;
 import ru.tinkoff.acquiring.sdk.TinkoffAcquiring;
 import ru.tinkoff.acquiring.sdk.exceptions.AcquiringApiException;
+import ru.tinkoff.acquiring.sdk.models.AsdkState;
 import ru.tinkoff.acquiring.sdk.models.Card;
 import ru.tinkoff.acquiring.sdk.models.DefaultState;
+import ru.tinkoff.acquiring.sdk.models.GooglePayParams;
 import ru.tinkoff.acquiring.sdk.models.enums.CardStatus;
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions;
+import ru.tinkoff.acquiring.sdk.payment.PaymentListener;
+import ru.tinkoff.acquiring.sdk.payment.PaymentState;
 import ru.tinkoff.acquiring.sdk.requests.GetCardListRequest;
+import ru.tinkoff.acquiring.sdk.utils.GooglePayHelper;
 
 public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
     private static final String TAG = "tinkoff_sdk";
@@ -61,6 +70,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private static final int ATTACH_CARD_REQUEST_CODE = 1002;
     private static final int QR_REQUEST_CODE = 1003;
     private static final int REQUEST_CAMERA_CARD_SCAN = 4123;
+    private static final int GOOGLE_PAY_REQUEST_CODE = 5001;
 
     private Activity activity;
     private MethodChannel methodChannel;
@@ -70,31 +80,55 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     private AcquiringSdk sdk;
     private TinkoffSdkParser parser;
 
+    private GooglePayHelper googlePayHelper;
+    private boolean isGooglePayEnabled = false;
+    private PaymentOptions shadowPaymentOptions;
+
+    private PaymentListener paymentListener = new PaymentListener() {
+        @Override
+        public void onSuccess(long l, @Nullable String s, @Nullable String s1) {
+            if (result == null) return;
+
+            shadowPaymentOptions = null;
+            result.success(createResult(-1, null).toString());
+            result = null;
+        }
+
+        @Override
+        public void onUiNeeded(@NotNull AsdkState asdkState) {
+            tinkoffAcquiring.openPaymentScreen(
+                (FragmentActivity) activity,
+                shadowPaymentOptions,
+                PAYMENT_REQUEST_CODE,
+                asdkState
+            );
+        }
+
+        @Override
+        public void onError(@NotNull Throwable throwable) {
+            if (result == null) return;
+
+            final String locMessage = throwable.getLocalizedMessage();
+            final String message = throwable.getMessage();
+            result.error(locMessage, message, null);
+            result = null;
+        }
+
+        @Override
+        public void onStatusChanged(@Nullable PaymentState paymentState) {
+            final String state = paymentState != null ? paymentState.toString() : "null";
+            Log.i(TAG, "PaymentListener onStatusChanged: " + state);
+        }
+    };
+
     private PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
         @Override
         public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
             if (result != null) {
-                JSONObject json = new JSONObject();
-                String message;
-                final boolean success = resultCode == -1;
-
-                if (data != null && !success) {
-                    final Bundle bundle = data.getExtras();
-                    final AcquiringApiException exception = (AcquiringApiException) bundle.get(TinkoffAcquiring.EXTRA_ERROR);
-                    message = exception.getLocalizedMessage();
-                } else {
-                    message = success ? "Оплата прошла успешно" : "Закрытие экрана оплаты";
-                }
 
                 if (requestCode == PAYMENT_REQUEST_CODE) {
-                    try {
-                        json.put("success", success);
-                        json.put("isError", resultCode > 0);
-                        json.put("message", message);
-                    } catch (JSONException ex) {
-                        ex.printStackTrace();
-                    }
-                    result.success(json.toString());
+                    result.success(createResult(resultCode, data).toString());
+                    shadowPaymentOptions = null;
                     result = null;
                 } else if (requestCode == ATTACH_CARD_REQUEST_CODE) {
                     result.success(null);
@@ -102,11 +136,38 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
                 } else if (requestCode == QR_REQUEST_CODE) {
                     result.success(null);
                     result = null;
+                } else if (requestCode == GOOGLE_PAY_REQUEST_CODE) {
+                    handleGooglePayResult(resultCode, data);
                 }
             }
             return false;
         }
     };
+
+    private JSONObject createResult(int resultCode, Intent data) {
+        JSONObject json = new JSONObject();
+        String message;
+        final boolean success = resultCode == -1;
+
+        if (data != null && !success) {
+            final Bundle bundle = data.getExtras();
+            final AcquiringApiException exception = (AcquiringApiException) bundle.get(TinkoffAcquiring.EXTRA_ERROR);
+                message = exception != null
+                    ? exception.getLocalizedMessage()
+                    : "Неизвестная ошибка";
+        } else {
+            message = success ? "Оплата прошла успешно" : "Закрытие экрана оплаты";
+        }
+
+        try {
+            json.put("success", success);
+            json.put("isError", resultCode > 0);
+            json.put("message", message);
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+        }
+        return json;
+    }
 
     // Supporting FlutterEmbedding v1
     public static void registerWith(Registrar registrar) {
@@ -151,6 +212,9 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             case "startCharge":
                 handleStartCharge(call);
                 break;
+            case "isNativePayAvailable":
+                handleIsNativePayAvailable(call);
+                break;
             default:
                 result.notImplemented();
                 break;
@@ -165,6 +229,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             final String terminalKey = (String) arguments.get("terminalKey");
             final String password = (String) arguments.get("password");
             final String publicKey = (String) arguments.get("publicKey");
+            final boolean nativePay = (boolean) arguments.get("nativePay");
             final boolean isDeveloperMode = (boolean) arguments.get("isDeveloperMode");
             final boolean isDebug = (boolean) arguments.get("isDebug");
             final String language = (String) arguments.get("language");
@@ -177,11 +242,37 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             sdk = new AcquiringSdk(terminalKey, password, publicKey);
                 sdk.init(initRequest -> Unit.INSTANCE);
 
+            if (nativePay) {
+                setupGooglePlay(terminalKey);
+            }
+
             result.success(true);
         } catch (Exception e) {
             result.success(false);
         }
         result = null;
+    }
+
+    private void setupGooglePlay(@NonNull String terminalKey) {
+        final GooglePayParams googleParams = new GooglePayParams(
+            terminalKey,
+            false,
+            false,
+            AcquiringSdk.AsdkLogger.isDebug()
+                ? WalletConstants.ENVIRONMENT_TEST
+                : WalletConstants.ENVIRONMENT_PRODUCTION
+        );
+
+        googlePayHelper = new GooglePayHelper(googleParams);
+
+        Context context = activity.getApplicationContext();
+        googlePayHelper.initGooglePay(
+            context,
+            isReady -> {
+                isGooglePayEnabled = isReady;
+                return Unit.INSTANCE;
+            }
+        );
     }
 
     private void handleCardList(MethodCall call) {
@@ -277,14 +368,44 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
         }
     }
 
+    private void handleIsNativePayAvailable(MethodCall call) {
+        result.success(isGooglePayEnabled);
+        result = null;
+    }
+
     private void handleShowQrScreen(MethodCall call) {
         //TODO: implement method
         result.notImplemented();
     }
 
     private void handleOpenNativePayment(MethodCall call) {
-        //TODO: implement method
-        result.notImplemented();
+        if (isGooglePayEnabled) {
+            @SuppressWarnings("unchecked")
+            final Map<String, Object> arguments = (Map<String, Object>) call.arguments;
+            shadowPaymentOptions = parser.createPaymentOptions(arguments);
+
+            googlePayHelper.openGooglePay(
+                activity,
+                shadowPaymentOptions.getOrder().getAmount(),
+                GOOGLE_PAY_REQUEST_CODE
+            );
+        } else {
+            result.error("GooglePay is not available", "", null);
+            result = null;
+        }
+    }
+
+    private void handleGooglePayResult(int resultCode, Intent data) {
+        if (data != null && resultCode == -1) {
+            final String token = GooglePayHelper.getGooglePayToken(data);
+
+            tinkoffAcquiring.initPayment(token, shadowPaymentOptions)
+                .subscribe(paymentListener)
+                .start();
+        } else {
+            result.success(createResult(resultCode, data).toString());
+            result = null;
+        }
     }
 
     private void handleStartCharge(MethodCall call) {

@@ -24,6 +24,7 @@ class Method {
   static const OpenPaymentScreen openPaymentScreen = const OpenPaymentScreen();
   static const AttachCardScreen attachCardScreen = const AttachCardScreen();
   static const ShowQrScreen showQrScreen = const ShowQrScreen();
+  static const IsNativePayAvailable isNativePayAvailable = const IsNativePayAvailable();
   static const OpenNativePayment openNativePayment = const OpenNativePayment();
   static const StartCharge startCharge = const StartCharge();
   static const GetCardList getCardList = const GetCardList();
@@ -37,10 +38,12 @@ class Activate {
   String get terminalKey => 'terminalKey';
   String get password => 'password';
   String get publicKey => 'publicKey';
+  String get nativePay => 'nativePay';
 
   String get isDeveloperMode => 'isDeveloperMode';
   String get isDebug => 'isDebug';
   String get language => 'language';
+
 }
 
 class OpenPaymentScreen {
@@ -70,10 +73,19 @@ class ShowQrScreen {
   String get localization => 'localizationSource';
 }
 
+class IsNativePayAvailable {
+  const IsNativePayAvailable();
+
+  String get name => 'isNativePayAvailable';
+}
+
 class OpenNativePayment {
   const OpenNativePayment();
 
   String get name => 'openNativePayment';
+
+  String get orderOptions => 'orderOptions';
+  String get customerOptions => 'customerOptions';
 }
 
 class StartCharge {

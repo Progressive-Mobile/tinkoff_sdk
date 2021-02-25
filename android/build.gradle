@@ -45,6 +45,6 @@ dependencies {
     implementation "androidx.core:core-ktx:1.3.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     // Tinkoff SDK
-    implementation "ru.tinkoff.acquiring:ui:2.1.0"
-    implementation "ru.tinkoff.acquiring:card-io:1.7.3"
+    implementation "ru.tinkoff.acquiring:ui:2.3.0"
+    implementation "ru.tinkoff.acquiring:cardio:2.3.0"
 }
