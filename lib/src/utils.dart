@@ -21,7 +21,7 @@ import 'dart:convert';
 import 'package:tinkoff_sdk/tinkoff_sdk.dart';
 
 TinkoffResult parseTinkoffResult(dynamic result) {
-  if (result == null) return null;
+  if (result == null) return TinkoffResult.error();
 
   final map = jsonDecode(result);
 
@@ -29,7 +29,7 @@ TinkoffResult parseTinkoffResult(dynamic result) {
 }
 
 List<CardData> parseCardListResult(dynamic result) {
-  final List<CardData> cards = List();
+  final cards = <CardData>[];
 
   if (result is List) {
     for (final item in result) {
@@ -40,16 +40,6 @@ List<CardData> parseCardListResult(dynamic result) {
   }
 
   return cards;
-}
-
-Map<String, dynamic> checkNullArguments(Map<String, dynamic> arguments, {List<String> ignore = const []}) {
-  for (final argument in arguments.entries) {
-    if (argument.value == null) {
-      if (!ignore.contains(argument.key))
-        throw ArgumentError.notNull(argument.key);
-    }
-  }
-  return arguments;
 }
 
 String checkTypeString(CheckType type) {

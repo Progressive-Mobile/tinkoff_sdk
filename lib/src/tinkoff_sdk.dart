@@ -19,22 +19,20 @@
 part of tinkoff_sdk;
 
 class TinkoffSdk {
-  static TinkoffSdk _instance;
+  static TinkoffSdk? _instance;
 
   factory TinkoffSdk() {
     if (_instance == null) {
-      _instance = TinkoffSdk._private(
-          const MethodChannel(Method.channel)
-      );
+      _instance = TinkoffSdk._private(const MethodChannel(Method.channel));
     }
-    return _instance;
+    return _instance!;
   }
 
   TinkoffSdk._private(this._channel);
 
   final MethodChannel _channel;
-  String _terminalKey;
-  
+  String? _terminalKey;
+
   bool get activated => _terminalKey != null;
 
   /// Создание объекта для взаимодействия с SDK и передача данных продавца.
@@ -52,38 +50,33 @@ class TinkoffSdk {
   /// [isDeveloperMode] - Тестовый URL (в этом режиме деньги с карт не списываются).
   /// [logging] - Логирование запросов.
   Future<bool> activate({
-    @required String terminalKey,
-    @required String password,
-    @required String publicKey,
+    required String terminalKey,
+    required String password,
+    required String publicKey,
     bool configureNativePay = false,
     LocalizationSource language = LocalizationSource.ru,
-
     bool isDeveloperMode = false,
     bool logging = false,
   }) async {
     final method = Method.activate;
 
-    final arguments = <String, dynamic> {
+    final arguments = <String, dynamic>{
       method.terminalKey: terminalKey,
       method.password: password,
       method.publicKey: publicKey,
       method.nativePay: configureNativePay,
-      
       method.isDeveloperMode: isDeveloperMode,
       method.isDebug: logging,
       method.language: localizationString(language)
     };
 
-    final activated = await _channel.invokeMethod<bool>(
-      method.name,
-      checkNullArguments(arguments, ignore: [method.language])
-    );
+    final activated = await _channel.invokeMethod<bool>(method.name, arguments) ?? false;
 
     if (activated)
       _terminalKey = terminalKey;
     else
       throw 'Cannot activate TinkoffSDK.'
-            '\nOne or more of parameters are invalid.';
+          '\nOne or more of parameters are invalid.';
 
     return activated;
   }
@@ -93,13 +86,11 @@ class TinkoffSdk {
 
     final method = Method.getCardList;
 
-    final arguments = <String, dynamic> {
-      method.customerKey: customerKey
+    final arguments = <String, dynamic>{
+      method.customerKey: customerKey,
     };
 
-    return _channel
-        .invokeMethod(method.name, checkNullArguments(arguments))
-        .then(parseCardListResult);
+    return _channel.invokeMethod(method.name, arguments).then(parseCardListResult);
   }
 
   /// Открытие экрана оплаты.
@@ -109,34 +100,21 @@ class TinkoffSdk {
   /// Подробное описание параметров см. в реализации
   /// [OrderOptions], [CustomerOptions], [FeaturesOptions].
   Future<TinkoffResult> openPaymentScreen({
-    @required OrderOptions orderOptions,
-    @required CustomerOptions customerOptions,
-    FeaturesOptions featuresOptions
+    required OrderOptions orderOptions,
+    required CustomerOptions customerOptions,
+    FeaturesOptions featuresOptions = const FeaturesOptions(),
   }) async {
     _checkActivated();
-    if (customerOptions == null) {
-      throw ArgumentError.notNull('CustomerOptions cannot be null');
-    }
-    final _featuresOptions = featuresOptions ?? FeaturesOptions();
 
     final method = Method.openPaymentScreen;
 
-    final arguments = <String, dynamic> {
-      method.orderOptions: checkNullArguments(
-          orderOptions._arguments()
-      ),
-      method.customerOptions: checkNullArguments(
-          customerOptions._arguments(),
-          ignore: [CustomerOptions._email]
-      ),
-      method.featuresOptions: checkNullArguments(
-          _featuresOptions._arguments()
-      )
+    final arguments = <String, dynamic>{
+      method.orderOptions: orderOptions._arguments(),
+      method.customerOptions: customerOptions._arguments(),
+      method.featuresOptions: featuresOptions._arguments(),
     };
 
-    return _channel
-        .invokeMethod(method.name, arguments)
-        .then(parseTinkoffResult);
+    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
   }
 
   /// Открытие экрана привязки карт.
@@ -144,24 +122,19 @@ class TinkoffSdk {
   /// Подробное описание параметров см. в реализации
   /// [CustomerOptions], [FeaturesOptions].
   Future<void> openAttachCardScreen({
-    @required CustomerOptions customerOptions,
-    FeaturesOptions featuresOptions,
+    required CustomerOptions customerOptions,
+    FeaturesOptions featuresOptions = const FeaturesOptions(),
   }) async {
     _checkActivated();
-    if (customerOptions == null) {
-      throw ArgumentError.notNull('CustomerOptions cannot be null');
-    }
-    final _featuresOptions = featuresOptions ?? FeaturesOptions();
 
     final method = Method.attachCardScreen;
 
-    final arguments = <String, dynamic> {
+    final arguments = <String, dynamic>{
       method.customerOptions: customerOptions._arguments(),
-      method.featuresOptions: _featuresOptions._arguments()
+      method.featuresOptions: featuresOptions._arguments()
     };
 
-    return _channel
-        .invokeMethod(method.name, arguments);
+    return _channel.invokeMethod(method.name, arguments);
   }
 
   /// Экран приема оплаты по QR коду через СПБ.
@@ -172,40 +145,31 @@ class TinkoffSdk {
     _checkActivated();
     final method = Method.showQrScreen;
 
-    return _channel
-        .invokeMethod(method.name)
-        .then(parseTinkoffResult);
+    return _channel.invokeMethod(method.name).then(parseTinkoffResult);
   }
 
   Future<bool> get isNativePayAvailable async {
     _checkActivated();
-    return _channel.invokeMethod(Method.isNativePayAvailable.name);
+    final result = await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
+    return result ?? false;
   }
 
   // TODO: implement ApplePay + GooglePay
   Future<TinkoffResult> openNativePaymentScreen({
-    @required OrderOptions orderOptions,
-    @required CustomerOptions customerOptions,
+    required OrderOptions orderOptions,
+    required CustomerOptions customerOptions,
   }) async {
     _checkActivated();
-    if (!await isNativePayAvailable)
-      throw "Native payments isn't available.";
-    
+    if (!await isNativePayAvailable) throw "Native payments isn't available.";
+
     final method = Method.openNativePayment;
 
-    final arguments = <String, dynamic> {
-      method.orderOptions: checkNullArguments(
-          orderOptions._arguments()
-      ),
-      method.customerOptions: checkNullArguments(
-          customerOptions._arguments(),
-          ignore: [CustomerOptions._email]
-      ),
+    final arguments = <String, dynamic>{
+      method.orderOptions: orderOptions._arguments(),
+      method.customerOptions: customerOptions._arguments(),
     };
 
-    return _channel
-        .invokeMethod(method.name, arguments)
-        .then(parseTinkoffResult);
+    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
   }
 
   // TODO: implement Charge
@@ -213,17 +177,15 @@ class TinkoffSdk {
     _checkActivated();
     final method = Method.startCharge;
 
-    final arguments = <String, dynamic> {};
+    final arguments = <String, dynamic>{};
 
-    return _channel
-        .invokeMethod(method.name, arguments)
-        .then(parseTinkoffResult);
+    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
   }
 
   void _checkActivated() {
     if (_terminalKey == null) {
       throw 'TinkoffSDK is not activated.'
-            '\nYou need call TinkoffSdk.activate method before calling other methods.';
+          '\nYou need call TinkoffSdk.activate method before calling other methods.';
     }
   }
 }

@@ -47,13 +47,13 @@ class _MyAppState extends State<MyApp> {
   static const _PASSWORD = '';
   static const _PUBLIC_KEY = '';
 
-  final TextEditingController _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
-  final TextEditingController _passwordController = TextEditingController(text: _PASSWORD);
-  final TextEditingController _publicKeyController = TextEditingController(text: _PUBLIC_KEY);
+  final _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
+  final _passwordController = TextEditingController(text: _PASSWORD);
+  final _publicKeyController = TextEditingController(text: _PUBLIC_KEY);
   final locale = ValueNotifier<LocalizationSource>(LocalizationSource.ru);
 
-  OrderOptions _orderOptions;
-  CustomerOptions _customerOptions;
+  OrderOptions? _orderOptions;
+  CustomerOptions? _customerOptions;
   FeaturesOptions _featuresOptions = FeaturesOptions();
 
   @override
@@ -69,8 +69,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _getAppBar() {
-    return AppBar(
+  AppBar _getAppBar() => AppBar(
       title: Text('Tinkoff SDK'),
       centerTitle: true,
       actions: TinkoffSdk().activated
@@ -94,13 +93,12 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ],
                   onChanged: (value) {
-                    locale.value = value;
+                    locale.value = value!;
                   }
               ),
             ),
           ]
     );
-  }
 
   Widget _getLayout() {
     if (!TinkoffSdk().activated) {
@@ -169,11 +167,11 @@ class _MyAppState extends State<MyApp> {
       body: _orderOptions != null
         ? Column(
             children: [
-              _getEntryText('ID заказа', _orderOptions.orderId, required: true),
-              _getEntryText('Заголовок', _orderOptions.title, required: true),
-              _getEntryText('Описание', _orderOptions.description, required: true),
-              _getEntryText('Сумма (в копейках)', _orderOptions.amount),
-              _getEntryText('Рекуррентный платеж', _orderOptions.saveAsParent)
+              _getEntryText('ID заказа', _orderOptions!.orderId, required: true),
+              _getEntryText('Заголовок', _orderOptions!.title, required: true),
+              _getEntryText('Описание', _orderOptions!.description, required: true),
+              _getEntryText('Сумма (в копейках)', _orderOptions!.amount),
+              _getEntryText('Рекуррентный платеж', _orderOptions!.saveAsParent)
             ],
           )
         : Text('Нажмите чтобы заполнить'),
@@ -187,9 +185,9 @@ class _MyAppState extends State<MyApp> {
       body: _customerOptions != null
         ? Column(
             children: [
-              _getEntryText('ID', _customerOptions.customerKey, required: true),
-              _getEntryText('E-mail', _customerOptions.email),
-              _getEntryText('Тип проверки карты', _customerOptions.checkType)
+              _getEntryText('ID', _customerOptions!.customerKey, required: true),
+              _getEntryText('E-mail', _customerOptions!.email),
+              _getEntryText('Тип проверки карты', _customerOptions!.checkType)
             ],
           )
         : Text('Нажмите чтобы заполнить'),
@@ -222,11 +220,11 @@ class _MyAppState extends State<MyApp> {
         children: [
           Expanded(
             child: RaisedButton(
-              onPressed: _orderOptions != null
+              onPressed: _orderOptions != null && _customerOptions != null
                 ? () {
                     acquiring.openPaymentScreen(
-                        orderOptions: _orderOptions,
-                        customerOptions: _customerOptions,
+                        orderOptions: _orderOptions!,
+                        customerOptions: _customerOptions!,
                         featuresOptions: _featuresOptions
                     )
                     .then(_showResultDialog)
@@ -238,11 +236,11 @@ class _MyAppState extends State<MyApp> {
           ),
           SizedBox(width: 8.0),
           RaisedButton(
-            onPressed: _orderOptions != null
+            onPressed: _orderOptions != null && _customerOptions != null
               ? () async {
                      acquiring.openNativePaymentScreen(
-                      orderOptions: _orderOptions,
-                      customerOptions: _customerOptions,
+                      orderOptions: _orderOptions!,
+                      customerOptions: _customerOptions!,
                     )
                     .then(_showResultDialog)
                     .catchError(_showErrorDialog);
@@ -257,9 +255,9 @@ class _MyAppState extends State<MyApp> {
 
   Widget _getCardsAction() {
     return RaisedButton(
-      onPressed: _customerOptions?.customerKey != null
+      onPressed: _customerOptions != null
         ? () {
-            acquiring.getCardList(_customerOptions.customerKey);
+            acquiring.getCardList(_customerOptions!.customerKey);
           }
         : null,
       child: Text('Список карт'),
@@ -269,7 +267,7 @@ class _MyAppState extends State<MyApp> {
   Widget _getTextForm(
     String hint,
     TextEditingController controller, {
-      TextInputType keyboardType,
+      TextInputType? keyboardType,
       bool isDialog = false,
     }) {
     return Container(
@@ -310,9 +308,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _getCardLayout({
-    @required String title,
-    @required Widget body,
-    VoidCallback onTap
+    required String title,
+    required Widget body,
+    VoidCallback? onTap
   }) {
     return Card(
       margin: EdgeInsets.symmetric(
@@ -345,13 +343,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
-  }
-
-  String _emptyStringToNull(String text) {
-    if (text.isEmpty)
-      return null;
-    else
-      return text;
   }
 
   Future<Null> _showResultDialog(TinkoffResult result) async {
@@ -440,11 +431,11 @@ class _MyAppState extends State<MyApp> {
         ),
       )
     );
-    final orderId = _emptyStringToNull(orderIdController.text);
+    final orderId = orderIdController.text;
     setState(() {
       _orderOptions = OrderOptions(
         orderId: orderId,
-        amount: int.tryParse(amountController.text),
+        amount: int.tryParse(amountController.text)!,
         title: titleController.text,
         description: descriptionController.text,
         saveAsParent: reccurent.value,
@@ -481,7 +472,7 @@ class _MyAppState extends State<MyApp> {
                   children: <Widget>[
                     Text('Тип проверки'),
                     Spacer(),
-                    ValueListenableBuilder(
+                    ValueListenableBuilder<CheckType>(
                       valueListenable: checkType,
                       builder: (context, value, _) => DropdownButton<CheckType>(
                         value: value,
@@ -504,7 +495,7 @@ class _MyAppState extends State<MyApp> {
                           )
                         ],
                         onChanged: (value) {
-                          checkType.value = value;
+                          checkType.value = value!;
                         }
                       ),
                     ),
@@ -517,9 +508,9 @@ class _MyAppState extends State<MyApp> {
     );
     setState(() {
       _customerOptions = CustomerOptions(
-        customerKey: _emptyStringToNull(idController.text),
-        email: _emptyStringToNull(emailController.text),
-        checkType: checkType.value
+        customerKey: idController.text,
+        email: emailController.text,
+        checkType: checkType.value,
       );
     });
   }
@@ -548,7 +539,7 @@ class _MyAppState extends State<MyApp> {
                   children: <Widget>[
                     Text('Темная тема'),
                     Spacer(),
-                    ValueListenableBuilder(
+                    ValueListenableBuilder<DarkThemeMode>(
                       valueListenable: darkTheme,
                       builder: (context, value, _) => DropdownButton<DarkThemeMode>(
                           value: value,
@@ -567,7 +558,7 @@ class _MyAppState extends State<MyApp> {
                             )
                           ],
                           onChanged: (value) {
-                            darkTheme.value = value;
+                            darkTheme.value = value!;
                           }
                       ),
                     ),
@@ -589,16 +580,16 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Widget _getCheckboxRow(String title, ValueNotifier valueListenable) {
+  Widget _getCheckboxRow(String title, ValueNotifier<bool> valueListenable) {
     return Row(
       children: <Widget>[
         Text(title),
         Spacer(),
-        ValueListenableBuilder(
+        ValueListenableBuilder<bool>(
           valueListenable: valueListenable,
           builder: (context, value, _) => Checkbox(
             value: value,
-            onChanged: (value) => valueListenable.value = value
+            onChanged: (value) => valueListenable.value = value!,
           ),
         ),
       ],
@@ -608,12 +599,14 @@ class _MyAppState extends State<MyApp> {
   Widget _getCardAttachAction() {
     return IconButton(
       icon: Icon(Icons.credit_card),
-      onPressed: () async {
-        await acquiring.openAttachCardScreen(
-          customerOptions: _customerOptions,
-          featuresOptions: _featuresOptions
-        );
-      },
+      onPressed:_customerOptions != null
+        ? () async {
+            await acquiring.openAttachCardScreen(
+              customerOptions: _customerOptions!,
+              featuresOptions: _featuresOptions
+            );
+          }
+        : null
     );
   }
 

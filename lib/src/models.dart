@@ -34,6 +34,11 @@ class TinkoffResult {
   final bool isError;
   final String message;
 
+  TinkoffResult.error() :
+      this.success = false,
+      this.message = 'Native error',
+      this.isError = true;
+
   TinkoffResult.fromMap(Map<String, dynamic> map) :
     this.success = map[_success],
     this.isError = map[_isError],
@@ -79,21 +84,20 @@ class OrderOptions {
   final String description;
   final bool saveAsParent;
 
-  OrderOptions({
-    @required this.orderId,
-    @required this.amount,
-    @required this.title,
-    @required this.description,
+  const OrderOptions({
+    required this.orderId,
+    required this.amount,
+    required this.title,
+    required this.description,
     this.saveAsParent = false,
-  }) :
-      assert(saveAsParent != null, "SaveAsParent cannot be null");
+  });
 
   _arguments() => {
     _orderId: orderId,
     _amount: amount,
     _title: title,
     _description: description,
-    _reccurent: saveAsParent ?? false
+    _reccurent: saveAsParent
   };
 }
 
@@ -108,17 +112,16 @@ class CustomerOptions {
   static const String _checkType = 'checkType';
 
   final String customerKey;
-  final String email;
+  final String? email;
   final CheckType checkType;
 
-  CustomerOptions({
-    @required this.customerKey,
+  const CustomerOptions({
+    required this.customerKey,
     this.email,
     this.checkType = CheckType.hold,
-  }) :
-      assert(checkType != null, "CheckType cannot be null");
+  });
 
-  _arguments() => {
+  Map<String, dynamic> _arguments() => {
     _customerKey: customerKey,
     _email: email,
     _checkType: checkTypeString(checkType)
@@ -144,23 +147,18 @@ class FeaturesOptions {
   final bool enableCameraCardScanner;
   final DarkThemeMode darkThemeMode;
 
-  FeaturesOptions({
+  const FeaturesOptions({
     this.sbpEnabled = false,
     this.useSecureKeyboard = true,
     this.handleCardListErrorInSdk = true,
     this.enableCameraCardScanner = false,
     this.darkThemeMode = DarkThemeMode.auto,
-  }) :
-      assert(sbpEnabled != null, 'SBP boolean cannot be null'),
-      assert(useSecureKeyboard != null, 'SecureKeyboard boolean cannot be null'),
-      assert(handleCardListErrorInSdk != null, 'HandleError boolean cannot be null'),
-      assert(enableCameraCardScanner != null, 'EnableCamera boolean cannot be null'),
-      assert(darkThemeMode != null, 'DarkThemeMode cannot be null');
+  });
 
   _arguments() => {
-    _fpsEnabled: sbpEnabled ?? false,
-    _useSecureKeyboard: useSecureKeyboard ?? true,
-    _handleCardListErrorInSdk: handleCardListErrorInSdk ?? true,
+    _fpsEnabled: sbpEnabled,
+    _useSecureKeyboard: useSecureKeyboard,
+    _handleCardListErrorInSdk: handleCardListErrorInSdk,
     _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
     _darkThemeMode: darkThemeString(darkThemeMode),
   };
