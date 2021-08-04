@@ -328,7 +328,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             let success = result.status != .cancelled
             map["success"] = success
             map["isError"] = false
-            map["message"] = success ? "Оплата прошла успешно" : "Закрытие экрана оплаты"
+            map["message"] = result.status.rawValue
         case .failure(let result):
             map["success"] = false
             map["isError"] = true
