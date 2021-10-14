@@ -158,6 +158,7 @@ class TinkoffSdk {
   Future<TinkoffResult> openNativePaymentScreen({
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
+    String? merchantId,
   }) async {
     _checkActivated();
     if (!await isNativePayAvailable) throw "Native payments isn't available.";
@@ -167,6 +168,7 @@ class TinkoffSdk {
     final arguments = <String, dynamic>{
       method.orderOptions: orderOptions._arguments(),
       method.customerOptions: customerOptions._arguments(),
+      method.merchantId: merchantId ?? '',
     };
 
     return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);

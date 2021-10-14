@@ -43,7 +43,6 @@ class Activate {
   String get isDeveloperMode => 'isDeveloperMode';
   String get isDebug => 'isDebug';
   String get language => 'language';
-
 }
 
 class OpenPaymentScreen {
@@ -86,6 +85,7 @@ class OpenNativePayment {
 
   String get orderOptions => 'orderOptions';
   String get customerOptions => 'customerOptions';
+  String get merchantId => 'merchantId';
 }
 
 class StartCharge {

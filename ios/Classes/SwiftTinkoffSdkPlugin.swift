@@ -251,7 +251,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
-        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: .init()) ?? false
+        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: AcquiringUISDK.ApplePayConfiguration()) ?? false
         result(canMakePayments)
         awaitingResult = false
     }
@@ -270,6 +270,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let customerKey = customerOptionsArgs?["customerKey"] as! String
         let email = customerOptionsArgs?["email"] as? String
         
+        let merchantId = args!["merchantId"] as! String
+
         var paymentData = PaymentInitData(
             amount: coins,
             orderId: orderId,
@@ -290,11 +292,13 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         viewConfiguration.localizableInfo = Utils.getLanguage()
         
         let view = Utils.getView()
+        var applePayConfiguration = AcquiringUISDK.ApplePayConfiguration()
+        applePayConfiguration.merchantIdentifier = merchantId
         
         self.acquiring.presentPaymentApplePay(on: view,
                                               paymentData: paymentData,
                                               viewConfiguration: viewConfiguration,
-                                              paymentConfiguration: .init(),
+                                              paymentConfiguration: applePayConfiguration,
                                               completionHandler: setPaymentHandler(view, flutterResult: result))
     }
     
