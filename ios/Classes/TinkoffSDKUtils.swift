@@ -130,7 +130,7 @@ class Utils {
         viewConfigration.fields.append(
             AcquiringViewConfiguration.InfoFields.email(
                 value: email,
-                placeholder: "E-mail для получения квитанции"
+                placeholder: "E-mail для получения чека"
             )
         )
         
