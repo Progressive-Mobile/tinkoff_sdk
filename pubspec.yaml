@@ -1,7 +1,7 @@
-name: tinkoff_sdk
+name: flutter_tinkoff_sdk
 description: Flutter TinkoffSDK plugin
 version: 0.4.1
-homepage: 'https://github.com/Progressive-Mobile/flutter_tinkoff_sdk'
+homepage: "https://github.com/Progressive-Mobile/flutter_tinkoff_sdk"
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
