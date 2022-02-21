@@ -5,10 +5,10 @@ SDK позволяет интегрировать [Интернет-Эквайр
 Возможности SDK:
 
 * [x] Прием платежей (в том числе рекуррентных)
-* [ ]  Оплата с помощью:
+* [x]  Оплата с помощью:
     * [x] СБП (система быстрых платежей)
-    * [ ]  ApplePay
-    * [ ]  Google Pay
+    * [x]  ApplePay
+    * [x]  Google Pay
 * [x] Получение информации о клиенте и сохраненных картах:
     * [x] Сохранение банковских карт клиента
     * [x] Управление сохраненными картами
@@ -109,9 +109,9 @@ acquiring.activate(
 
 Для проведения оплаты необходимо вызвать метод `openPaymentScreen`.
 В метод необходимо передать настройки проведения оплаты, включающие в себя данные заказа, данные покупателя и опционально параметры кастомизации экрана оплаты.
-Метод возвращает `true` при успешной оплате, а в случае ошибки либо отмены вернет `false`.
+Метод возвращает `TinkoffResult`.
 ```dart
-final bool paymentSuccessful = await TinkoffSdk().openPaymentScreen(
+final result paymentSuccessful = await TinkoffSdk().openPaymentScreen(
   orderOptions: OrderOptions(
     orderId: 1,
     amount: 10000,
@@ -129,6 +129,26 @@ final bool paymentSuccessful = await TinkoffSdk().openPaymentScreen(
     localizationSource: LocalizationSource.ru,
     enableCameraCardScanner: false
   )
+);
+```
+
+Для проведения оплаты через Google/Apple pay необходимо вызвать метод `openNativePaymentScreen`.
+В метод необходимо передать настройки проведения оплаты, включающие в себя данные заказа, данные покупателя и merchantId в случае оплаты через Apple Pay (рекомендуется использовать .env для хранения такой информации)
+```dart
+final result paymentSuccessful = await TinkoffSdk().openNativePaymentScreen(
+  orderOptions: OrderOptions(
+    orderId: 1,
+    amount: 10000,
+    title: "Название платежа",
+    description: "Описание платежа",
+    reccurentPayment: false
+  ),
+  customerOptions: CustomerOptions(
+    customerKey: "CUSTOMER_KEY",
+    email: "email@example.com",
+    checkType: CheckType.no
+  ),
+  merchantId: 'example.merchant.id',
 );
 ```
 
