@@ -34,15 +34,15 @@ class TinkoffResult {
   final bool isError;
   final String message;
 
-  TinkoffResult.error() :
-      this.success = false,
-      this.message = 'Native error',
-      this.isError = true;
+  TinkoffResult.error()
+      : this.success = false,
+        this.message = 'Native error',
+        this.isError = true;
 
-  TinkoffResult.fromMap(Map<String, dynamic> map) :
-    this.success = map[_success],
-    this.isError = map[_isError],
-    this.message = map[_message] ?? '';
+  TinkoffResult.fromMap(Map<String, dynamic> map)
+      : this.success = map[_success],
+        this.isError = map[_isError],
+        this.message = map[_message] ?? '';
 }
 
 class CardData {
@@ -54,10 +54,10 @@ class CardData {
   final String pan;
   final String expDate;
 
-  CardData.fromMap(Map<String, dynamic> map) :
-    this.cardId = map[_cardId],
-    this.pan = map[_pan],
-    this.expDate = map[_expDate];
+  CardData.fromMap(Map<String, dynamic> map)
+      : this.cardId = map[_cardId],
+        this.pan = map[_pan],
+        this.expDate = map[_expDate];
 
   @override
   String toString() {
@@ -92,13 +92,8 @@ class OrderOptions {
     this.saveAsParent = false,
   });
 
-  _arguments() => {
-    _orderId: orderId,
-    _amount: amount,
-    _title: title,
-    _description: description,
-    _reccurent: saveAsParent
-  };
+  _arguments() =>
+      {_orderId: orderId, _amount: amount, _title: title, _description: description, _reccurent: saveAsParent};
 }
 
 /// [CustomerOptions] - Данные покупателя.
@@ -121,11 +116,8 @@ class CustomerOptions {
     this.checkType = CheckType.hold,
   });
 
-  Map<String, dynamic> _arguments() => {
-    _customerKey: customerKey,
-    _email: email,
-    _checkType: checkTypeString(checkType)
-  };
+  Map<String, dynamic> _arguments() =>
+      {_customerKey: customerKey, _email: email, _checkType: checkTypeString(checkType)};
 }
 
 /// [FeaturesOptions] - Настройки визуального отображения и функций экрана оплаты.
@@ -156,27 +148,23 @@ class FeaturesOptions {
   });
 
   _arguments() => {
-    _fpsEnabled: sbpEnabled,
-    _useSecureKeyboard: useSecureKeyboard,
-    _handleCardListErrorInSdk: handleCardListErrorInSdk,
-    _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
-    _darkThemeMode: darkThemeString(darkThemeMode),
-  };
+        _fpsEnabled: sbpEnabled,
+        _useSecureKeyboard: useSecureKeyboard,
+        _handleCardListErrorInSdk: handleCardListErrorInSdk,
+        _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
+        _darkThemeMode: darkThemeString(darkThemeMode),
+      };
 }
 
 /// [LocalizationSource] - Языковая локализация экрана.
-enum LocalizationSource {
-  ru, en
-}
+enum LocalizationSource { ru, en }
 
 /// [DarkThemeMode] - Режим включения темной темы.
 ///
 /// [DarkThemeMode.auto] - Темная тема переключается в зависимости от системы устройства.
 /// [DarkThemeMode.enabled] - Темная тема всегда включена.
 /// [DarkThemeMode.disabled] - Темная тема всегда выключена.
-enum DarkThemeMode {
-  auto, disabled, enabled
-}
+enum DarkThemeMode { auto, disabled, enabled }
 
 /// [CheckType] используется для создания платежа и привязки карты.
 ///
@@ -196,9 +184,4 @@ enum DarkThemeMode {
 /// Если карта не поддерживает 3DS, выполняется списание и последующая отмена на произвольную сумму от 100 до 199 копеек.
 /// Клиент будет перенаправлен на экран для ввода списанной суммы, где должен корректно указать случайную сумму.
 /// В случае успешного подтверждения случайной суммы карта будет привязана.
-enum CheckType {
-  no,
-  hold,
-  threeDS,
-  threeDS_hold
-}
+enum CheckType { no, hold, threeDS, threeDS_hold }

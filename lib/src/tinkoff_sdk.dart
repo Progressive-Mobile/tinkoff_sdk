@@ -70,7 +70,8 @@ class TinkoffSdk {
       method.language: localizationString(language)
     };
 
-    final activated = await _channel.invokeMethod<bool>(method.name, arguments) ?? false;
+    final activated =
+        await _channel.invokeMethod<bool>(method.name, arguments) ?? false;
 
     if (activated)
       _terminalKey = terminalKey;
@@ -90,7 +91,9 @@ class TinkoffSdk {
       method.customerKey: customerKey,
     };
 
-    return _channel.invokeMethod(method.name, arguments).then(parseCardListResult);
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseCardListResult);
   }
 
   /// Открытие экрана оплаты.
@@ -114,7 +117,9 @@ class TinkoffSdk {
       method.featuresOptions: featuresOptions._arguments(),
     };
 
-    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
   }
 
   /// Открытие экрана привязки карт.
@@ -150,11 +155,11 @@ class TinkoffSdk {
 
   Future<bool> get isNativePayAvailable async {
     _checkActivated();
-    final result = await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
+    final result =
+        await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
     return result ?? false;
   }
 
-  // TODO: implement ApplePay + GooglePay
   Future<TinkoffResult> openNativePaymentScreen({
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
@@ -171,7 +176,9 @@ class TinkoffSdk {
       method.merchantId: merchantId ?? '',
     };
 
-    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
   }
 
   // TODO: implement Charge
@@ -181,7 +188,9 @@ class TinkoffSdk {
 
     final arguments = <String, dynamic>{};
 
-    return _channel.invokeMethod(method.name, arguments).then(parseTinkoffResult);
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
   }
 
   void _checkActivated() {

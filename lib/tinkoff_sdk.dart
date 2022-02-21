@@ -21,10 +21,9 @@ library tinkoff_sdk;
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 
 import 'src/methods.dart';
 import 'src/utils.dart';
 
-part 'src/tinkoff_sdk.dart';
 part 'src/models.dart';
+part 'src/tinkoff_sdk.dart';

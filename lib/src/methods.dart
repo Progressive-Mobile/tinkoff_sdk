@@ -24,7 +24,8 @@ class Method {
   static const OpenPaymentScreen openPaymentScreen = const OpenPaymentScreen();
   static const AttachCardScreen attachCardScreen = const AttachCardScreen();
   static const ShowQrScreen showQrScreen = const ShowQrScreen();
-  static const IsNativePayAvailable isNativePayAvailable = const IsNativePayAvailable();
+  static const IsNativePayAvailable isNativePayAvailable =
+      const IsNativePayAvailable();
   static const OpenNativePayment openNativePayment = const OpenNativePayment();
   static const StartCharge startCharge = const StartCharge();
   static const GetCardList getCardList = const GetCardList();

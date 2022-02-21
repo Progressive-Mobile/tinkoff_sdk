@@ -16,9 +16,7 @@
 
 */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:tinkoff_sdk/tinkoff_sdk.dart';
 
 void main() {
@@ -60,7 +58,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,32 +71,24 @@ class _MyAppState extends State<MyApp> {
       title: Text('Tinkoff SDK'),
       centerTitle: true,
       actions: TinkoffSdk().activated
-        ? [
-            _getCardAttachAction(),
-            _getSBPShowQRAction()
-          ]
-        : [
-            ValueListenableBuilder<LocalizationSource>(
-              valueListenable: locale,
-              builder: (context, value, _) => DropdownButton<LocalizationSource>(
-                  value: value,
-                  items: [
-                    DropdownMenuItem(
-                      value: LocalizationSource.ru,
-                      child: Text('RU'),
-                    ),
-                    DropdownMenuItem(
-                        value: LocalizationSource.en,
-                        child: Text('EN')
-                    ),
-                  ],
-                  onChanged: (value) {
-                    locale.value = value!;
-                  }
+          ? [_getCardAttachAction(), _getSBPShowQRAction()]
+          : [
+              ValueListenableBuilder<LocalizationSource>(
+                valueListenable: locale,
+                builder: (context, value, _) => DropdownButton<LocalizationSource>(
+                    value: value,
+                    items: [
+                      DropdownMenuItem(
+                        value: LocalizationSource.ru,
+                        child: Text('RU'),
+                      ),
+                      DropdownMenuItem(value: LocalizationSource.en, child: Text('EN')),
+                    ],
+                    onChanged: (value) {
+                      locale.value = value!;
+                    }),
               ),
-            ),
-          ]
-    );
+            ]);
 
   Widget _getLayout() {
     if (!TinkoffSdk().activated) {
@@ -118,19 +108,20 @@ class _MyAppState extends State<MyApp> {
           _getTextForm('Password', _passwordController),
           _getTextForm('Public Key', _publicKeyController),
           SizedBox(height: 16.0),
-          RaisedButton(
+          ElevatedButton(
             onPressed: () {
-              acquiring.activate(
-                terminalKey: _terminalKeyController.text,
-                password: _passwordController.text,
-                publicKey: _publicKeyController.text,
-                configureNativePay: true,
-                logging: true,
-                isDeveloperMode: false,
-                language: locale.value
-              ).then((_) {
-                  if (mounted) setState((){});
-                }).catchError(_showErrorDialog);
+              acquiring
+                  .activate(
+                      terminalKey: _terminalKeyController.text,
+                      password: _passwordController.text,
+                      publicKey: _publicKeyController.text,
+                      configureNativePay: true,
+                      logging: true,
+                      isDeveloperMode: false,
+                      language: locale.value)
+                  .then((_) {
+                if (mounted) setState(() {});
+              }).catchError(_showErrorDialog);
             },
             child: Text('Активировать'),
           )
@@ -165,50 +156,48 @@ class _MyAppState extends State<MyApp> {
     return _getCardLayout(
       title: 'Данные заказа',
       body: _orderOptions != null
-        ? Column(
-            children: [
-              _getEntryText('ID заказа', _orderOptions!.orderId, required: true),
-              _getEntryText('Заголовок', _orderOptions!.title, required: true),
-              _getEntryText('Описание', _orderOptions!.description, required: true),
-              _getEntryText('Сумма (в копейках)', _orderOptions!.amount),
-              _getEntryText('Рекуррентный платеж', _orderOptions!.saveAsParent)
-            ],
-          )
-        : Text('Нажмите чтобы заполнить'),
+          ? Column(
+              children: [
+                _getEntryText('ID заказа', _orderOptions!.orderId, required: true),
+                _getEntryText('Заголовок', _orderOptions!.title, required: true),
+                _getEntryText('Описание', _orderOptions!.description, required: true),
+                _getEntryText('Сумма (в копейках)', _orderOptions!.amount),
+                _getEntryText('Рекуррентный платеж', _orderOptions!.saveAsParent)
+              ],
+            )
+          : Text('Нажмите чтобы заполнить'),
       onTap: _showOrderOptionsDialog,
     );
   }
 
   Widget _getCustomerCard() {
     return _getCardLayout(
-      title: 'Данные покупателя',
-      body: _customerOptions != null
-        ? Column(
-            children: [
-              _getEntryText('ID', _customerOptions!.customerKey, required: true),
-              _getEntryText('E-mail', _customerOptions!.email),
-              _getEntryText('Тип проверки карты', _customerOptions!.checkType)
-            ],
-          )
-        : Text('Нажмите чтобы заполнить'),
-      onTap: _showCustomerOptionsDialog
-    );
+        title: 'Данные покупателя',
+        body: _customerOptions != null
+            ? Column(
+                children: [
+                  _getEntryText('ID', _customerOptions!.customerKey, required: true),
+                  _getEntryText('E-mail', _customerOptions!.email),
+                  _getEntryText('Тип проверки карты', _customerOptions!.checkType)
+                ],
+              )
+            : Text('Нажмите чтобы заполнить'),
+        onTap: _showCustomerOptionsDialog);
   }
 
   Widget _getFeatureCard() {
     return _getCardLayout(
-      title: 'Настройки экрана',
-      body: Column(
-        children: [
-          _getEntryText('СБП включено', _featuresOptions.sbpEnabled),
-          _getEntryText('Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
-          _getEntryText('Сканер карт включён', _featuresOptions.enableCameraCardScanner),
-          _getEntryText('Обработка ошибок', _featuresOptions.handleCardListErrorInSdk),
-          _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
-        ],
-      ),
-      onTap: _showFeatureOptionsDialog
-    );
+        title: 'Настройки экрана',
+        body: Column(
+          children: [
+            _getEntryText('СБП включено', _featuresOptions.sbpEnabled),
+            _getEntryText('Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
+            _getEntryText('Сканер карт включён', _featuresOptions.enableCameraCardScanner),
+            _getEntryText('Обработка ошибок', _featuresOptions.handleCardListErrorInSdk),
+            _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
+          ],
+        ),
+        onTap: _showFeatureOptionsDialog);
   }
 
   Widget _getPaymentAction() {
@@ -219,33 +208,34 @@ class _MyAppState extends State<MyApp> {
       child: Row(
         children: [
           Expanded(
-            child: RaisedButton(
+            child: ElevatedButton(
               onPressed: _orderOptions != null && _customerOptions != null
-                ? () {
-                    acquiring.openPaymentScreen(
-                        orderOptions: _orderOptions!,
-                        customerOptions: _customerOptions!,
-                        featuresOptions: _featuresOptions
-                    )
-                    .then(_showResultDialog)
-                    .catchError(_showErrorDialog);
-                  }
-                : null,
+                  ? () {
+                      acquiring
+                          .openPaymentScreen(
+                              orderOptions: _orderOptions!,
+                              customerOptions: _customerOptions!,
+                              featuresOptions: _featuresOptions)
+                          .then(_showResultDialog)
+                          .catchError(_showErrorDialog);
+                    }
+                  : null,
               child: Text('Тестовая оплата'),
             ),
           ),
           SizedBox(width: 8.0),
-          RaisedButton(
+          ElevatedButton(
             onPressed: _orderOptions != null && _customerOptions != null
-              ? () async {
-                     acquiring.openNativePaymentScreen(
-                      orderOptions: _orderOptions!,
-                      customerOptions: _customerOptions!,
-                    )
-                    .then(_showResultDialog)
-                    .catchError(_showErrorDialog);
-                }
-              : null,
+                ? () async {
+                    acquiring
+                        .openNativePaymentScreen(
+                          orderOptions: _orderOptions!,
+                          customerOptions: _customerOptions!,
+                        )
+                        .then(_showResultDialog)
+                        .catchError(_showErrorDialog);
+                  }
+                : null,
             child: Text('NativePay'),
           ),
         ],
@@ -254,12 +244,12 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _getCardsAction() {
-    return RaisedButton(
+    return ElevatedButton(
       onPressed: _customerOptions != null
-        ? () {
-            acquiring.getCardList(_customerOptions!.customerKey);
-          }
-        : null,
+          ? () {
+              acquiring.getCardList(_customerOptions!.customerKey);
+            }
+          : null,
       child: Text('Список карт'),
     );
   }
@@ -267,22 +257,15 @@ class _MyAppState extends State<MyApp> {
   Widget _getTextForm(
     String hint,
     TextEditingController controller, {
-      TextInputType? keyboardType,
-      bool isDialog = false,
-    }) {
+    TextInputType? keyboardType,
+    bool isDialog = false,
+  }) {
     return Container(
-      margin: EdgeInsets.symmetric(
-        vertical: 2.0,
-        horizontal: isDialog ? 0.0 : 24.0
-      ),
+      margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: isDialog ? 0.0 : 24.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType ?? TextInputType.text,
-        decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: hint,
-          alignLabelWithHint: true
-        ),
+        decoration: InputDecoration(border: OutlineInputBorder(), labelText: hint, alignLabelWithHint: true),
       ),
     );
   }
@@ -294,36 +277,21 @@ class _MyAppState extends State<MyApp> {
         Text(key),
         Spacer(),
         Text(
-          canShow
-            ? value.toString()
-            : 'не указано',
-          style: TextStyle(
-            fontSize: 12.0,
-            color: canShow ? Colors.black : Colors.grey
-          ),
+          canShow ? value.toString() : 'не указано',
+          style: TextStyle(fontSize: 12.0, color: canShow ? Colors.black : Colors.grey),
         ),
         if (!canShow && required) Icon(Icons.warning, color: Colors.red, size: 14.0)
       ],
     );
   }
 
-  Widget _getCardLayout({
-    required String title,
-    required Widget body,
-    VoidCallback? onTap
-  }) {
+  Widget _getCardLayout({required String title, required Widget body, VoidCallback? onTap}) {
     return Card(
-      margin: EdgeInsets.symmetric(
-        vertical: 4.0,
-        horizontal: 24.0
-      ),
+      margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 24.0),
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.symmetric(
-            vertical: 4.0,
-            horizontal: 8.0
-          ),
+          padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
@@ -331,10 +299,7 @@ class _MyAppState extends State<MyApp> {
               Text(
                 title,
                 textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontSize: 12.0,
-                  color: Colors.grey
-                ),
+                style: TextStyle(fontSize: 12.0, color: Colors.grey),
               ),
               SizedBox(height: 4.0),
               body
@@ -349,88 +314,77 @@ class _MyAppState extends State<MyApp> {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Результат'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text('Success: ' + result.success.toString()),
-              Text('isError: ' + result.isError.toString()),
-              Text('Message: ' + result.message.toString()),
-            ],
-          ),
-          actions: [
-            RaisedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Ok'),
-            )
-          ],
-        )
-    );
+              title: Text('Результат'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Success: ' + result.success.toString()),
+                  Text('isError: ' + result.isError.toString()),
+                  Text('Message: ' + result.message.toString()),
+                ],
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Ok'),
+                )
+              ],
+            ));
   }
 
   Future<Null> _showErrorDialog(error) async {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Ошибка'),
-          content: Text(error.toString()),
-          actions: [
-            RaisedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Ok'),
-            )
-          ],
-        )
-    );
+              title: Text('Ошибка'),
+              content: Text(error.toString()),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Ok'),
+                )
+              ],
+            ));
   }
 
   void _showOrderOptionsDialog() async {
-    final orderIdController = TextEditingController(text: _orderOptions?.orderId?.toString() ?? '');
+    final orderIdController = TextEditingController(text: _orderOptions?.orderId.toString() ?? '');
     final titleController = TextEditingController(text: _orderOptions?.title ?? '');
     final descriptionController = TextEditingController(text: _orderOptions?.description ?? '');
-    final amountController = TextEditingController(text: _orderOptions?.amount?.toString() ?? '');
+    final amountController = TextEditingController(text: _orderOptions?.amount.toString() ?? '');
     final ValueNotifier<bool> reccurent = ValueNotifier(_orderOptions?.saveAsParent ?? false);
 
     await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        content: SingleChildScrollView(
-          padding: EdgeInsets.all(14.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _getTextForm(
-                'ID заказа',
-                orderIdController,
-                keyboardType: TextInputType.number,
-                isDialog: true
+        context: context,
+        builder: (context) => AlertDialog(
+              contentPadding: EdgeInsets.zero,
+              content: SingleChildScrollView(
+                padding: EdgeInsets.all(14.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _getTextForm('ID заказа', orderIdController, keyboardType: TextInputType.number, isDialog: true),
+                    _getTextForm(
+                      'Заголовок',
+                      titleController,
+                      isDialog: true,
+                    ),
+                    _getTextForm(
+                      'Описание',
+                      descriptionController,
+                      isDialog: true,
+                    ),
+                    _getTextForm('Сумма (в копейках)', amountController,
+                        keyboardType: TextInputType.number, isDialog: true),
+                    _getCheckboxRow('Рекуррентный платеж', reccurent),
+                  ],
+                ),
               ),
-              _getTextForm(
-                'Заголовок',
-                titleController,
-                isDialog: true,
-              ),
-              _getTextForm(
-                'Описание',
-                descriptionController,
-                isDialog: true,
-              ),
-              _getTextForm(
-                'Сумма (в копейках)',
-                amountController, keyboardType: TextInputType.number,
-                isDialog: true
-              ),
-              _getCheckboxRow('Рекуррентный платеж', reccurent),
-            ],
-          ),
-        ),
-      )
-    );
+            ));
     final orderId = orderIdController.text;
     setState(() {
       _orderOptions = OrderOptions(
@@ -451,61 +405,41 @@ class _MyAppState extends State<MyApp> {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SingleChildScrollView(
-            padding: EdgeInsets.all(14.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _getTextForm(
-                  'ID',
-                  idController,
-                  isDialog: true
-                ),
-                _getTextForm(
-                  'E-mail',
-                  emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  isDialog: true
-                ),
-                Row(
-                  children: <Widget>[
-                    Text('Тип проверки'),
-                    Spacer(),
-                    ValueListenableBuilder<CheckType>(
-                      valueListenable: checkType,
-                      builder: (context, value, _) => DropdownButton<CheckType>(
-                        value: value,
-                        items: [
-                          DropdownMenuItem(
-                            value: CheckType.no,
-                            child: Text('NO'),
-                          ),
-                          DropdownMenuItem(
-                            value: CheckType.hold,
-                            child: Text('HOLD')
-                          ),
-                          DropdownMenuItem(
-                            value: CheckType.threeDS,
-                            child: Text('3DS')
-                          ),
-                          DropdownMenuItem(
-                            value: CheckType.threeDS_hold,
-                            child: Text('3DS_HOLD')
-                          )
-                        ],
-                        onChanged: (value) {
-                          checkType.value = value!;
-                        }
-                      ),
-                    ),
+              contentPadding: EdgeInsets.zero,
+              content: SingleChildScrollView(
+                padding: EdgeInsets.all(14.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _getTextForm('ID', idController, isDialog: true),
+                    _getTextForm('E-mail', emailController, keyboardType: TextInputType.emailAddress, isDialog: true),
+                    Row(
+                      children: <Widget>[
+                        Text('Тип проверки'),
+                        Spacer(),
+                        ValueListenableBuilder<CheckType>(
+                          valueListenable: checkType,
+                          builder: (context, value, _) => DropdownButton<CheckType>(
+                              value: value,
+                              items: [
+                                DropdownMenuItem(
+                                  value: CheckType.no,
+                                  child: Text('NO'),
+                                ),
+                                DropdownMenuItem(value: CheckType.hold, child: Text('HOLD')),
+                                DropdownMenuItem(value: CheckType.threeDS, child: Text('3DS')),
+                                DropdownMenuItem(value: CheckType.threeDS_hold, child: Text('3DS_HOLD'))
+                              ],
+                              onChanged: (value) {
+                                checkType.value = value!;
+                              }),
+                        ),
+                      ],
+                    )
                   ],
-                )
-              ],
-            ),
-          ),
-        )
-    );
+                ),
+              ),
+            ));
     setState(() {
       _customerOptions = CustomerOptions(
         customerKey: idController.text,
@@ -525,50 +459,42 @@ class _MyAppState extends State<MyApp> {
     await showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SingleChildScrollView(
-            padding: EdgeInsets.all(14.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _getCheckboxRow('СБП', sbp),
-                _getCheckboxRow('Безопасная клавиатура', secureKeyboard),
-                _getCheckboxRow('Сканнер карт', scanner),
-                _getCheckboxRow('Обработка ошибок', errorHandle),
-                Row(
-                  children: <Widget>[
-                    Text('Темная тема'),
-                    Spacer(),
-                    ValueListenableBuilder<DarkThemeMode>(
-                      valueListenable: darkTheme,
-                      builder: (context, value, _) => DropdownButton<DarkThemeMode>(
-                          value: value,
-                          items: [
-                            DropdownMenuItem(
-                              value: DarkThemeMode.auto,
-                              child: Text('AUTO'),
-                            ),
-                            DropdownMenuItem(
-                                value: DarkThemeMode.enabled,
-                                child: Text('ENABLED')
-                            ),
-                            DropdownMenuItem(
-                                value: DarkThemeMode.disabled,
-                                child: Text('DISABLED')
-                            )
-                          ],
-                          onChanged: (value) {
-                            darkTheme.value = value!;
-                          }
-                      ),
+              contentPadding: EdgeInsets.zero,
+              content: SingleChildScrollView(
+                padding: EdgeInsets.all(14.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _getCheckboxRow('СБП', sbp),
+                    _getCheckboxRow('Безопасная клавиатура', secureKeyboard),
+                    _getCheckboxRow('Сканнер карт', scanner),
+                    _getCheckboxRow('Обработка ошибок', errorHandle),
+                    Row(
+                      children: <Widget>[
+                        Text('Темная тема'),
+                        Spacer(),
+                        ValueListenableBuilder<DarkThemeMode>(
+                          valueListenable: darkTheme,
+                          builder: (context, value, _) => DropdownButton<DarkThemeMode>(
+                              value: value,
+                              items: [
+                                DropdownMenuItem(
+                                  value: DarkThemeMode.auto,
+                                  child: Text('AUTO'),
+                                ),
+                                DropdownMenuItem(value: DarkThemeMode.enabled, child: Text('ENABLED')),
+                                DropdownMenuItem(value: DarkThemeMode.disabled, child: Text('DISABLED'))
+                              ],
+                              onChanged: (value) {
+                                darkTheme.value = value!;
+                              }),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        )
-    );
+              ),
+            ));
     setState(() {
       _featuresOptions = FeaturesOptions(
         sbpEnabled: sbp.value,
@@ -598,30 +524,24 @@ class _MyAppState extends State<MyApp> {
 
   Widget _getCardAttachAction() {
     return IconButton(
-      icon: Icon(Icons.credit_card),
-      onPressed:_customerOptions != null
-        ? () async {
-            await acquiring.openAttachCardScreen(
-              customerOptions: _customerOptions!,
-              featuresOptions: _featuresOptions
-            );
-          }
-        : null
-    );
+        icon: Icon(Icons.credit_card),
+        onPressed: _customerOptions != null
+            ? () async {
+                await acquiring.openAttachCardScreen(
+                    customerOptions: _customerOptions!, featuresOptions: _featuresOptions);
+              }
+            : null);
   }
 
   Widget _getSBPShowQRAction() {
     return IconButton(
-      icon: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          Icon(Icons.apps),
-          Icon(Icons.camera_alt, size: 7.0, color: Colors.grey)
-        ],
-      ),
-      onPressed: null /*() async {
+        icon: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[Icon(Icons.apps), Icon(Icons.camera_alt, size: 7.0, color: Colors.grey)],
+        ),
+        onPressed: null /*() async {
         await acquiring.showSBPQrScreen();
       },*/
-    );
+        );
   }
 }
