@@ -1,3 +1,3 @@
-## 0.4.1
+## 0.4.2
 
-* Initialized flutter_tinkoff_sdk.
+* Updated IOS and Adnroid dependecies.
