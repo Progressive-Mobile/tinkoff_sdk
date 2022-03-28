@@ -79,7 +79,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         
         let credential = AcquiringSdkCredential(
             terminalKey: terminalKey,
-            password: password,
+            // password: password,
             publicKey: publicKey
         )
         

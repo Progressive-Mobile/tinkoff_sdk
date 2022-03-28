@@ -238,8 +238,8 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             AcquiringSdk.AsdkLogger.setDebug(isDebug);
 
             parser = new TinkoffSdkParser(language);
-            tinkoffAcquiring = new TinkoffAcquiring(terminalKey, password, publicKey);
-            sdk = new AcquiringSdk(terminalKey, password, publicKey);
+            tinkoffAcquiring = new TinkoffAcquiring(terminalKey, publicKey);
+            sdk = new AcquiringSdk(terminalKey, publicKey);
                 sdk.init(initRequest -> Unit.INSTANCE);
 
             if (nativePay) {
