@@ -1,3 +1,3 @@
-## 0.4.2
+## 0.4.3
 
-* Updated IOS and Adnroid dependecies.
+* Fixed launching with Flutter v3.
