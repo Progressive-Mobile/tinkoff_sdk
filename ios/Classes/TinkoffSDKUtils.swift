@@ -136,9 +136,9 @@ class Utils {
         
         /// Добавление кнопки "Оплатить с помощью СПБ"
         if (enableSPB) {
-            viewConfigration.fields.append(AcquiringViewConfiguration.InfoFields.buttonPaySPB)
+            // viewConfigration.fields.append(AcquiringViewConfiguration.InfoFields.buttonPaySPB)
         }
-        
+
         viewConfigration.localizableInfo = AcquiringViewConfiguration.LocalizableInfo.init(lang: language.lowercased())
         viewConfigration.alertViewHelper = nil
         
