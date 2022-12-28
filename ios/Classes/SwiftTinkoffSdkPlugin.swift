@@ -115,7 +115,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         let customerKey = args!["customerKey"] as! String
         
-        let provider = CardListDataProvider.init(sdk: sdk, customerKey: customerKey)
+        let provider = CardListDataProvider.init(coreSDK: sdk, customerKey: customerKey)
         
         var cardList = [] as [String?]
 
