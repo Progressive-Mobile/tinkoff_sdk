@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.dependency 'Flutter'
   s.dependency 'TinkoffASDKCore'
   s.dependency 'TinkoffASDKUI'
-  s.platform = :ios, '12.3'
+  s.platform = :ios, '11.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
   s.swift_version = '5.0'
