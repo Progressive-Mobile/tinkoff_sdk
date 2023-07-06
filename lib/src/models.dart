@@ -211,8 +211,8 @@ class Receipt {
   _arguments() => {
     _email : email,
     _phone : phone,
-    _taxation : taxation,
-    _items : items,
+    _taxation : taxationString(taxation),
+    _items : items.map((e) => e._arguments()),
   };
 }
 
@@ -260,7 +260,7 @@ class Item {
     _quantity : quantity,
     _amount : amount,
     _price : price,
-    _tax : tax,
+    _tax : taxString(tax),
   };
 }
 

@@ -54,6 +54,7 @@ class OpenPaymentScreen {
   String get orderOptions => 'orderOptions';
   String get customerOptions => 'customerOptions';
   String get featuresOptions => 'featuresOptions';
+  String get receipt => 'receipt';
 }
 
 class AttachCardScreen {

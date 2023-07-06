@@ -101,11 +101,12 @@ class TinkoffSdk {
   /// в случае ошибки либо отмены вернет [false].
   ///
   /// Подробное описание параметров см. в реализации
-  /// [OrderOptions], [CustomerOptions], [FeaturesOptions].
+  /// [OrderOptions], [CustomerOptions], [FeaturesOptions], [Receipt].
   Future<TinkoffResult> openPaymentScreen({
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
+    Receipt? receipt,
   }) async {
     _checkActivated();
 
@@ -115,6 +116,7 @@ class TinkoffSdk {
       method.orderOptions: orderOptions._arguments(),
       method.customerOptions: customerOptions._arguments(),
       method.featuresOptions: featuresOptions._arguments(),
+      method.receipt : receipt?._arguments(),
     };
 
     return _channel
