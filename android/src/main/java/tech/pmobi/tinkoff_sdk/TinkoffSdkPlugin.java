@@ -105,9 +105,8 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
         }
 
         @Override
-        public void onError(@NotNull Throwable throwable) {
+        public void onError(@NonNull Throwable throwable, @androidx.annotation.Nullable Long aLong) {
             if (result == null) return;
-
             final String locMessage = throwable.getLocalizedMessage();
             final String message = throwable.getMessage();
             result.error(locMessage, message, null);
@@ -122,6 +121,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
     };
 
     private PluginRegistry.ActivityResultListener activityResultListener = new PluginRegistry.ActivityResultListener() {
+
         @Override
         public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
             if (result != null) {
@@ -233,12 +233,11 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             final boolean isDeveloperMode = (boolean) arguments.get("isDeveloperMode");
             final boolean isDebug = (boolean) arguments.get("isDebug");
             final String language = (String) arguments.get("language");
-
-            AcquiringSdk.AsdkLogger.setDeveloperMode(isDeveloperMode);
-            AcquiringSdk.AsdkLogger.setDebug(isDebug);
+            AcquiringSdk.Companion.setDeveloperMode(isDeveloperMode);
+            AcquiringSdk.Companion.setDebug(isDebug);
 
             parser = new TinkoffSdkParser(language);
-            tinkoffAcquiring = new TinkoffAcquiring(terminalKey, publicKey);
+            tinkoffAcquiring = new TinkoffAcquiring(activity.getApplicationContext(), terminalKey, publicKey);
             sdk = new AcquiringSdk(terminalKey, publicKey);
                 sdk.init(initRequest -> Unit.INSTANCE);
 
@@ -258,7 +257,7 @@ public class TinkoffSdkPlugin implements MethodCallHandler, FlutterPlugin, Activ
             terminalKey,
             false,
             false,
-            AcquiringSdk.AsdkLogger.isDebug()
+            AcquiringSdk.Companion.isDebug()
                 ? WalletConstants.ENVIRONMENT_TEST
                 : WalletConstants.ENVIRONMENT_PRODUCTION
         );
