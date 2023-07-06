@@ -18,15 +18,19 @@
 
 package tech.pmobi.tinkoff_sdk;
 
+import java.lang.reflect.Array;
 import java.util.Map;
+import java.util.ArrayList;
 
 import ru.tinkoff.acquiring.sdk.localization.AsdkSource;
 import ru.tinkoff.acquiring.sdk.localization.Language;
 import ru.tinkoff.acquiring.sdk.models.DarkThemeMode;
+import ru.tinkoff.acquiring.sdk.models.Item;
+import ru.tinkoff.acquiring.sdk.models.Receipt;
+import ru.tinkoff.acquiring.sdk.models.enums.Tax;
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions;
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions;
 import ru.tinkoff.acquiring.sdk.models.options.OrderOptions;
-import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions;
 import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions;
 import ru.tinkoff.acquiring.sdk.utils.Money;
@@ -70,6 +74,12 @@ class TinkoffSdkParser {
         final CustomerOptions customer = parseCustomerOptions(customerOptionsArguments);
         paymentOptions.setCustomer(customer);
 
+        final Map<String, Object> receiptArguments = (Map<String, Object>) arguments.get("receipt");
+        if (receiptArguments != null) {
+            final Receipt receipt = parseReceipt(receiptArguments);
+            order.setReceipt(receipt);
+        }
+
         @SuppressWarnings("unchecked")
         final Map<String, Object> featuresOptionsArguments = (Map<String, Object>) arguments.get("featuresOptions");
         if (featuresOptionsArguments != null) {
@@ -77,6 +87,48 @@ class TinkoffSdkParser {
             paymentOptions.setFeatures(features);
         }
         return paymentOptions;
+    }
+
+    Receipt parseReceipt(Map<String, Object> arguments) {
+        final Receipt result = new Receipt();
+        final String phone = (String) arguments.get("phone");
+        final String email = (String) arguments.get("email");
+        if (email != null) result.setEmail(email);
+        if (phone != null) result.setPhone(phone);
+        final ArrayList<Map<String, Object>> itemsArguments = (ArrayList<Map<String, Object>>) arguments.get("items");
+        final ArrayList<Item> items = parseReceiptItems(itemsArguments);
+        result.setItems(items);
+        return  result;
+    }
+
+    ArrayList<Item> parseReceiptItems(ArrayList<Map<String, Object>> arguments) {
+        final ArrayList<Item> result = new ArrayList();
+        for (int i = 0; i < arguments.size(); i++ ) {
+            final Map<String, Object> currentArguments = arguments.get(i);
+            final Item item = parseItem(currentArguments);
+            final Receipt x = new Receipt();
+            result.add(item);
+        }
+        return  result;
+    }
+
+    Item parseItem(Map<String, Object> arguments) {
+        final Item result = new Item();
+
+        final int amount = (int) arguments.get("amount");
+        final String name = (String) arguments.get("name");
+        final int price = (int) arguments.get("price");
+        final Double quantity = (Double) arguments.get("quantity");
+        final String taxArg = (String) arguments.get("tax");
+        final Tax tax = parseTax(taxArg);
+
+        result.setAmount((long) amount);
+        result.setName(name);
+        result.setTax(tax);
+        result.setPrice(price);
+        if (quantity != null) result.setQuantity(quantity);
+
+        return  result;
     }
 
     OrderOptions parseOrderOptions(Map<String, Object> arguments) {
@@ -153,4 +205,24 @@ class TinkoffSdkParser {
                 return Language.RU;
         }
     }
-}
+
+    private Tax parseTax(String tax) {
+        switch (tax) {
+            case "vat10":
+                return Tax.VAT_10;
+            case "vat18":
+                return Tax.VAT_18;
+            case "vat20":
+                return  Tax.VAT_20;
+            case "vat110":
+                return Tax.VAT_110;
+            case "vat118":
+                return Tax.VAT_118;
+            case "vat120":
+                return Tax.VAT_120;
+            case "non":
+            default:
+                return  Tax.NONE;
+        }
+    }
+ }
