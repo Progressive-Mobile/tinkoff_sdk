@@ -185,3 +185,91 @@ enum DarkThemeMode { auto, disabled, enabled }
 /// Клиент будет перенаправлен на экран для ввода списанной суммы, где должен корректно указать случайную сумму.
 /// В случае успешного подтверждения случайной суммы карта будет привязана.
 enum CheckType { no, hold, threeDS, threeDS_hold }
+
+/// [Receipt] - Расширенный набор параметров чека
+/// [Receipt.email] - элекронная почта покупателя 
+/// [Receipt.phone] - телефон покупателя (в формате +(Ц))
+/// [Receipt.email], [Receipt.phone] - одно из этих полей обязательно
+class Receipt {
+  static const String _email = 'email';
+  static const String _phone = 'prone';
+  static const String _taxation = 'taxation';
+  static const String _items = 'items';
+
+  final String? email;
+  final String? phone;
+  final Taxation taxation;
+  final List<Item> items;
+
+  const Receipt({
+    this.email,
+    this.phone,
+    this.taxation = Taxation.osn,
+    required this.items,
+  });
+
+  _arguments() => {
+    _email : email,
+    _phone : phone,
+    _taxation : taxation,
+    _items : items,
+  };
+}
+
+/// [Taxation] - система налогообложения
+/// 
+/// [Taxation.osn] - общая
+/// [Taxation.usn_income] - упрощенная (доходы)
+/// [Taxation.usn_income_outcome] - упрощенная (доходы минус расходы)
+/// [Taxation.patent] - патентная
+/// [Taxation.envd] - единый налог на вмененный доход
+/// [Taxation.esn] - единый сельскохозяйственный доход
+enum Taxation {osn, usn_income, usn_income_outcome, patent, envd, esn}
+
+
+/// [Item] - позиция чека с информацией о товаре
+/// 
+/// [Item.name] - наименование товара
+/// [Item.quantity] - количество или вес товара
+/// [Item.amount] - стоимость товара в копейках
+/// [Item.price] - цена за единицу товара в копейках
+/// [Item.tax] - система налогообложения 
+class Item {
+  static const String _name = 'name';
+  static const String _quantity = 'quantity';
+  static const String _amount = 'amount';
+  static const String _price = 'price';
+  static const String _tax = 'tax';
+
+  final String name;
+  final num quantity;
+  final num amount;
+  final num price;
+  final Tax tax;
+
+  Item({
+    required this.name, 
+    required this.quantity, 
+    required this.amount, 
+    required this.price, 
+    this.tax = Tax.non,
+  });
+
+  _arguments() => {
+    _name : name,
+    _quantity : quantity,
+    _amount : amount,
+    _price : price,
+    _tax : tax,
+  };
+}
+
+/// [Tax] - ставка НДС
+/// 
+/// [Tax.non] -  без НДС
+/// [Tax.vat0] - 0%
+/// [Tax.vat10] - 10%
+/// [Tax.vat20] - 20%
+/// [Tax.vat110] - 10/100
+/// [Tax.vat120] - 20/120
+enum Tax {non, vat0, vat10, vat20, vat110, vat120}
