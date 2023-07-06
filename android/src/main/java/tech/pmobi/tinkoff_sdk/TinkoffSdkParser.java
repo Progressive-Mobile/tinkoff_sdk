@@ -28,6 +28,7 @@ import ru.tinkoff.acquiring.sdk.models.DarkThemeMode;
 import ru.tinkoff.acquiring.sdk.models.Item;
 import ru.tinkoff.acquiring.sdk.models.Receipt;
 import ru.tinkoff.acquiring.sdk.models.enums.Tax;
+import ru.tinkoff.acquiring.sdk.models.enums.Taxation;
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions;
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions;
 import ru.tinkoff.acquiring.sdk.models.options.OrderOptions;
@@ -93,11 +94,15 @@ class TinkoffSdkParser {
         final Receipt result = new Receipt();
         final String phone = (String) arguments.get("phone");
         final String email = (String) arguments.get("email");
-        if (email != null) result.setEmail(email);
-        if (phone != null) result.setPhone(phone);
+        final String taxationStr =  (String) arguments.get("taxation");
+        final Taxation taxation = parseTaxation(taxationStr);
         final ArrayList<Map<String, Object>> itemsArguments = (ArrayList<Map<String, Object>>) arguments.get("items");
         final ArrayList<Item> items = parseReceiptItems(itemsArguments);
+
+        if (email != null) result.setEmail(email);
+        if (phone != null) result.setPhone(phone);
         result.setItems(items);
+        result.setTaxation(taxation);
         return  result;
     }
 
@@ -223,6 +228,24 @@ class TinkoffSdkParser {
             case "non":
             default:
                 return  Tax.NONE;
+        }
+    }
+
+    private Taxation parseTaxation(String taxation) {
+        switch (taxation) {
+            case "usn_income":
+                return Taxation.USN_INCOME;
+            case "usn_income_outcome":
+                return  Taxation.USN_INCOME_OUTCOME;
+            case "patent":
+                return Taxation.PATENT;
+            case "envd":
+                return Taxation.ENVD;
+            case "esn":
+                return  Taxation.ESN;
+            case "osn":
+            default:
+                return Taxation.OSN;
         }
     }
  }
