@@ -212,7 +212,7 @@ class Receipt {
     _email : email,
     _phone : phone,
     _taxation : taxationString(taxation),
-    _items : items.map((e) => e._arguments()),
+    _items : items.map((e) => e._arguments()).toList(),
   };
 }
 
