@@ -242,9 +242,9 @@ class Item {
   static const String _tax = 'tax';
 
   final String name;
-  final num quantity;
-  final num amount;
-  final num price;
+  final double quantity;
+  final int amount;
+  final int price;
   final Tax tax;
 
   Item({
