@@ -197,6 +197,7 @@ class TinkoffSdkParser {
 //        if (enableCameraCardScanner) {
 //            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(language));
 //        }
+        featuresOptions.setDuplicateEmailToReceipt(true);
         featuresOptions.setDarkThemeMode(darkMode);
         return featuresOptions;
     }
