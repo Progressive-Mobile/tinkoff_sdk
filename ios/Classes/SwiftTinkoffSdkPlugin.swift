@@ -165,9 +165,18 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             amount: coins,
             orderId: orderId,
             customerKey: customerKey
-        )
+        );
+        
+        let receiptArgs = args!["receipt"] as? Dictionary<String, Any>
+        if (receiptArgs != nil) {
+            let receipt = parseReceipt(receiptArgs!)
+            
+            paymentData.receipt = receipt;
+        }
+        
         paymentData.description = description
         paymentData.savingAsParentPayment = reccurentPayment
+        
         if (reccurentPayment) {
             paymentData.payType = .twoStage
         }
@@ -197,6 +206,40 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         acquiring.addCardNeedSetCheckTypeHandler = {
             return PaymentCardCheckType.init(rawValue: checkType)
         }
+    }
+    
+    private func parseReceipt(_ receiptArgs: Dictionary<String, Any>!) -> Receipt {
+        let receiptPhone = receiptArgs!["phone"] as? String
+        let receiptEmail = receiptArgs!["email"] as? String
+        let taxationArgs = receiptArgs!["taxation"] as? String
+        let taxation = Utils.parseTaxation(taxationArgs)
+        let itemsArgs = receiptArgs!["items"] as? Array<Dictionary<String, Any>>
+        
+        var items: [Item] = []
+        
+        for itemArgs in itemsArgs ?? [] {
+            let amount = itemArgs["amount"] as! Int64
+            let price = itemArgs["price"] as! Int64
+            let name = itemArgs["name"] as? String ?? ""
+            let taxArgs = itemArgs["tax"] as? String
+            let tax = Utils.parseTax(taxArgs)
+            let item = Item(amount: amount, price: price, name: name, tax: tax)
+            items.append(item)
+        }
+        
+        let receipt = Receipt(
+            shopCode: nil,
+            email: receiptEmail,
+            taxation: taxation,
+            phone: receiptPhone,
+            items: items,
+            agentData: nil,
+            supplierInfo: nil,
+            customer: nil,
+            customerInn: nil
+        );
+        
+        return receipt
     }
     
     private func handleAttachCardScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
