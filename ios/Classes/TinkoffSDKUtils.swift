@@ -127,14 +127,6 @@ class Utils {
             )
         )
         
-        /// Добавление поля для ввода E-mail адреса
-        viewConfigration.fields.append(
-            AcquiringViewConfiguration.InfoFields.email(
-                value: email,
-                placeholder: "E-mail для получения чека"
-            )
-        )
-        
         /// Добавление кнопки "Оплатить с помощью СПБ"
         if (enableSPB) {
             // viewConfigration.fields.append(AcquiringViewConfiguration.InfoFields.buttonPaySPB)
