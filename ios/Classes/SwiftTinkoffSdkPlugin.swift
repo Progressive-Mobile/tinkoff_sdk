@@ -21,6 +21,7 @@ import UIKit
 
 import TinkoffASDKUI
 import TinkoffASDKCore
+import ThreeDSWrapper
 
 public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private var acquiring: AcquiringUISDK!
@@ -51,12 +52,12 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         case "showQrScreen":
             handleShowQrScreen(call, result: result)
             break
-        case "isNativePayAvailable":
-            handleIsNativePayAvailable(call, result: result)
-            break
-        case "openNativePayment":
-            handleOpenNativePayment(call, result: result)
-            break
+//        case "isNativePayAvailable":
+//            handleIsNativePayAvailable(call, result: result)
+//            break
+//        case "openNativePayment":
+//            handleOpenNativePayment(call, result: result)
+//            break
         case "startCharge":
             handleStartCharge(call, result: result)
             break
@@ -75,11 +76,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let logging = args!["isDebug"] as! Bool
         let isDeveloperMode = args!["isDeveloperMode"] as! Bool
         
-        Utils.setLanguage((args!["language"] as! String).lowercased())
-        
         let credential = AcquiringSdkCredential(
             terminalKey: terminalKey,
-            // password: password,
             publicKey: publicKey
         )
         
@@ -87,25 +85,21 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             ? AcquiringSdkEnvironment.test
             : AcquiringSdkEnvironment.prod
         
-        let configuration = AcquiringSdkConfiguration(
+        let coreSDKconfiguration = AcquiringSdkConfiguration(
             credential: credential,
-            server: server
+            server: server,
+            logger: logging ? Logger() : nil
         )
-        
-        if (logging) {
-            configuration.logger = AcquiringLoggerDefault()
-        }
 
-        configuration.showErrorAlert = isDeveloperMode
-        configuration.fpsEnabled = true
-        
-        if let sdk = try? AcquiringUISDK.init(
-            configuration: configuration
-        ) {
-            self.acquiring = sdk
-            self.sdk = try! AcquiringSdk.init(configuration: configuration)
+        let uiSDKConfiguration = UISDKConfiguration()
+
+        do {
+            self.acquiring = try AcquiringUISDK(
+                coreSDKConfiguration: coreSDKconfiguration,
+                uiSDKConfiguration: uiSDKConfiguration
+            )
             result(true)
-        } else {
+        } catch {
             result(false)
         }
         awaitingResult = false
@@ -114,28 +108,35 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleCardList(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         let customerKey = args!["customerKey"] as! String
-        
-        let provider = CardListDataProvider.init(coreSDK: sdk, customerKey: customerKey)
+        var cardsController = acquiring.cardsController(customerKey: customerKey)
         
         var cardList = [] as [String?]
-
-        provider.fetch(startHandler: nil) { (cards, _) in
-            if cards != nil {
-                let cardsAmount = cards!.count
-                if (cardsAmount > 0) {
-                    for index in 0...cardsAmount-1 {
-                        var map = Dictionary<String, Any>()
-                        let card = provider.item(at: index)
-                        map["cardId"] = card.cardId
-                        map["pan"] = card.pan
-                        map["expDate"] = card.expDate
-                        cardList.append(Utils.prepareJson(map))
+        
+//        cardsController.getActiveCards(completion: (result) in
+//                                       switch result {
+//            self?.activeCards = cards
+//                            self?.tableView.reloadData()
+//        }
+//        )
+        
+        cardsController.getActiveCards { response in
+            switch response {
+                case let .success(cards):
+                    let cardsAmount = cards.count
+                    if (cardsAmount > 0) {
+                        for index in 0...cardsAmount-1 {
+                            var map = Dictionary<String, Any>()
+                            map["cardId"] = cards[index].cardId
+                            map["pan"] = cards[index].pan
+                            map["expDate"] = cards[index].expDate
+                            cardList.append(Utils.prepareJson(map))
+                        }
                     }
-                }
+                    result(cardList)
+                    self.awaitingResult = false
+                case .failure:
+                    break
             }
-            
-            result(cardList)
-            self.awaitingResult = false
         }
     }
     
@@ -153,13 +154,6 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let customerKey = customerOptionsArgs?["customerKey"] as! String
         let email = customerOptionsArgs?["email"] as? String
         let checkType = customerOptionsArgs!["checkType"] as! String
-        
-        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-        let fpsEnabled = featuresOptionsArgs!["fpsEnabled"] as! Bool
-        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
-        
-//        let useSecureKeyboard = featuresOptionsArgs!["useSecureKeyboard"] as! Bool
-//        let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
         
         var paymentData = PaymentInitData(
             amount: coins,
@@ -181,31 +175,28 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
             paymentData.payType = .twoStage
         }
         
-        let viewConfiguration = Utils.getViewConfiguration(
-            title: title,
-            description: description,
-            amount: coins,
-            enableSPB: fpsEnabled,
-            email: email
-        )
-        viewConfiguration.localizableInfo = Utils.getLanguage()
-        
-        if cameraCardScannerEnabled {
-            viewConfiguration.scaner = self
-        }
-        
         let view = Utils.getView()
-        
-        self.acquiring.presentPaymentView(
-            on: view,
-            paymentData: paymentData,
-            configuration: viewConfiguration,
-            completionHandler: setPaymentHandler(view, flutterResult: result)
+        let paymentFlow = PaymentFlow.full(
+            paymentOptions: PaymentOptions(
+                orderOptions: OrderOptions(
+                    orderId: orderId,
+                    amount: coins,
+                    description: description
+                ),
+                customerOptions: 
+                    CustomerOptions(
+                        customerKey: customerKey, 
+                        email: email
+                    )
+            )
         )
-
-        acquiring.addCardNeedSetCheckTypeHandler = {
-            return PaymentCardCheckType.init(rawValue: checkType)
-        }
+        let viewConfiguration = MainFormUIConfiguration.init(orderDescription: description)
+        
+        self.acquiring.presentMainForm(
+            on: view,
+            paymentFlow: paymentFlow,
+            configuration: viewConfiguration
+        )
     }
     
     private func parseReceipt(_ receiptArgs: Dictionary<String, Any>!) -> Receipt {
@@ -253,25 +244,20 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
         //let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
         
-        let cardListViewConfiguration = AcquiringViewConfiguration.init()
-        
-        if (cameraCardScannerEnabled) {
-            cardListViewConfiguration.scaner = self
-        }
+//        let cardListViewConfiguration = AcquiringViewConfiguration.init()
+//        
+//        if (cameraCardScannerEnabled) {
+//            cardListViewConfiguration.scaner = self
+//        }
 
-        cardListViewConfiguration.localizableInfo = Utils.getLanguage()
+//        cardListViewConfiguration.localizableInfo = Utils.getLanguage()
         let controller = Utils.getView()
         self.acquiring.presentCardList(
             on: controller,
-            customerKey: customerKey,
-            configuration: cardListViewConfiguration
+            customerKey: customerKey
         )
 
         checkForDismiss(controller, result: result)
-
-        acquiring.addCardNeedSetCheckTypeHandler = {
-            return PaymentCardCheckType.init(rawValue: checkType)
-        }
     }
     
     private func checkForDismiss(_ controller: UIViewController, result: @escaping FlutterResult) {
@@ -293,57 +279,57 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         awaitingResult = false
     }
     
-    private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
-        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: AcquiringUISDK.ApplePayConfiguration()) ?? false
-        result(canMakePayments)
-        awaitingResult = false
-    }
+//    private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
+//        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: AcquiringUISDK.ApplePayConfiguration()) ?? false
+//        result(canMakePayments)
+//        awaitingResult = false
+//    }
     
-    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        let args = call.arguments as? Dictionary<String, Any>
-        
-        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
-        let orderId = orderOptionsArgs!["orderId"] as! String
-        let coins = orderOptionsArgs!["amount"] as! Int64
-        let title = orderOptionsArgs!["title"] as! String
-        let description = orderOptionsArgs!["description"] as! String
-        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
-        
-        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
-        let customerKey = customerOptionsArgs?["customerKey"] as! String
-        let email = customerOptionsArgs?["email"] as? String
-        
-        let merchantId = args!["merchantId"] as! String
-
-        var paymentData = PaymentInitData(
-            amount: coins,
-            orderId: orderId,
-            customerKey: customerKey
-        )
-        paymentData.description = description
-        paymentData.savingAsParentPayment = reccurentPayment
-        if (reccurentPayment) {
-            paymentData.payType = .twoStage
-        }
-        
-        let viewConfiguration = Utils.getViewConfiguration(
-            title: title,
-            description: description,
-            amount: coins,
-            email: email
-        )
-        viewConfiguration.localizableInfo = Utils.getLanguage()
-        
-        let view = Utils.getView()
-        var applePayConfiguration = AcquiringUISDK.ApplePayConfiguration()
-        applePayConfiguration.merchantIdentifier = merchantId
-        
-        self.acquiring.presentPaymentApplePay(on: view,
-                                              paymentData: paymentData,
-                                              viewConfiguration: viewConfiguration,
-                                              paymentConfiguration: applePayConfiguration,
-                                              completionHandler: setPaymentHandler(view, flutterResult: result))
-    }
+//    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+//        let args = call.arguments as? Dictionary<String, Any>
+//        
+//        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
+//        let orderId = orderOptionsArgs!["orderId"] as! String
+//        let coins = orderOptionsArgs!["amount"] as! Int64
+//        let title = orderOptionsArgs!["title"] as! String
+//        let description = orderOptionsArgs!["description"] as! String
+//        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
+//        
+//        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
+//        let customerKey = customerOptionsArgs?["customerKey"] as! String
+//        let email = customerOptionsArgs?["email"] as? String
+//        
+//        let merchantId = args!["merchantId"] as! String
+//
+//        var paymentData = PaymentInitData(
+//            amount: coins,
+//            orderId: orderId,
+//            customerKey: customerKey
+//        )
+//        paymentData.description = description
+//        paymentData.savingAsParentPayment = reccurentPayment
+//        if (reccurentPayment) {
+//            paymentData.payType = .twoStage
+//        }
+//        
+//        let viewConfiguration = Utils.getViewConfiguration(
+//            title: title,
+//            description: description,
+//            amount: coins,
+//            email: email
+//        )
+//        viewConfiguration.localizableInfo = Utils.getLanguage()
+//        
+//        let view = Utils.getView()
+//        var applePayConfiguration = AcquiringUISDK.ApplePayConfiguration()
+//        applePayConfiguration.merchantIdentifier = merchantId
+//        
+//        self.acquiring.presentPaymentApplePay(on: view,
+//                                              paymentData: paymentData,
+//                                              viewConfiguration: viewConfiguration,
+//                                              paymentConfiguration: applePayConfiguration,
+//                                              completionHandler: setPaymentHandler(view, flutterResult: result))
+//    }
     
     private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
@@ -351,35 +337,40 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         awaitingResult = false
     }
     
-    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult) -> PaymentCompletionHandler {
+    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult) -> PaymentResultCompletion {
         return setPaymentHandler(view, flutterResult: flutterResult) {}
     }
     
-    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult, additional: @escaping () -> Void) -> PaymentCompletionHandler {
-        let handler: PaymentCompletionHandler = {[weak self] (response) in
+    private func setPaymentHandler(_ view: UIViewController, flutterResult: @escaping FlutterResult, additional: @escaping () -> Void) -> PaymentResultCompletion {
+        let handler: PaymentResultCompletion = {[weak self] (response) in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 if (view.presentedViewController == nil) {
                     self?.responseReviewing(response, flutterResult: flutterResult)
                     additional()
                 }
             }
+
         }
         return handler
     }
 
-    private func responseReviewing(_ response: Result<PaymentStatusResponse, Error>,
-                                   flutterResult: FlutterResult) {
+    private func responseReviewing(_ response: PaymentResult,flutterResult: FlutterResult) {
         var map = Dictionary<String, Any>()
         switch response {
-        case .success(let result):
-            let success = result.status != .cancelled
+        case .succeeded(let result):
+            let success = result.paymentStatus != .cancelled
             map["success"] = success
             map["isError"] = false
-            map["message"] = result.status.rawValue
-        case .failure(let result):
+            map["message"] = result.paymentStatus.rawValue
+        case .failed(let result):
             map["success"] = false
             map["isError"] = true
             map["message"] = result.localizedDescription.split(separator: "(").last?.split(separator: ".").first
+        case .cancelled(let result):
+            let success = result?.paymentStatus == .cancelled
+            map["success"] = success
+            map["isError"] = false
+            map["message"] = result?.paymentStatus.rawValue ?? "Cancelled"
         }
         
         flutterResult(Utils.prepareJson(map))
@@ -387,18 +378,10 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     }
 }
 
-extension SwiftTinkoffSdkPlugin: AcquiringAlertViewProtocol {
-    public func presentAlertView(_ title: String?, message: String?, dismissCompletion: (() -> Void)?) -> UIViewController? {
-        let alertView = UIAlertController.init(title: title, message: message, preferredStyle: .alert)
-        alertView.addAction(UIAlertAction.init(title: "Ok", style: .default, handler: { (action) in
-            dismissCompletion?()
-        }))
-        
-        return alertView
+extension SwiftTinkoffSdkPlugin: ICardScannerDelegate {
+    public func cardScanButtonDidPressed(on viewController: UIViewController, completion: @escaping TinkoffASDKUI.CardScannerCompletion) {
     }
-}
-
-extension SwiftTinkoffSdkPlugin: AcquiringScanerProtocol {
+    
     public func presentScanner(completion: @escaping (_ number: String?, _ yy: Int?, _ mm: Int?) -> Void) -> UIViewController? {
         if let viewController = UIStoryboard.init(name: "Tinkoff", bundle: Bundle.init(for: TinkoffSDKCardScanner.self))
             .instantiateViewController(withIdentifier: "TinkoffSDKCardScanner") as? TinkoffSDKCardScanner {
@@ -412,4 +395,23 @@ extension SwiftTinkoffSdkPlugin: AcquiringScanerProtocol {
         return nil
     }
     
+    public func presentAlertView(_ title: String?, message: String?, dismissCompletion: (() -> Void)?) -> UIViewController? {
+        let alertView = UIAlertController.init(title: title, message: message, preferredStyle: .alert)
+        alertView.addAction(UIAlertAction.init(title: "Ok", style: .default, handler: { (action) in
+            dismissCompletion?()
+        }))
+        
+        return alertView
+    }
+
+    
+}
+
+class SwiftTinkoffSdkTokenProvider: ITokenProvider {
+    func provideToken(
+        forRequestParameters parameters: [String: String],
+        completion: @escaping (Result<String, Error>) -> Void
+    ) {
+        
+    }
 }

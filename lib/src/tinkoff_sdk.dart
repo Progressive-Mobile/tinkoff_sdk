@@ -53,9 +53,7 @@ class TinkoffSdk {
     required String terminalKey,
     required String password,
     required String publicKey,
-    bool configureNativePay = false,
-    LocalizationSource language = LocalizationSource.ru,
-    bool isDeveloperMode = false,
+    bool isDeveloperMode = true,
     bool logging = false,
   }) async {
     final method = Method.activate;
@@ -64,10 +62,8 @@ class TinkoffSdk {
       method.terminalKey: terminalKey,
       method.password: password,
       method.publicKey: publicKey,
-      method.nativePay: configureNativePay,
       method.isDeveloperMode: isDeveloperMode,
       method.isDebug: logging,
-      method.language: localizationString(language)
     };
 
     final activated =
@@ -155,33 +151,33 @@ class TinkoffSdk {
     return _channel.invokeMethod(method.name).then(parseTinkoffResult);
   }
 
-  Future<bool> get isNativePayAvailable async {
-    _checkActivated();
-    final result =
-        await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
-    return result ?? false;
-  }
+  // Future<bool> get isNativePayAvailable async {
+  //   _checkActivated();
+  //   final result =
+  //       await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
+  //   return result ?? false;
+  // }
 
-  Future<TinkoffResult> openNativePaymentScreen({
-    required OrderOptions orderOptions,
-    required CustomerOptions customerOptions,
-    String? merchantId,
-  }) async {
-    _checkActivated();
-    if (!await isNativePayAvailable) throw "Native payments isn't available.";
+  // Future<TinkoffResult> openNativePaymentScreen({
+  //   required OrderOptions orderOptions,
+  //   required CustomerOptions customerOptions,
+  //   String? merchantId,
+  // }) async {
+  //   _checkActivated();
+  //   if (!await isNativePayAvailable) throw "Native payments isn't available.";
 
-    final method = Method.openNativePayment;
+  //   final method = Method.openNativePayment;
 
-    final arguments = <String, dynamic>{
-      method.orderOptions: orderOptions._arguments(),
-      method.customerOptions: customerOptions._arguments(),
-      method.merchantId: merchantId ?? '',
-    };
+  //   final arguments = <String, dynamic>{
+  //     method.orderOptions: orderOptions._arguments(),
+  //     method.customerOptions: customerOptions._arguments(),
+  //     method.merchantId: merchantId ?? '',
+  //   };
 
-    return _channel
-        .invokeMethod(method.name, arguments)
-        .then(parseTinkoffResult);
-  }
+  //   return _channel
+  //       .invokeMethod(method.name, arguments)
+  //       .then(parseTinkoffResult);
+  // }
 
   // TODO: implement Charge
   Future<TinkoffResult> startCharge() async {

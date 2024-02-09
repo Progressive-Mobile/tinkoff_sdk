@@ -35,16 +35,12 @@ class Utils {
         return "\(amountFormatter.string(from: value) ?? "\(value)") \(currency)"
     }
     
-    static func setLanguage(_ language: String!) {
-        self.language = language
-    }
-    
-    static func getLanguage() -> AcquiringViewConfiguration.LocalizableInfo! {
-       return AcquiringViewConfiguration.LocalizableInfo.init(lang: self.language)
-    }
+//    static func getLanguage() -> AcquiringViewConfiguration.LocalizableInfo! {
+//       return AcquiringViewConfiguration.LocalizableInfo.init(lang: self.language)
+//    }
     
     static func getView(_ navigator: Bool = false) -> UIViewController {
-        var topController: UIViewController = UIApplication.shared.keyWindow!.rootViewController!
+        var topController: UIViewController = UIApplication.shared.windows.filter{$0.isKeyWindow}.first!.rootViewController!
         
         while (topController.presentedViewController != nil) {
             topController = topController.presentedViewController!
@@ -60,82 +56,6 @@ class Utils {
         } else {
             return topController
         }
-    }
-    
-    static func getViewConfiguration(
-        title: String,
-        description: String,
-        amount: Int64,
-        enableSPB: Bool = false,
-        email: String? = nil,
-        scanner: AcquiringScanerProtocol? = nil
-    ) -> AcquiringViewConfiguration {
-        //!TODO: Локализация экрана оплаты
-        
-        let viewConfigration = AcquiringViewConfiguration.init()
-
-        viewConfigration.scaner = scanner
-
-        viewConfigration.viewTitle = "Оплата"
-        
-        viewConfigration.fields = []
-        // InfoFields.amount
-        let paymentTitle = NSAttributedString.init(
-            string: "Оплата",
-            attributes: [
-                .font: UIFont.boldSystemFont(ofSize: 22)
-            ]
-        )
-        let amountString = Utils.formatAmount(NSDecimalNumber.init(floatLiteral: Double(amount)/100))
-        let amountTitle = NSAttributedString.init(
-            string: "на сумму \(amountString)",
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 17)
-            ]
-        )
-        
-        // Добавление заголовка
-        viewConfigration.fields.append(
-            AcquiringViewConfiguration.InfoFields.amount(
-                title: paymentTitle,
-                amount: amountTitle
-            )
-        )
-        
-        let productDetail = NSMutableAttributedString.init()
-        let titleString = NSAttributedString.init(
-            string: title + "\n",
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 17)
-            ]
-        )
-        let descriptionString = NSAttributedString.init(
-            string: description,
-            attributes: [
-                .font : UIFont.systemFont(ofSize: 13),
-                .foregroundColor: UIColor(red: 0.573, green: 0.6, blue: 0.635, alpha: 1)
-            ]
-        )
-        
-        productDetail.append(titleString)
-        productDetail.append(descriptionString)
-        
-        /// Добавление поля для описания покупки
-        viewConfigration.fields.append(
-            AcquiringViewConfiguration.InfoFields.detail(
-                title: productDetail
-            )
-        )
-        
-        /// Добавление кнопки "Оплатить с помощью СПБ"
-        if (enableSPB) {
-            // viewConfigration.fields.append(AcquiringViewConfiguration.InfoFields.buttonPaySPB)
-        }
-
-        viewConfigration.localizableInfo = AcquiringViewConfiguration.LocalizableInfo.init(lang: language.lowercased())
-        viewConfigration.alertViewHelper = nil
-        
-        return viewConfigration
     }
     
     static func prepareJson(_ dictionary: Dictionary<String, Any>) -> String? {
