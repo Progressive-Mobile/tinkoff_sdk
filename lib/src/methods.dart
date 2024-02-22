@@ -54,6 +54,8 @@ class OpenPaymentScreen {
   String get featuresOptions => 'featuresOptions';
   String get receipt => 'receipt';
   String get token => 'token';
+  String get terminalKey => 'terminalKey';
+  String get publicKey => 'publicKey';
 }
 
 class AttachCardScreen {

@@ -99,6 +99,8 @@ class TinkoffSdk {
   /// Подробное описание параметров см. в реализации
   /// [OrderOptions], [CustomerOptions], [FeaturesOptions], [Receipt].
   Future<TinkoffResult> openPaymentScreen({
+    required String terminalKey,
+    required String publicKey,
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
@@ -113,6 +115,8 @@ class TinkoffSdk {
       method.customerOptions: customerOptions._arguments(),
       method.featuresOptions: featuresOptions._arguments(),
       method.receipt : receipt?._arguments(),
+      method.terminalKey: terminalKey,
+      method.publicKey: publicKey,
     };
 
     return _channel

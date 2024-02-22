@@ -95,11 +95,3 @@ String localizationString(LocalizationSource source) {
       }
   }
 }
-
-String taxationString(Taxation taxation) {
-  return taxation.name;
-}
-
-String taxString(Tax tax) {
-  return tax.name;
-}

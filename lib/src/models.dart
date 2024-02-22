@@ -92,8 +92,13 @@ class OrderOptions {
     this.saveAsParent = false,
   });
 
-  _arguments() =>
-      {_orderId: orderId, _amount: amount, _title: title, _description: description, _reccurent: saveAsParent};
+  _arguments() => {
+        _orderId: orderId,
+        _amount: amount,
+        _title: title,
+        _description: description,
+        _reccurent: saveAsParent
+      };
 }
 
 /// [CustomerOptions] - Данные покупателя.
@@ -116,8 +121,11 @@ class CustomerOptions {
     this.checkType = CheckType.hold,
   });
 
-  Map<String, dynamic> _arguments() =>
-      {_customerKey: customerKey, _email: email, _checkType: checkTypeString(checkType)};
+  Map<String, dynamic> _arguments() => {
+        _customerKey: customerKey,
+        _email: email,
+        _checkType: checkTypeString(checkType)
+      };
 }
 
 /// [FeaturesOptions] - Настройки визуального отображения и функций экрана оплаты.
@@ -151,7 +159,8 @@ class FeaturesOptions {
         _fpsEnabled: sbpEnabled,
         _useSecureKeyboard: useSecureKeyboard,
         _handleCardListErrorInSdk: handleCardListErrorInSdk,
-        _cameraCardScanner: false, //enableCameraCardScanner, //TODO: camera flag
+        _cameraCardScanner:
+            false, //enableCameraCardScanner, //TODO: camera flag
         _darkThemeMode: darkThemeString(darkThemeMode),
       };
 }
@@ -187,7 +196,7 @@ enum DarkThemeMode { auto, disabled, enabled }
 enum CheckType { no, hold, threeDS, threeDS_hold }
 
 /// [Receipt] - Расширенный набор параметров чека
-/// [Receipt.email] - элекронная почта покупателя 
+/// [Receipt.email] - элекронная почта покупателя
 /// [Receipt.phone] - телефон покупателя (в формате +(Ц))
 /// [Receipt.email], [Receipt.phone] - одно из этих полей обязательно
 class Receipt {
@@ -195,81 +204,44 @@ class Receipt {
   static const String _phone = 'prone';
   static const String _taxation = 'taxation';
   static const String _items = 'items';
+  static const String _parseAs = 'parseAs';
 
   final String? email;
   final String? phone;
   final Taxation taxation;
   final List<Item> items;
+  final ReceiptType parseAs;
 
   const Receipt({
     this.email,
     this.phone,
     this.taxation = Taxation.osn,
     required this.items,
+    this.parseAs = ReceiptType.receiptFfd105,
   });
 
   _arguments() => {
-    _email : email,
-    _phone : phone,
-    _taxation : taxationString(taxation),
-    _items : items.map((e) => e._arguments()).toList(),
-  };
+        _email: email,
+        _phone: phone,
+        _taxation: taxation.name,
+        _items: items.map((e) => e.arguments).toList(),
+        _parseAs: parseAs.receiptTypeString
+      };
 }
 
-/// [Taxation] - система налогообложения
-/// 
-/// [Taxation.osn] - общая
-/// [Taxation.usn_income] - упрощенная (доходы)
-/// [Taxation.usn_income_outcome] - упрощенная (доходы минус расходы)
-/// [Taxation.patent] - патентная
-/// [Taxation.envd] - единый налог на вмененный доход
-/// [Taxation.esn] - единый сельскохозяйственный доход
-enum Taxation {osn, usn_income, usn_income_outcome, patent, envd, esn}
+/// [ReceiptType] - формат фискального документа (ФФД)
+///
+/// [ReceiptType.receiptFfd105] - ФФД 1.05
+/// [ReceiptType.receiptFfd12] - ФФД 1.2
+enum ReceiptType { receiptFfd105, receiptFfd12 }
 
-
-/// [Item] - позиция чека с информацией о товаре
-/// 
-/// [Item.name] - наименование товара
-/// [Item.quantity] - количество или вес товара
-/// [Item.amount] - стоимость товара в копейках
-/// [Item.price] - цена за единицу товара в копейках
-/// [Item.tax] - система налогообложения 
-class Item {
-  static const String _name = 'name';
-  static const String _quantity = 'quantity';
-  static const String _amount = 'amount';
-  static const String _price = 'price';
-  static const String _tax = 'tax';
-
-  final String name;
-  final double quantity;
-  final int amount;
-  final int price;
-  final Tax tax;
-
-  Item({
-    required this.name, 
-    required this.quantity, 
-    required this.amount, 
-    required this.price, 
-    this.tax = Tax.non,
-  });
-
-  _arguments() => {
-    _name : name,
-    _quantity : quantity,
-    _amount : amount,
-    _price : price,
-    _tax : taxString(tax),
-  };
+extension ReceiptTypeExtension on ReceiptType {
+  String get receiptTypeString {
+    switch (this) {
+      case ReceiptType.receiptFfd105:
+        return '105';
+      case ReceiptType.receiptFfd12:
+        return '12';
+    }
+  }
 }
-
-/// [Tax] - ставка НДС
-/// 
-/// [Tax.non] -  без НДС
-/// [Tax.vat0] - 0%
-/// [Tax.vat10] - 10%
-/// [Tax.vat20] - 20%
-/// [Tax.vat110] - 10/100
-/// [Tax.vat120] - 20/120
-enum Tax {non, vat0, vat10, vat20, vat110, vat120}

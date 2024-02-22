@@ -227,6 +227,8 @@ class _MyAppState extends State<MyApp> {
                             orderOptions: _orderOptions!,
                             customerOptions: _customerOptions!,
                             featuresOptions: _featuresOptions,
+                            terminalKey: _TERMINAL_KEY,
+                            publicKey: _PUBLIC_KEY,
                           )
                           .then(_showResultDialog)
                           .catchError(_showErrorDialog);
@@ -373,13 +375,13 @@ class _MyAppState extends State<MyApp> {
 
   void _showOrderOptionsDialog() async {
     final orderIdController =
-        TextEditingController(text: _orderOptions?.orderId.toString() ?? '');
+        TextEditingController(text: _orderOptions?.orderId.toString() ?? '123');
     final titleController =
-        TextEditingController(text: _orderOptions?.title ?? '');
+        TextEditingController(text: _orderOptions?.title ?? 'test');
     final descriptionController =
-        TextEditingController(text: _orderOptions?.description ?? '');
+        TextEditingController(text: _orderOptions?.description ?? 'test');
     final amountController =
-        TextEditingController(text: _orderOptions?.amount.toString() ?? '');
+        TextEditingController(text: _orderOptions?.amount.toString() ?? '1000');
     final ValueNotifier<bool> reccurent =
         ValueNotifier(_orderOptions?.saveAsParent ?? false);
 
@@ -425,9 +427,9 @@ class _MyAppState extends State<MyApp> {
 
   void _showCustomerOptionsDialog() async {
     final idController =
-        TextEditingController(text: _customerOptions?.customerKey ?? '');
+        TextEditingController(text: _customerOptions?.customerKey ?? '1');
     final emailController =
-        TextEditingController(text: _customerOptions?.email ?? '');
+        TextEditingController(text: _customerOptions?.email ?? 'fsog1920@gmail.com');
     final checkType =
         ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
 
