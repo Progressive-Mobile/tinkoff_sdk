@@ -36,7 +36,7 @@ class Item105 implements Item {
   /// Штрих-код
   final String? ean13;
 
-  /// Код магазине
+  /// Код магазина
   final String? shopCode;
 
   /// Тип оплаты
@@ -71,17 +71,17 @@ class Item105 implements Item {
         _price: price,
         _quantity: quantity,
         _amount: amount,
-        _tax: tax,
+        _tax: tax.name,
         _ean13: ean13,
         _shopCode: shopCode,
         _paymentMethod: paymentMethod?.name,
         _paymentObject: paymentObject?.name,
-        _agentData: agentData?.arguments,
-        _supplierInfo: supplierInfo?.arguments,
+        _agentData: agentData?._arguments,
+        _supplierInfo: supplierInfo?._arguments,
       };
 }
 
-class Item12 extends Item {
+class Item12 implements Item {
   static const String _price = 'price';
   static const String _quantity = 'quantity';
   static const String _name = 'name';
@@ -185,16 +185,17 @@ class Item12 extends Item {
         _tax: tax.name,
         _paymentMethod: paymentMethod?.name,
         _paymentObject: paymentObject?.name,
-        _agentData: agentData?.arguments,
-        _supplierInfo: supplierInfo?.arguments,
+        _agentData: agentData?._arguments,
+        _supplierInfo: supplierInfo?._arguments,
         _userData: userData,
         _excise: excise,
         _countryCode: countryCode,
         _declarationNumber: declarationNumber,
         _measurementUnit: measurementUnit,
         _markProcessingMode: markProcessingMode,
-        _markCode: markCode?.arguments,
-        _markQuantity: markQuantity?.arguments,
-        _sectoralItemProps: sectoralItemProps?.map((e) => e.arguments).toList(),
+        _markCode: markCode?._arguments,
+        _markQuantity: markQuantity?._arguments,
+        _sectoralItemProps:
+            sectoralItemProps?.map((e) => e._arguments).toList(),
       };
 }

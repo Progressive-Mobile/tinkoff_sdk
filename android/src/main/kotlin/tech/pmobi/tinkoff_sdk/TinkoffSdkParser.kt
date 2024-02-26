@@ -25,9 +25,11 @@ import ru.tinkoff.acquiring.sdk.models.DarkThemeMode
 import ru.tinkoff.acquiring.sdk.models.Item
 import ru.tinkoff.acquiring.sdk.models.Item105
 import ru.tinkoff.acquiring.sdk.models.Item12
+import ru.tinkoff.acquiring.sdk.models.Payments
 import ru.tinkoff.acquiring.sdk.models.Receipt
 import ru.tinkoff.acquiring.sdk.models.ReceiptFfd105
 import ru.tinkoff.acquiring.sdk.models.enums.PaymentMethod
+import ru.tinkoff.acquiring.sdk.models.enums.PaymentObject105
 import ru.tinkoff.acquiring.sdk.models.enums.Tax
 import ru.tinkoff.acquiring.sdk.models.enums.Taxation
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions
@@ -71,7 +73,9 @@ class TinkoffSdkParser() {
         paymentsOptions.order = orderOptions
         paymentsOptions.customer = customerOptions
         paymentsOptions.features = featuresOptions
-        paymentsOptions.order.receipt = receipt
+        if (receipt != null) {
+            paymentsOptions.order.receipt = receipt
+        }
 
         return paymentsOptions
     }
@@ -114,9 +118,6 @@ class TinkoffSdkParser() {
             receipt.phone = phone
             receipt.items = items as MutableList<Item12>
         }
-
-        PaymentOb
-
         return receipt
     }
 
@@ -167,12 +168,28 @@ class TinkoffSdkParser() {
     }
 
     private fun parseItem105(arguments: Map<String, Any>): Item {
-        val amount = (arguments["amount"] as Int).toLong()
-        val name = arguments["name"] as String?
+        val name = arguments["name"] as String
         val price = (arguments["price"] as Int).toLong()
         val quantity = arguments["quantity"] as Double
-        val taxArg = arguments["tax"] as String?
-        val tax = parseTax(taxArg)
+        val amount = (arguments["amount"] as Int).toLong()
+        val tax = parseTax(arguments["tax"] as String)
+        val ean13 = arguments["ean13"] as String?
+        val shopCode = arguments["shopCode"] as String?
+        val paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?)
+        val paymentObject = parsePaymentObject105(arguments["paymentObject"] as String?)
+
+        return Item105(
+            name,
+            price,
+            quantity,
+            amount,
+            tax,
+            ean13,
+            shopCode,
+            paymentMethod,
+            paymentObject,
+        )
+
 //        return Item12(
 //            price = price,
 //            quantity = quantity,
@@ -199,11 +216,11 @@ class TinkoffSdkParser() {
         val orderOptions = OrderOptions()
         val orderId = arguments["orderId"] as String?
         val coins = (arguments["amount"] as Int).toLong()
+        val reccurentPayment = arguments["reccurentPayment"] as Boolean?
         val title = arguments["title"] as String?
         val description = arguments["description"] as String?
-        val reccurentPayment = arguments["reccurentPayment"] as Boolean
         orderOptions.orderId = orderId!!
-        orderOptions.recurrentPayment = reccurentPayment
+        orderOptions.recurrentPayment = reccurentPayment ?: false
         orderOptions.amount = ofCoins(coins)
         orderOptions.title = title
         orderOptions.description = description
@@ -234,13 +251,10 @@ class TinkoffSdkParser() {
         }
         val featuresOptions = FeaturesOptions()
         featuresOptions.fpsEnabled = fpsEnabled
-        featuresOptions.useSecureKeyboard = useSecureKeyboard
-        featuresOptions.handleCardListErrorInSdk = handleCardListErrorInSdk
-        //        if (enableCameraCardScanner) {
-//            featuresOptions.setCameraCardScanner(new TinkoffSdkCardScanner(language));
-//        }
-        featuresOptions.duplicateEmailToReceipt = true
-        featuresOptions.darkThemeMode = darkMode
+//        featuresOptions.useSecureKeyboard = useSecureKeyboard
+//        featuresOptions.handleCardListErrorInSdk = handleCardListErrorInSdk
+//        featuresOptions.duplicateEmailToReceipt = true
+//        featuresOptions.darkThemeMode = darkMode
         return featuresOptions
     }
 
@@ -254,13 +268,14 @@ class TinkoffSdkParser() {
 
     private fun parseTax(tax: String?): Tax {
         return when (tax) {
+            "vat0" -> Tax.VAT_0
             "vat10" -> Tax.VAT_10
             "vat18" -> Tax.VAT_18
             "vat20" -> Tax.VAT_20
             "vat110" -> Tax.VAT_110
             "vat118" -> Tax.VAT_118
             "vat120" -> Tax.VAT_120
-            "non" -> Tax.NONE
+            "none" -> Tax.NONE
             else -> Tax.NONE
         }
     }
@@ -274,6 +289,37 @@ class TinkoffSdkParser() {
             "esn" -> Taxation.ESN
             "osn" -> Taxation.OSN
             else -> Taxation.OSN
+        }
+    }
+
+    private fun parsePaymentMethod(paymentMethod: String?): PaymentMethod? {
+        return when (paymentMethod) {
+            "fullPrepayment" -> PaymentMethod.FULL_PREPAYMENT
+            "prepayment" -> PaymentMethod.PREPAYMENT
+            "advance" -> PaymentMethod.ADVANCE
+            "fullPayment" -> PaymentMethod.FULL_PAYMENT
+            "partialPayment" -> PaymentMethod.PARTIAL_PAYMENT
+            "credit" -> PaymentMethod.CREDIT
+            "creditPayment" -> PaymentMethod.CREDIT_PAYMENT
+            else -> null
+        }
+    }
+
+    private fun parsePaymentObject105(paymentObject: String?): PaymentObject105? {
+        return when (paymentObject) {
+            "excise" -> PaymentObject105.EXCISE
+            "job" -> PaymentObject105.JOB
+            "service" -> PaymentObject105.SERVICE
+            "gamblingBet" -> PaymentObject105.GAMBLING_BET
+            "gamblingPrize" -> PaymentObject105.GAMBLING_PRIZE
+            "lottery" -> PaymentObject105.LOTTERY
+            "lotteryPrize" -> PaymentObject105.LOTTERY_PRIZE
+            "intellectualActivity" -> PaymentObject105.INTELLECTUAL_ACTIVITY
+            "payment" -> PaymentObject105.PAYMENT
+            "agentCommission" -> PaymentObject105.AGENT_COMMISSION
+            "composite" -> PaymentObject105.COMPOSITE
+            "another" -> PaymentObject105.ANOTHER
+            else -> null
         }
     }
 }

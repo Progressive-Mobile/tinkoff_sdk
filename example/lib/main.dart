@@ -118,7 +118,7 @@ class _MyAppState extends State<MyApp> {
                 terminalKey: _terminalKeyController.text,
                 password: _passwordController.text,
                 publicKey: _publicKeyController.text,
-                logging: true,
+                logging: false,
                 isDeveloperMode: false,
               )
                   .then((_) {
@@ -236,21 +236,6 @@ class _MyAppState extends State<MyApp> {
                   : null,
               child: Text('Тестовая оплата'),
             ),
-          ),
-          SizedBox(width: 8.0),
-          ElevatedButton(
-            onPressed: _orderOptions != null && _customerOptions != null
-                ? () async {
-                    // acquiring
-                    //     .openNativePaymentScreen(
-                    //       orderOptions: _orderOptions!,
-                    //       customerOptions: _customerOptions!,
-                    //     )
-                    //     .then(_showResultDialog)
-                    //     .catchError(_showErrorDialog);
-                  }
-                : null,
-            child: Text('NativePay'),
           ),
         ],
       ),
@@ -428,8 +413,8 @@ class _MyAppState extends State<MyApp> {
   void _showCustomerOptionsDialog() async {
     final idController =
         TextEditingController(text: _customerOptions?.customerKey ?? '1');
-    final emailController =
-        TextEditingController(text: _customerOptions?.email ?? 'fsog1920@gmail.com');
+    final emailController = TextEditingController(
+        text: _customerOptions?.email ?? 'fsog1920@gmail.com');
     final checkType =
         ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
 

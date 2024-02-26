@@ -10,3 +10,9 @@ part 'item/sectoral_item_props.dart';
 part 'item/supplier_info.dart';
 part 'item/tax.dart';
 part 'item/taxation.dart';
+
+part 'receipt/receipt.dart';
+part 'receipt/client_info.dart';
+part 'receipt/payments.dart';
+part 'receipt/operating_check_props.dart';
+part 'receipt/sectoral_check_props.dart';

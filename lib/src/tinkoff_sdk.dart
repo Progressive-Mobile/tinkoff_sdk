@@ -43,9 +43,6 @@ class TinkoffSdk {
   /// [publicKey] - Публичный ключ. Используется для шифрования данных.
   ///               Необходим для интеграции вашего приложения с интернет-эквайрингом Тинькофф.
   ///
-  /// [configureNativePay] отвечает за возможность проведения оплат через Google Pay / ApplePay.
-  /// [language] - Язык
-  ///
   /// Флаги ниже используются для тестирования настроек эквайринга:
   /// [isDeveloperMode] - Тестовый URL (в этом режиме деньги с карт не списываются).
   /// [logging] - Логирование запросов.
@@ -114,7 +111,7 @@ class TinkoffSdk {
       method.orderOptions: orderOptions._arguments(),
       method.customerOptions: customerOptions._arguments(),
       method.featuresOptions: featuresOptions._arguments(),
-      method.receipt : receipt?._arguments(),
+      method.receipt : receipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
     };
