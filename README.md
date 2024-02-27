@@ -177,7 +177,7 @@ await TinkoffSdk().openAttachCardScreen(
 
 ```dart
 final features = FeaturesOptions(
-  sbpEnabled: true
+  fpsEnabled: true
 );
 ```
 

@@ -106,14 +106,21 @@ class TinkoffSdk {
     _checkActivated();
 
     final method = Method.openPaymentScreen;
+    String? ffdVersion;
+    if (receipt?.runtimeType == ReceiptFfd105) {
+      ffdVersion = ReceiptType.receiptFfd105.name;
+    } else if (receipt?.runtimeType == ReceiptFfd12) {
+      ffdVersion = ReceiptType.receiptFfd12.name;
+    }
 
     final arguments = <String, dynamic>{
-      method.orderOptions: orderOptions._arguments(),
+      method.orderOptions: orderOptions.arguments,
       method.customerOptions: customerOptions._arguments(),
       method.featuresOptions: featuresOptions._arguments(),
-      method.receipt : receipt?.arguments,
+      method.receipt: receipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
+      method.ffdVersion: ffdVersion,
     };
 
     return _channel

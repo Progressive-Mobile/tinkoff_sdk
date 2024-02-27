@@ -11,5 +11,8 @@ part 'item/supplier_info.dart';
 part 'item/tax.dart';
 part 'item/taxation.dart';
 
+part 'options/order_options.dart';
+part 'options/shop.dart';
+
 part 'receipt/receipt.dart';
 part 'receipt/client_info.dart';

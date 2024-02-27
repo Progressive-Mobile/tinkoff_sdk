@@ -97,10 +97,10 @@ enum PaymentObject12 {
   taxReduction(name: 'taxReduction'),
 
   /// Торговый сбор
-  trade_fee(name: 'trade_fee'),
+  tradeFee(name: 'tradeFee'),
 
   /// Курортный сбор
-  resort_tax(name: 'resort_tax'),
+  resortTax(name: 'resortTax'),
 
   /// Залог
   pledge(name: 'pledge'),

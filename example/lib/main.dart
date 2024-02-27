@@ -49,7 +49,6 @@ class _MyAppState extends State<MyApp> {
   final _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
   final _passwordController = TextEditingController(text: _PASSWORD);
   final _publicKeyController = TextEditingController(text: _PUBLIC_KEY);
-  final locale = ValueNotifier<LocalizationSource>(LocalizationSource.ru);
 
   OrderOptions? _orderOptions;
   CustomerOptions? _customerOptions;
@@ -73,25 +72,7 @@ class _MyAppState extends State<MyApp> {
       centerTitle: true,
       actions: TinkoffSdk().activated
           ? [_getCardAttachAction(), _getSBPShowQRAction()]
-          : [
-              ValueListenableBuilder<LocalizationSource>(
-                valueListenable: locale,
-                builder: (context, value, _) =>
-                    DropdownButton<LocalizationSource>(
-                        value: value,
-                        items: [
-                          DropdownMenuItem(
-                            value: LocalizationSource.ru,
-                            child: Text('RU'),
-                          ),
-                          DropdownMenuItem(
-                              value: LocalizationSource.en, child: Text('EN')),
-                        ],
-                        onChanged: (value) {
-                          locale.value = value!;
-                        }),
-              ),
-            ]);
+          : []);
 
   Widget _getLayout() {
     if (!TinkoffSdk().activated) {
@@ -168,7 +149,7 @@ class _MyAppState extends State<MyApp> {
                     required: true),
                 _getEntryText('Сумма (в копейках)', _orderOptions!.amount),
                 _getEntryText(
-                    'Рекуррентный платеж', _orderOptions!.saveAsParent)
+                    'Рекуррентный платеж', _orderOptions!.recurrentPayment)
               ],
             )
           : Text('Нажмите чтобы заполнить'),
@@ -198,7 +179,7 @@ class _MyAppState extends State<MyApp> {
         title: 'Настройки экрана',
         body: Column(
           children: [
-            _getEntryText('СБП включено', _featuresOptions.sbpEnabled),
+            _getEntryText('СБП включено', _featuresOptions.fpsEnabled),
             _getEntryText(
                 'Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
             _getEntryText('Сканер карт включён',
@@ -229,6 +210,19 @@ class _MyAppState extends State<MyApp> {
                             featuresOptions: _featuresOptions,
                             terminalKey: _TERMINAL_KEY,
                             publicKey: _PUBLIC_KEY,
+                            receipt: ReceiptFfd105(
+                              taxation: Taxation.osn,
+                              email: 'fsog1920@gmail.com',
+                              items: [
+                                Item105(
+                                  name: 'Кружка 350 мл',
+                                  amount: 1000,
+                                  tax: Tax.vat10,
+                                  price: 1000,
+                                  quantity: 1,
+                                ),
+                              ],
+                            ),
                           )
                           .then(_showResultDialog)
                           .catchError(_showErrorDialog);
@@ -368,7 +362,7 @@ class _MyAppState extends State<MyApp> {
     final amountController =
         TextEditingController(text: _orderOptions?.amount.toString() ?? '1000');
     final ValueNotifier<bool> reccurent =
-        ValueNotifier(_orderOptions?.saveAsParent ?? false);
+        ValueNotifier(_orderOptions?.recurrentPayment ?? false);
 
     await showDialog(
         context: context,
@@ -405,7 +399,7 @@ class _MyAppState extends State<MyApp> {
         amount: int.tryParse(amountController.text)!,
         title: titleController.text,
         description: descriptionController.text,
-        saveAsParent: reccurent.value,
+        recurrentPayment: reccurent.value,
       );
     });
   }
@@ -475,7 +469,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showFeatureOptionsDialog() async {
-    final sbp = ValueNotifier<bool>(_featuresOptions.sbpEnabled);
+    final sbp = ValueNotifier<bool>(_featuresOptions.fpsEnabled);
     final secureKeyboard =
         ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
     final scanner =
@@ -531,7 +525,7 @@ class _MyAppState extends State<MyApp> {
             ));
     setState(() {
       _featuresOptions = FeaturesOptions(
-        sbpEnabled: sbp.value,
+        fpsEnabled: sbp.value,
         useSecureKeyboard: secureKeyboard.value,
         enableCameraCardScanner: scanner.value,
         handleCardListErrorInSdk: errorHandle.value,

@@ -56,6 +56,7 @@ class OpenPaymentScreen {
   String get token => 'token';
   String get terminalKey => 'terminalKey';
   String get publicKey => 'publicKey';
+  String get ffdVersion => 'ffdVersion';
 }
 
 class AttachCardScreen {

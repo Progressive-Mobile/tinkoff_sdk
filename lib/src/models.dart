@@ -65,132 +65,174 @@ class CardData {
   }
 }
 
-/// [OrderOptions] - Описание данных заказа.
-/// [OrderOptions.orderId] - ID заказа в вашей системе.
-/// [OrderOptions.amount] - Сумма для оплаты в копейках.
-/// [OrderOptions.title] - Название платежа, видимое пользователю.
-/// [OrderOptions.description] - Описание платежа, видимое пользователю.
-/// [OrderOptions.saveAsParent] - Флаг определяющий является ли платеж рекуррентным.
-class OrderOptions {
-  static const String _orderId = 'orderId';
-  static const String _amount = 'amount';
-  static const String _title = 'title';
-  static const String _description = 'description';
-  static const String _reccurent = 'reccurentPayment';
-
-  final String orderId;
-  final int amount;
-  final String title;
-  final String description;
-  final bool saveAsParent;
-
-  const OrderOptions({
-    required this.orderId,
-    required this.amount,
-    required this.title,
-    required this.description,
-    this.saveAsParent = false,
-  });
-
-  _arguments() => {
-        _orderId: orderId,
-        _amount: amount,
-        _title: title,
-        _description: description,
-        _reccurent: saveAsParent
-      };
-}
-
-/// [CustomerOptions] - Данные покупателя.
-/// [CustomerOptions.customerKey] - Уникальный ID пользователя для сохранения данных его карты.
-/// [CustomerOptions.email] - E-mail клиента для отправки уведомлений об оплате, привязке карты.
-/// [CustomerOptions.checkType] - Тип проверки при привязке карты.
-/// Подробное описание находится в [CheckType].
+/// Данные покупателя
 class CustomerOptions {
-  static const String _customerKey = 'customerKey';
-  static const String _email = 'email';
-  static const String _checkType = 'checkType';
+  static const _customerKey = 'customerKey';
+  static const _checkType = 'checkType';
+  static const _email = 'email';
+  static const _data = 'data';
 
+  /// Идентификатор покупателя в системе продавца. Максимальная длина - 36 символов
   final String customerKey;
+
+  /// Email, на который будет отправлена квитанция об оплате
   final String? email;
+
+  /// Тип привязки карты
   final CheckType checkType;
+
+  /// Объект содержащий дополнительные параметры в виде "ключ":"значение".
+  /// Данные параметры будут переданы в запросе платежа/привязки карты.
+  /// Максимальная длина для каждого передаваемого параметра:
+  /// Ключ – 20 знаков, Значение – 100 знаков.
+  /// Максимальное количество пар "ключ-значение" не может превышать 20
+  final Map<String, String>? data;
 
   const CustomerOptions({
     required this.customerKey,
-    this.email,
     this.checkType = CheckType.hold,
+    this.email,
+    this.data,
   });
 
   Map<String, dynamic> _arguments() => {
         _customerKey: customerKey,
+        _checkType: checkType.name,
         _email: email,
-        _checkType: checkTypeString(checkType)
+        _data: data,
       };
 }
 
-/// [FeaturesOptions] - Настройки визуального отображения и функций экрана оплаты.
-/// [FeaturesOptions.sbpEnabled] - Флаг подлючения СБП.
-/// [FeaturesOptions.useSecureKeyboard] - Флаг использования безопасной клавиатуры (Android only).
-/// [FeaturesOptions.handleCardListErrorInSdk] - Флаг, указывающий где обрабатывать ошибки получения списка карт.
-/// [FeaturesOptions.enableCameraCardScanner] - Обработчик сканирования карты с помощью камеры телефона (не работает на симуляторе iOS).
-/// [FeaturesOptions.darkThemeMode] - Тема экрана оплаты.
+/// Настройки для конфигурирования визуального отображения и функций экранов SDK
 class FeaturesOptions {
-  static const String _fpsEnabled = 'fpsEnabled';
+  static const String _darkThemeMode = 'darkThemeMode';
   static const String _useSecureKeyboard = 'useSecureKeyboard';
   static const String _handleCardListErrorInSdk = 'handleCardListErrorInSdk';
-  static const String _cameraCardScanner = 'enableCameraCardScanner';
-  static const String _darkThemeMode = 'darkThemeMode';
+  static const String _fpsEnabled = 'fpsEnabled';
+  static const String _enableCameraCardScanner = 'enableCameraCardScanner';
+  static const String _tinkoffPayEnabled = 'tinkoffPayEnabled';
+  static const String _yandexPayEnabled = 'yandexPayEnabled';
+  static const String _selectedCardId = 'selectedCardId';
+  static const String _userCanSelectCard = 'userCanSelectCard';
+  static const String _showOnlyRecurrentCards = 'showOnlyRecurrentCards';
+  static const String _handleErrorsInSdk = 'handleErrorsInSdk';
+  static const String _emailRequired = 'emailRequired';
+  static const String _duplicateEmailToReceipt = 'duplicateEmailToReceipt';
+  static const String _validateExpiryDate = 'validateExpiryDate';
 
-  final bool sbpEnabled;
-  final bool useSecureKeyboard;
-  final bool handleCardListErrorInSdk;
-  final bool enableCameraCardScanner;
+  /// Режим темной темы
   final DarkThemeMode darkThemeMode;
 
+  /// Использовать безопасную клавиатуру для ввода данных карты (только Android)
+  final bool useSecureKeyboard;
+
+  /// Обрабатывать возможные ошибки при загрузке карт в SDK
+  final bool handleCardListErrorInSdk;
+
+  /// Включение приема платежа через Систему быстрых платежей
+  final bool fpsEnabled;
+
+  /// Включение сканирования карты
+  final bool enableCameraCardScanner;
+
+  /// Включение приема платежа через Tinkoff Pay
+  final bool tinkoffPayEnabled;
+
+  /// Включение приема платежа через Yandex Pay
+  final bool yandexPayEnabled;
+
+  /// Идентификатор карты в системе банка.
+  /// Если передан на экран оплаты - в списке карт на экране отобразится первой карта с этим cardId.
+  /// Если передан на экран списка карт - в списке карт отобразится выбранная карта.
+  /// Если не передан или в списке нет карты с таким cardId - список карт будет отображаться по умолчанию.
+  final String? selectedCardId;
+
+  /// Возможность выбрать приоритетную карту для оплаты
+  final bool userCanSelectCard;
+
+  /// Показывать на экране списка карт только те карты, которые привязаны как рекуррентные
+  final bool showOnlyRecurrentCards;
+
+  /// Обрабатывать возможные ошибки в SDK.
+  /// Если установлен true, SDK будет обрабатывать некоторые ошибки с API Acquiring самостоятельно, если false - все ошибки будут возвращаться в вызываемый код, а экран SDK закрываться.
+  final bool handleErrorsInSdk;
+
+  /// Должен ли покупатель обязательно вводить email для оплаты.
+  /// Если установлен false - покупатель может оставить поле email пустым
+  final bool emailRequired;
+
+  /// При выставлении параметра в true, введенный пользователем на форме оплаты email будет продублирован в объект чека.
+  ///Не имеет эффекта если объект чека отсутствует
+  final bool duplicateEmailToReceipt;
+
+  /// Следует ли при валидации данных карты показывать пользователю ошибку, если введенная им срок действия карты уже истек. 
+  /// Если установить в true - пользователь не сможет добавить или провести оплату с помощью карты с истекшим сроком действия
+  final bool validateExpiryDate;
+
   const FeaturesOptions({
-    this.sbpEnabled = false,
+    this.darkThemeMode = DarkThemeMode.auto,
     this.useSecureKeyboard = true,
     this.handleCardListErrorInSdk = true,
+    this.fpsEnabled = false,
     this.enableCameraCardScanner = false,
-    this.darkThemeMode = DarkThemeMode.auto,
+    this.tinkoffPayEnabled = true,
+    this.yandexPayEnabled = false,
+    this.selectedCardId,
+    this.userCanSelectCard = false,
+    this.showOnlyRecurrentCards = false,
+    this.handleErrorsInSdk = true,
+    this.emailRequired = true,
+    this.duplicateEmailToReceipt = false,
+    this.validateExpiryDate = false,
   });
 
   _arguments() => {
-        _fpsEnabled: sbpEnabled,
+        _darkThemeMode: darkThemeMode.name,
         _useSecureKeyboard: useSecureKeyboard,
         _handleCardListErrorInSdk: handleCardListErrorInSdk,
-        _cameraCardScanner:
-            false, //enableCameraCardScanner, //TODO: camera flag
-        _darkThemeMode: darkThemeString(darkThemeMode),
+        _fpsEnabled: fpsEnabled,
+        _enableCameraCardScanner: enableCameraCardScanner,
+        _tinkoffPayEnabled: tinkoffPayEnabled,
+        _yandexPayEnabled: yandexPayEnabled,
+        _selectedCardId: selectedCardId,
+        _userCanSelectCard: userCanSelectCard,
+        _showOnlyRecurrentCards: showOnlyRecurrentCards,
+        _handleErrorsInSdk: handleErrorsInSdk,
+        _emailRequired: emailRequired,
+        _duplicateEmailToReceipt: duplicateEmailToReceipt,
+        _validateExpiryDate: validateExpiryDate,
       };
 }
 
-/// [LocalizationSource] - Языковая локализация экрана.
-enum LocalizationSource { ru, en }
+/// Настройка включения темной темы
+enum DarkThemeMode {
+  /// Темная тема переключается в зависимости от системы
+  auto(name: 'AUTO'),
 
-/// [DarkThemeMode] - Режим включения темной темы.
-///
-/// [DarkThemeMode.auto] - Темная тема переключается в зависимости от системы устройства.
-/// [DarkThemeMode.enabled] - Темная тема всегда включена.
-/// [DarkThemeMode.disabled] - Темная тема всегда выключена.
-enum DarkThemeMode { auto, disabled, enabled }
+  /// Темная тема всегда выключена
+  disabled(name: 'DISABLED'),
 
-/// [CheckType] используется для создания платежа и привязки карты.
-///
-/// [CheckType.no] – Сохранить карту без проверок.
-/// Если у пользователя нет сохраненных карт, то
-/// в [TinkoffSdk.openAttachCardScreen] данный тип привязки может привести к ошибке.
-///
-/// [CheckType.hold] – При сохранении сделать списание и затем отмену на 1 руб.
-/// Используется по умолчанию.
-///
-/// [CheckType.threeDS] (3DS) – При сохранении карты выполнить проверку 3DS.
-/// Если карта поддерживает 3DS, выполняется списание и последующая отмена на 1 руб.
-/// Карты, не поддерживающие 3DS, привязаны не будут.
-///
-/// [CheckType.threeDS_hold] (3DSHOLD) – При привязке карты выполнить проверку поддержки картой 3DS.
-/// Если карта поддерживает 3DS, выполняется списание и последующая отмена на 1 руб.
-/// Если карта не поддерживает 3DS, выполняется списание и последующая отмена на произвольную сумму от 100 до 199 копеек.
-/// Клиент будет перенаправлен на экран для ввода списанной суммы, где должен корректно указать случайную сумму.
-/// В случае успешного подтверждения случайной суммы карта будет привязана.
-enum CheckType { no, hold, threeDS, threeDS_hold }
+  /// Темная тема всегда включена
+  enabled(name: 'ENABLED');
+
+  final String name;
+  const DarkThemeMode({required this.name});
+}
+
+/// Тип проверки при привязке карты
+enum CheckType {
+  /// Привязка без проверки
+  no(name: 'NO'),
+
+  /// Привязка с блокировкой в 1 руб. Используется по умолчанию
+  hold(name: 'HOLD'),
+
+  /// Привязка с 3DS
+  threeDS(name: '3DS'),
+
+  /// Привязка с 3DS и блокировкой маленькой суммы до 2 руб
+  threeDS_hold(name: '3DSHOLD');
+
+  final String name;
+  const CheckType({required this.name});
+}
