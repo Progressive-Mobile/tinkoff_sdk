@@ -10,6 +10,7 @@ class ReceiptFfd105 implements Receipt {
   static const _phone = 'phone';
   static const _taxation = 'taxation';
   static const _items = 'items';
+  static const _parseAs = 'parseAs';
 
   /// Электронный адрес для отправки чека покупателю. Параметр email или phone должен быть заполнен
   final String? email;
@@ -36,6 +37,7 @@ class ReceiptFfd105 implements Receipt {
         _phone: phone,
         _taxation: taxation.name,
         _items: items.map((e) => e.arguments).toList(),
+        _parseAs: ReceiptType.receiptFfd105.name,
       };
 }
 
@@ -45,9 +47,10 @@ class ReceiptFfd12 implements Receipt {
   static const _email = 'email';
   static const _phone = 'phone';
   static const _items = 'items';
+  static const _parseAs = 'parseAs';
 
   /// Информация о клиенте
-  final ClientInfo? clientInfo;
+  final ClientInfo clientInfo;
 
   /// Система налогообложения
   final Taxation taxation;
@@ -62,7 +65,7 @@ class ReceiptFfd12 implements Receipt {
   final List<Item12> items;
 
   ReceiptFfd12({
-    this.clientInfo,
+    required this.clientInfo,
     required this.taxation,
     this.email,
     this.phone,
@@ -71,10 +74,23 @@ class ReceiptFfd12 implements Receipt {
 
   @override
   Map<String, dynamic> get arguments => {
-        _clientInfo: clientInfo?._arguments,
+        _clientInfo: clientInfo._arguments,
         _taxation: taxation.name,
         _email: email,
         _phone: phone,
         _items: items.map((e) => e.arguments).toList(),
+        _parseAs: ReceiptType.receiptFfd105.name,
       };
+}
+
+/// [ReceiptType] - формат фискального документа (ФФД)
+///
+/// [ReceiptType.receiptFfd105] - ФФД 1.05
+/// [ReceiptType.receiptFfd12] - ФФД 1.2
+enum ReceiptType {
+  receiptFfd105(name: '105'),
+  receiptFfd12(name: '12');
+
+  final String name;
+  const ReceiptType({required this.name});
 }

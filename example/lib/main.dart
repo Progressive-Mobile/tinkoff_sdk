@@ -118,7 +118,7 @@ class _MyAppState extends State<MyApp> {
                 terminalKey: _terminalKeyController.text,
                 password: _passwordController.text,
                 publicKey: _publicKeyController.text,
-                logging: false,
+                logging: true,
                 isDeveloperMode: false,
               )
                   .then((_) {

@@ -138,10 +138,10 @@ class TinkoffSdkParser() {
     }
 
     private fun parseItem12(arguments: Map<String, Any>): Item {
-        val price = (arguments["price"] as Int).toLong()
+        val price = (arguments["price"] as Double).toLong()
         val quantity = arguments["quantity"] as Double
         val name = arguments["name"] as String?
-        val amount = (arguments["amount"] as Int).toLong()
+        val amount = (arguments["amount"] as Double).toLong()
         val tax = parseTax(arguments["tax"] as String?)
 
 
@@ -169,9 +169,9 @@ class TinkoffSdkParser() {
 
     private fun parseItem105(arguments: Map<String, Any>): Item {
         val name = arguments["name"] as String
-        val price = (arguments["price"] as Int).toLong()
+        val price = (arguments["price"] as Double).toLong()
         val quantity = arguments["quantity"] as Double
-        val amount = (arguments["amount"] as Int).toLong()
+        val amount = (arguments["amount"] as Double).toLong()
         val tax = parseTax(arguments["tax"] as String)
         val ean13 = arguments["ean13"] as String?
         val shopCode = arguments["shopCode"] as String?
@@ -251,10 +251,10 @@ class TinkoffSdkParser() {
         }
         val featuresOptions = FeaturesOptions()
         featuresOptions.fpsEnabled = fpsEnabled
-//        featuresOptions.useSecureKeyboard = useSecureKeyboard
-//        featuresOptions.handleCardListErrorInSdk = handleCardListErrorInSdk
-//        featuresOptions.duplicateEmailToReceipt = true
-//        featuresOptions.darkThemeMode = darkMode
+        featuresOptions.useSecureKeyboard = useSecureKeyboard
+        featuresOptions.handleCardListErrorInSdk = handleCardListErrorInSdk
+        featuresOptions.duplicateEmailToReceipt = true
+        featuresOptions.darkThemeMode = darkMode
         return featuresOptions
     }
 

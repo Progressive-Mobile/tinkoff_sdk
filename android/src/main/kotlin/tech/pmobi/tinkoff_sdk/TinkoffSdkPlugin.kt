@@ -40,6 +40,7 @@ import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions
 import ru.tinkoff.acquiring.sdk.redesign.mainform.MainFormLauncher
 import ru.tinkoff.acquiring.sdk.responses.GetCardListResponse
 import ru.tinkoff.acquiring.sdk.utils.Money
+import ru.tinkoff.acquiring.sdk.utils.SampleAcquiringTokenGenerator
 
 class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     io.flutter.plugin.common.PluginRegistry.ActivityResultListener {
@@ -142,7 +143,6 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
         try {
             val arguments = call.arguments as Map<String?, Any?>
             val paymentOptions = parser.createPaymentOptions(arguments)
-            val data = MainFormLauncher.StartData(paymentOptions)
 
             val intent = MainFormLauncher.Contract.createIntent(context, MainFormLauncher.StartData(paymentOptions))
             act?.startActivityForResult(intent, 71)
@@ -218,11 +218,6 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     override fun onDetachedFromActivity() {
         act = null;
     }
-
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        return false
-//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode == PAYMENT_SUCCESSFULL) {
