@@ -20,7 +20,6 @@ library tinkoff_sdk;
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tinkoff_sdk/tinkoff_sdk.dart';
 export 'src/models/models.dart';
