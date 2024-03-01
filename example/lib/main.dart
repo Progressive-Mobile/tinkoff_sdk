@@ -41,10 +41,10 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final TinkoffSdk acquiring = TinkoffSdk();
 
-  static const _TERMINAL_KEY = '1702374962822';
-  static const _PASSWORD = '6canplvnfsye4bt7';
+  static const _TERMINAL_KEY = '';
+  static const _PASSWORD = '';
   static const _PUBLIC_KEY =
-      'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv5yse9ka3ZQE0feuGtemYv3IqOlLck8zHUM7lTr0za6lXTszRSXfUO7jMb+L5C7e2QNFs+7sIX2OQJ6a+HG8kr+jwJ4tS3cVsWtd9NXpsU40PE4MeNr5RqiNXjcDxA+L4OsEm/BlyFOEOh2epGyYUd5/iO3OiQFRNicomT2saQYAeqIwuELPs1XpLk9HLx5qPbm8fRrQhjeUD5TLO8b+4yCnObe8vy/BMUwBfq+ieWADIjwWCMp2KTpMGLz48qnaD9kdrYJ0iyHqzb2mkDhdIzkim24A3lWoYitJCBrrB2xM05sm9+OdCI1f7nPNJbl5URHobSwR94IRGT7CJcUjvwIDAQAB';
+      '';
 
   final _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
   final _passwordController = TextEditingController(text: _PASSWORD);
@@ -210,11 +210,11 @@ class _MyAppState extends State<MyApp> {
                             featuresOptions: _featuresOptions,
                             terminalKey: _TERMINAL_KEY,
                             publicKey: _PUBLIC_KEY,
-                            receipt: ReceiptFfd105(
+                            androidReceipt: AndroidReceiptFfd105(
                               taxation: Taxation.osn,
-                              email: 'fsog1920@gmail.com',
+                              email: '',
                               items: [
-                                Item105(
+                                AndroidItem105(
                                   name: 'Кружка 350 мл',
                                   amount: 1000,
                                   tax: Tax.vat10,
@@ -222,6 +222,9 @@ class _MyAppState extends State<MyApp> {
                                   quantity: 1,
                                 ),
                               ],
+                            ),
+                            iosReceipt: IosReceipt(
+                              email: '',
                             ),
                           )
                           .then(_showResultDialog)
@@ -354,7 +357,7 @@ class _MyAppState extends State<MyApp> {
 
   void _showOrderOptionsDialog() async {
     final orderIdController =
-        TextEditingController(text: _orderOptions?.orderId.toString() ?? '123');
+        TextEditingController(text: _orderOptions?.orderId.toString() ?? '12397987');
     final titleController =
         TextEditingController(text: _orderOptions?.title ?? 'test');
     final descriptionController =

@@ -23,5 +23,5 @@ class MarkQuantity {
   Map<String, dynamic> get _arguments => {
         _numerator: numerator,
         _denominator: denominator,
-      };
+      }..removeWhere((key, value) => value == null);
 }

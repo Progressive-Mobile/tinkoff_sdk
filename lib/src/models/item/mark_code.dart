@@ -19,7 +19,7 @@ class MarkCode {
   Map<String, dynamic> get _arguments => {
         _markCodeType: markCodeType.name,
         _value: value,
-      };
+      }..removeWhere((key, value) => value == null);
 }
 
 /// Код товара, формат которого не идентифицирован, как один из реквизитов

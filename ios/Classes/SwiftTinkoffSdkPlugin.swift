@@ -52,12 +52,6 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         case "showQrScreen":
             handleShowQrScreen(call, result: result)
             break
-//        case "isNativePayAvailable":
-//            handleIsNativePayAvailable(call, result: result)
-//            break
-//        case "openNativePayment":
-//            handleOpenNativePayment(call, result: result)
-//            break
         case "startCharge":
             handleStartCharge(call, result: result)
             break
@@ -71,23 +65,20 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         
         let terminalKey = args!["terminalKey"] as! String
-        let password = args!["password"] as! String
         let publicKey = args!["publicKey"] as! String
-        let logging = args!["isDebug"] as! Bool
         let isDeveloperMode = args!["isDeveloperMode"] as! Bool
+        let logging = args!["logging"] as! Bool
         
         let credential = AcquiringSdkCredential(
             terminalKey: terminalKey,
             publicKey: publicKey
         )
         
-        let server = isDeveloperMode
-            ? AcquiringSdkEnvironment.test
-            : AcquiringSdkEnvironment.prod
-        
         let coreSDKconfiguration = AcquiringSdkConfiguration(
             credential: credential,
-            server: server,
+            server: isDeveloperMode
+                ? AcquiringSdkEnvironment.test
+                : AcquiringSdkEnvironment.prod,
             logger: logging ? Logger() : nil
         )
 
@@ -143,94 +134,41 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleOpenPaymentScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         
-        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
-        let orderId = orderOptionsArgs!["orderId"] as! String
-        let coins = orderOptionsArgs!["amount"] as! Int64
-        let title = orderOptionsArgs!["title"] as! String
-        let description = orderOptionsArgs!["description"] as! String
-        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
+        let orderOptionsArgs = args!["orderOptions"] as! Dictionary<String, Any>
+        let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs)
         
-        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
-        let customerKey = customerOptionsArgs?["customerKey"] as! String
-        let email = customerOptionsArgs?["email"] as? String
-        let checkType = customerOptionsArgs!["checkType"] as! String
+        let customerOptions = Utils.parseCustomerOptions(args: args!["customerOptions"] as! Dictionary<String, Any>)
         
         var paymentData = PaymentInitData(
-            amount: coins,
-            orderId: orderId,
-            customerKey: customerKey
+            amount: orderOptions.amount,
+            orderId: orderOptions.orderId,
+            customerKey: customerOptions.customerKey,
+            payType: orderOptions.payType,
+            successURL: orderOptionsArgs["successURL"] as? String,
+            failURL: orderOptionsArgs["failURL"] as? String
         );
         
         let receiptArgs = args!["receipt"] as? Dictionary<String, Any>
         if (receiptArgs != nil) {
-            let receipt = parseReceipt(receiptArgs!)
+            let receipt = Utils.parseReceipt(receiptArgs: receiptArgs!)
             
             paymentData.receipt = receipt;
-        }
-        
-        paymentData.description = description
-        paymentData.savingAsParentPayment = reccurentPayment
-        
-        if (reccurentPayment) {
-            paymentData.payType = .twoStage
         }
         
         let view = Utils.getView()
         let paymentFlow = PaymentFlow.full(
             paymentOptions: PaymentOptions(
-                orderOptions: OrderOptions(
-                    orderId: orderId,
-                    amount: coins,
-                    description: description
-                ),
-                customerOptions: 
-                    CustomerOptions(
-                        customerKey: customerKey, 
-                        email: email
-                    )
+                orderOptions: orderOptions,
+                customerOptions: customerOptions
             )
         )
-        let viewConfiguration = MainFormUIConfiguration.init(orderDescription: description)
+        let viewConfiguration = MainFormUIConfiguration.init(orderDescription: orderOptions.description)
         
         self.acquiring.presentMainForm(
             on: view,
             paymentFlow: paymentFlow,
             configuration: viewConfiguration
         )
-    }
-    
-    private func parseReceipt(_ receiptArgs: Dictionary<String, Any>!) -> Receipt {
-        let receiptPhone = receiptArgs!["phone"] as? String
-        let receiptEmail = receiptArgs!["email"] as? String
-        let taxationArgs = receiptArgs!["taxation"] as? String
-        let taxation = Utils.parseTaxation(taxationArgs)
-        let itemsArgs = receiptArgs!["items"] as? Array<Dictionary<String, Any>>
-        
-        var items: [Item] = []
-        
-        for itemArgs in itemsArgs ?? [] {
-            let amount = itemArgs["amount"] as! Int64
-            let price = itemArgs["price"] as! Int64
-            let name = itemArgs["name"] as? String ?? ""
-            let taxArgs = itemArgs["tax"] as? String
-            let tax = Utils.parseTax(taxArgs)
-            let item = Item(amount: amount, price: price, name: name, tax: tax)
-            items.append(item)
-        }
-        
-        let receipt = Receipt(
-            shopCode: nil,
-            email: receiptEmail,
-            taxation: taxation,
-            phone: receiptPhone,
-            items: items,
-            agentData: nil,
-            supplierInfo: nil,
-            customer: nil,
-            customerInn: nil
-        );
-        
-        return receipt
     }
     
     private func handleAttachCardScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -240,8 +178,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let customerKey = customerOptionsArgs?["customerKey"] as! String
         let checkType = customerOptionsArgs!["checkType"] as! String
         
-        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
+//        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
+//        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
         //let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
         
 //        let cardListViewConfiguration = AcquiringViewConfiguration.init()
@@ -278,58 +216,6 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         result(FlutterMethodNotImplemented)
         awaitingResult = false
     }
-    
-//    private func handleIsNativePayAvailable(_ call: FlutterMethodCall, result: FlutterResult) {
-//        let canMakePayments = acquiring?.canMakePaymentsApplePay(with: AcquiringUISDK.ApplePayConfiguration()) ?? false
-//        result(canMakePayments)
-//        awaitingResult = false
-//    }
-    
-//    private func handleOpenNativePayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-//        let args = call.arguments as? Dictionary<String, Any>
-//        
-//        let orderOptionsArgs = args!["orderOptions"] as? Dictionary<String, Any>
-//        let orderId = orderOptionsArgs!["orderId"] as! String
-//        let coins = orderOptionsArgs!["amount"] as! Int64
-//        let title = orderOptionsArgs!["title"] as! String
-//        let description = orderOptionsArgs!["description"] as! String
-//        let reccurentPayment = orderOptionsArgs!["reccurentPayment"] as! Bool
-//        
-//        let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
-//        let customerKey = customerOptionsArgs?["customerKey"] as! String
-//        let email = customerOptionsArgs?["email"] as? String
-//        
-//        let merchantId = args!["merchantId"] as! String
-//
-//        var paymentData = PaymentInitData(
-//            amount: coins,
-//            orderId: orderId,
-//            customerKey: customerKey
-//        )
-//        paymentData.description = description
-//        paymentData.savingAsParentPayment = reccurentPayment
-//        if (reccurentPayment) {
-//            paymentData.payType = .twoStage
-//        }
-//        
-//        let viewConfiguration = Utils.getViewConfiguration(
-//            title: title,
-//            description: description,
-//            amount: coins,
-//            email: email
-//        )
-//        viewConfiguration.localizableInfo = Utils.getLanguage()
-//        
-//        let view = Utils.getView()
-//        var applePayConfiguration = AcquiringUISDK.ApplePayConfiguration()
-//        applePayConfiguration.merchantIdentifier = merchantId
-//        
-//        self.acquiring.presentPaymentApplePay(on: view,
-//                                              paymentData: paymentData,
-//                                              viewConfiguration: viewConfiguration,
-//                                              paymentConfiguration: applePayConfiguration,
-//                                              completionHandler: setPaymentHandler(view, flutterResult: result))
-//    }
     
     private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
@@ -405,13 +291,4 @@ extension SwiftTinkoffSdkPlugin: ICardScannerDelegate {
     }
 
     
-}
-
-class SwiftTinkoffSdkTokenProvider: ITokenProvider {
-    func provideToken(
-        forRequestParameters parameters: [String: String],
-        completion: @escaping (Result<String, Error>) -> Void
-    ) {
-        
-    }
 }

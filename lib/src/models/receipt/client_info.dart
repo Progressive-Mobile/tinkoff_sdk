@@ -37,5 +37,5 @@ class ClientInfo {
         _documentCode: documentCode,
         _documentData: documentData,
         _address: address,
-      };
+      }..removeWhere((key, value) => value == null);
 }

@@ -12,7 +12,7 @@ class AgentData {
   static const _operatorInn = 'operatorInn';
 
   /// Признак агента
-  final AgentSign? agentSign;
+  final AgentSign agentSign;
 
   /// Наименование операции
   final String? operationName;
@@ -36,7 +36,7 @@ class AgentData {
   final String? operatorInn;
 
   AgentData({
-    this.agentSign,
+    required this.agentSign,
     this.operationName,
     this.phones,
     this.receiverPhones,
@@ -47,7 +47,7 @@ class AgentData {
   });
 
   Map<String, dynamic> get _arguments => {
-        _agentSign: agentSign?.name,
+        _agentSign: agentSign.name,
         _operationName: operationName,
         _phones: phones,
         _receiverPhones: receiverPhones,
@@ -55,7 +55,7 @@ class AgentData {
         _operatorName: operatorName,
         _operatorAddress: operatorAddress,
         _operatorInn: operatorInn,
-      };
+      }..removeWhere((key, value) => value == null);
 }
 
 /// Признак агента

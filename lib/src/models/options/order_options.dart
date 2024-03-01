@@ -15,15 +15,16 @@ class OrderOptions {
   static const _clientInfo = 'clientInfo';
   static const _items = 'items';
   static const _additionalData = 'additionalData';
+  static const _payType = 'payType';
 
-  /// Номер заказа в системе продавца. 
+  /// Номер заказа в системе продавца.
   /// Максимальная длина - 20 символов
   final String orderId;
 
   /// Сумма в копейках
   final int amount;
 
-  /// Указывает, что совершается рекуррентный родительский или не рекуррентный платеж. 
+  /// Указывает, что совершается рекуррентный родительский или не рекуррентный платеж.
   /// По умолчанию - false
   final bool recurrentPayment;
 
@@ -60,6 +61,9 @@ class OrderOptions {
   /// Максимальное количество пар "ключ-значение" не может превышать 20
   final Map<String, String>? additionalData;
 
+  /// Тип проведения платежа - двухстадийная или одностадийная оплата (только iOS)
+  final PayType? payType;
+
   OrderOptions({
     required this.orderId,
     required this.amount,
@@ -74,6 +78,7 @@ class OrderOptions {
     this.clientInfo,
     this.items,
     this.additionalData,
+    this.payType,
   });
 
   Map<String, dynamic> get arguments => {
@@ -90,5 +95,15 @@ class OrderOptions {
         _clientInfo: clientInfo?._arguments,
         _items: items?.map((e) => e.arguments).toList(),
         _additionalData: additionalData,
+        _payType: payType?.name,
+        
       }..removeWhere((key, value) => value == null);
+}
+
+enum PayType {
+  oneStage(name: 'oneStage'),
+  twoStage(name: 'twoStage');
+
+  final String name;
+  const PayType({required this.name});
 }

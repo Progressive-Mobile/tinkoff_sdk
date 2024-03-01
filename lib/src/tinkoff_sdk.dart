@@ -50,7 +50,7 @@ class TinkoffSdk {
     required String terminalKey,
     required String password,
     required String publicKey,
-    bool isDeveloperMode = true,
+    bool isDeveloperMode = false,
     bool logging = false,
   }) async {
     final method = Method.activate;
@@ -60,7 +60,7 @@ class TinkoffSdk {
       method.password: password,
       method.publicKey: publicKey,
       method.isDeveloperMode: isDeveloperMode,
-      method.isDebug: logging,
+      method.logging: logging,
     };
 
     final activated =
@@ -101,23 +101,24 @@ class TinkoffSdk {
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
-    Receipt? receipt,
+    AndroidReceipt? androidReceipt,
+    IosReceipt? iosReceipt,
   }) async {
     _checkActivated();
 
     final method = Method.openPaymentScreen;
     String? ffdVersion;
-    if (receipt?.runtimeType == ReceiptFfd105) {
-      ffdVersion = ReceiptType.receiptFfd105.name;
-    } else if (receipt?.runtimeType == ReceiptFfd12) {
-      ffdVersion = ReceiptType.receiptFfd12.name;
+    if (androidReceipt?.runtimeType == AndroidReceiptFfd105) {
+      ffdVersion = "105";
+    } else if (androidReceipt?.runtimeType == AndroidReceiptFfd12) {
+      ffdVersion = "12";
     }
 
     final arguments = <String, dynamic>{
       method.orderOptions: orderOptions.arguments,
       method.customerOptions: customerOptions._arguments(),
       method.featuresOptions: featuresOptions._arguments(),
-      method.receipt: receipt?.arguments,
+      method.receipt: Platform.isIOS ? iosReceipt?.arguments : androidReceipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
       method.ffdVersion: ffdVersion,

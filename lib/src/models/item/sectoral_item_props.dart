@@ -31,5 +31,5 @@ class SectoralItemProps {
         _date: date,
         _number: number,
         _value: value,
-      };
+      }..removeWhere((key, value) => value == null);
 }

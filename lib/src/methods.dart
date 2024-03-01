@@ -41,7 +41,7 @@ class Activate {
   String get publicKey => 'publicKey';
 
   String get isDeveloperMode => 'isDeveloperMode';
-  String get isDebug => 'isDebug';
+  String get logging => 'logging';
 }
 
 class OpenPaymentScreen {

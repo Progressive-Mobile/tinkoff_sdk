@@ -5,7 +5,12 @@ abstract class Item {
   Map<String, dynamic> get arguments;
 }
 
-class Item105 implements Item {
+abstract class AndroidItem implements Item {
+  Map<String, dynamic> get arguments;
+}
+
+/// Позиция чека с информацией о товаре (Andriod, ФФД 1.05)
+class AndroidItem105 implements AndroidItem {
   static const String _name = 'name';
   static const String _price = 'price';
   static const String _quantity = 'quantity';
@@ -51,7 +56,7 @@ class Item105 implements Item {
   /// Данные поставщика платежного агента
   final SupplierInfo? supplierInfo;
 
-  Item105({
+  AndroidItem105({
     required this.name,
     this.price = 0,
     this.quantity = 0,
@@ -78,10 +83,11 @@ class Item105 implements Item {
         _paymentObject: paymentObject?.name,
         _agentData: agentData?._arguments,
         _supplierInfo: supplierInfo?._arguments,
-      };
+      }..removeWhere((key, value) => value == null);
 }
 
-class Item12 implements Item {
+/// Позиция чека с информацией о товаре (Andriod, ФФД 1.2)
+class AndroidItem12 implements AndroidItem {
   static const String _price = 'price';
   static const String _quantity = 'quantity';
   static const String _name = 'name';
@@ -155,7 +161,7 @@ class Item12 implements Item {
   /// Реквизит, предусмотренный НПА
   final List<SectoralItemProps>? sectoralItemProps;
 
-  Item12({
+  AndroidItem12({
     required this.price,
     required this.quantity,
     this.name,
@@ -197,5 +203,90 @@ class Item12 implements Item {
         _markQuantity: markQuantity?._arguments,
         _sectoralItemProps:
             sectoralItemProps?.map((e) => e._arguments).toList(),
-      };
+      }..removeWhere((key, value) => value == null);
+}
+
+/// Позиция чека с информацией о товаре (iOS)
+class IosItem implements Item {
+  static const _price = 'price';
+  static const _quantity = 'quantity';
+  static const _name = 'name';
+  static const _amount = 'amount';
+  static const _tax = 'tax';
+  static const _ean13 = 'ean13';
+  static const _shopCode = 'shopCode';
+  static const _measurementUnit = 'measurementUnit';
+  static const _paymentMethod = 'paymentMethod';
+  static const _paymentObject = 'paymentObject';
+  static const _agentData = 'agentData';
+  static const _supplierInfo = 'supplierInfo';
+
+  /// Сумма в копейках. Целочисленное значение не более 10 знаков
+  final int amount;
+
+  /// Сумма в копейках. Целочисленное значение не более 10 знаков
+  final int price;
+
+  /// Наименование товара. Максимальная длина строки – 64 символова
+  final String name;
+
+  /// Ставка налога
+  final Tax tax;
+
+  /// Количество/вес - целая часть не более 8 знаков, дробная часть не более 3 знаков
+  final double quantity;
+
+  /// Признак предмета расчета
+  final PaymentObjectIos? paymentObject;
+
+  /// Тип оплаты
+  final PaymentMethod? paymentMethod;
+
+  /// Штрих-код.
+  final String? ean13;
+
+  /// /// Код магазина.
+  /// Необходимо использовать значение параметра Submerchant_ID, полученного в ответ при регистрации магазинов через xml.
+  /// Если xml не используется, передавать поле не нужно.
+  final String? shopCode;
+
+  /// Единицы измерения позиции чека
+  final String? measurementUnit;
+
+  /// Данные поставщика платежного агента
+  final SupplierInfo? supplierInfo;
+
+  /// Данные агента
+  final AgentData? agentData;
+
+  IosItem({
+    this.price = 0,
+    this.quantity = 0,
+    required this.name,
+    required this.amount,
+    required this.tax,
+    this.ean13,
+    this.shopCode,
+    this.measurementUnit,
+    this.paymentMethod,
+    this.paymentObject,
+    this.agentData,
+    this.supplierInfo,
+  });
+
+  @override
+  Map<String, dynamic> get arguments => {
+        _price: price,
+        _quantity: quantity,
+        _name: name,
+        _amount: amount,
+        _tax: tax.name,
+        _ean13: ean13,
+        _shopCode: shopCode,
+        _measurementUnit: measurementUnit,
+        _paymentMethod: paymentMethod?.name,
+        _paymentObject: paymentObject,
+        _agentData: agentData?._arguments,
+        _supplierInfo: supplierInfo?._arguments,
+      }..removeWhere((key, value) => value == null);
 }

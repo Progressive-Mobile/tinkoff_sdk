@@ -25,5 +25,5 @@ class SupplierInfo {
         _phones: phones,
         _name: name,
         _inn: inn,
-      };
+      }..removeWhere((key, value) => value == null);
 }

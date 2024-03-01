@@ -32,5 +32,5 @@ class Shop {
     _name: name,
     _amount: amount,
     _fee: fee,
-  };
+  }..removeWhere((key, value) => value == null);
 }
