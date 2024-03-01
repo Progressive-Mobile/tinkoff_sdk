@@ -27,13 +27,13 @@ class AndroidItem105 implements AndroidItem {
   final String name;
 
   /// Сумма в копейках. Целочисленное значение не более 10 знаков
-  final double price;
+  final int price;
 
   /// Количество/вес - целая часть не более 8 знаков, дробная часть не более 3 знаков
   final double quantity;
 
   /// Сумма в копейках. Целочисленное значение не более 10 знаков
-  final double amount;
+  final int amount;
 
   /// Ставка налога
   final Tax tax;
