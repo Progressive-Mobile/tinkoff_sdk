@@ -45,6 +45,7 @@ import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions
 import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions
 import ru.tinkoff.acquiring.sdk.utils.Money.Companion.ofCoins
 import ru.tinkoff.acquiring.sdk.utils.builders.ReceiptBuilder
+import java.util.ArrayList
 
 class TinkoffSdkParser() {
     fun createSavedCardOptions(arguments: Map<String?, Any?>): SavedCardsOptions {
@@ -188,9 +189,9 @@ class TinkoffSdkParser() {
         if (ffdVersion == "105") {
             return Item105(
                 name = arguments["name"] as String,
-                price = (arguments["price"] as Double).toLong(),
+                price = (arguments["price"] as Int).toLong(),
                 quantity = arguments["quantity"] as Double,
-                amount = (arguments["amount"] as Double).toLong(),
+                amount = (arguments["amount"] as Int).toLong(),
                 tax = parseTax(arguments["tax"] as String),
                 ean13 = arguments["ean13"] as String?,
                 shopCode = arguments["shopCode"] as String?,
@@ -200,10 +201,10 @@ class TinkoffSdkParser() {
             )
         } else {
             return Item12(
-                price = (arguments["price"] as Double).toLong(),
+                price = (arguments["price"] as Int).toLong(),
                 quantity = arguments["quantity"] as Double,
                 name = arguments["name"] as String?,
-                amount = (arguments["amount"] as Double?)?.toLong(),
+                amount = (arguments["amount"] as Int?)?.toLong(),
                 tax = parseTax(arguments["tax"] as String),
                 paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?),
                 paymentObject = parsePaymentObject12(arguments["paymentObject"] as String?),
@@ -344,9 +345,9 @@ class TinkoffSdkParser() {
         val agentData = AgentData()
         agentData.agentSign = parseAgentSign(arguments["agentSign"] as String?)
         agentData.operationName = arguments["operationName"] as String?
-        agentData.phones = arguments["phones"] as Array<String>?
-        agentData.receiverPhones = arguments["receiverPhones"] as Array<String>?
-        agentData.transferPhones = arguments["transferPhones"] as Array<String>?
+        agentData.phones = (arguments["phones"] as ArrayList<String>?)?.toTypedArray()
+        agentData.receiverPhones = (arguments["receiverPhones"] as ArrayList<String>?)?.toTypedArray()
+        agentData.transferPhones = (arguments["transferPhones"] as ArrayList<String>?)?.toTypedArray()
         agentData.operatorName = arguments["operatorName"] as String?
         agentData.operatorAddress = arguments["operatorAddress"] as String?
         agentData.operatorInn = arguments["operatorInn"] as String?
