@@ -167,7 +167,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         self.acquiring.presentMainForm(
             on: view,
             paymentFlow: paymentFlow,
-            configuration: viewConfiguration
+            configuration: viewConfiguration,
+            completion: setPaymentHandler(view, flutterResult: result)
         )
     }
     
