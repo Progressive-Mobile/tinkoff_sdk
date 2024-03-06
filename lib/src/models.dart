@@ -95,7 +95,7 @@ class CustomerOptions {
     this.data,
   });
 
-  Map<String, dynamic> _arguments() => {
+  Map<String, dynamic> get _arguments => {
         _customerKey: customerKey,
         _checkType: checkType.name,
         _email: email,

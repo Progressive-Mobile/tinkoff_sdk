@@ -12,6 +12,7 @@ part 'item/tax.dart';
 part 'item/taxation.dart';
 
 part 'options/order_options.dart';
+part 'options/payment_flow.dart';
 part 'options/shop.dart';
 
 part 'receipt/receipt.dart';

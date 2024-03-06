@@ -116,7 +116,7 @@ class TinkoffSdk {
 
     final arguments = <String, dynamic>{
       method.orderOptions: orderOptions.arguments,
-      method.customerOptions: customerOptions._arguments(),
+      method.customerOptions: customerOptions._arguments,
       method.featuresOptions: featuresOptions._arguments(),
       method.receipt: Platform.isIOS ? iosReceipt?.arguments : androidReceipt?.arguments,
       method.terminalKey: terminalKey,
@@ -142,51 +142,65 @@ class TinkoffSdk {
     final method = Method.attachCardScreen;
 
     final arguments = <String, dynamic>{
-      method.customerOptions: customerOptions._arguments(),
+      method.customerOptions: customerOptions._arguments,
       method.featuresOptions: featuresOptions._arguments()
     };
 
     return _channel.invokeMethod(method.name, arguments);
   }
 
-  /// Экран приема оплаты по QR коду через СПБ.
+  /// Отображает экран с многоразовым `QR-кодом`, отсканировав который,
+  /// пользователь сможет провести оплату с помощью `Системы быстрых платежей`
   ///
-  /// Результат оплаты товара покупателем по статическому QR коду не отслеживается в SDK,
+  /// При данном типе оплаты SDK никак не отслеживает статус платежа,
   /// соответственно [Completer] завершается только при ошибке либо отмене (закрытии экрана).
-  Future<TinkoffResult> showSBPQrScreen() async {
+  Future<void> showStaticQRCode() async {
     _checkActivated();
-    final method = Method.showQrScreen;
+    final method = Method.showStaticQrScreen;
 
     return _channel.invokeMethod(method.name).then(parseTinkoffResult);
   }
 
-  // Future<bool> get isNativePayAvailable async {
-  //   _checkActivated();
-  //   final result =
-  //       await _channel.invokeMethod<bool>(Method.isNativePayAvailable.name);
-  //   return result ?? false;
-  // }
+  /// Отображает экран с одноразовым `QR-кодом`, отсканировав который,
+  /// пользователь сможет провести оплату  с помощью `Системы быстрых платежей`
+  ///
+  /// При данном типе оплаты сумма и информация о платеже фиксируется,
+  /// и SDK способен получить и обработать статус платежа
+  Future<TinkoffResult> showDynamicQRCode({
+    required PaymentFlow paymentFlow,
+    OrderOptions? orderOptions,
+    required CustomerOptions customerOptions,
+    String? paymentId,
+    int? amount,
+    String? orderId,
+  }) async {
+    assert(
+      (paymentFlow != PaymentFlow.full || orderOptions == null) ^
+          (paymentFlow != PaymentFlow.finish ||
+              paymentId == null ||
+              amount == null ||
+              orderId == null),
+      """Для paymentFlow == PaymentFlow.full параметр orderOptions должен быть не null.
+      Для paymentFlow == PaymentFlow.finish параметры paymentId, amount и orderID
+      должны быть не null.""",
+    );
 
-  // Future<TinkoffResult> openNativePaymentScreen({
-  //   required OrderOptions orderOptions,
-  //   required CustomerOptions customerOptions,
-  //   String? merchantId,
-  // }) async {
-  //   _checkActivated();
-  //   if (!await isNativePayAvailable) throw "Native payments isn't available.";
+    _checkActivated();
+    final method = Method.showDynamicQrScreen;
 
-  //   final method = Method.openNativePayment;
+    final arguments = <String, dynamic>{
+      method.paymentFlow: paymentFlow.name,
+      method.orderOptions: orderOptions?.arguments,
+      method.customerOptions: customerOptions._arguments,
+      method.paymentId: paymentId,
+      method.amount: amount,
+      method.orderId: orderId,
+    };
 
-  //   final arguments = <String, dynamic>{
-  //     method.orderOptions: orderOptions._arguments(),
-  //     method.customerOptions: customerOptions._arguments(),
-  //     method.merchantId: merchantId ?? '',
-  //   };
-
-  //   return _channel
-  //       .invokeMethod(method.name, arguments)
-  //       .then(parseTinkoffResult);
-  // }
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
+  }
 
   // TODO: implement Charge
   Future<TinkoffResult> startCharge() async {

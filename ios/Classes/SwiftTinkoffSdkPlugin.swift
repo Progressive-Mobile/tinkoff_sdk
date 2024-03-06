@@ -49,8 +49,11 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         case "attachCardScreen":
             handleAttachCardScreen(call, result: result)
             break
-        case "showQrScreen":
-            handleShowQrScreen(call, result: result)
+        case "showStaticQrScreen":
+            handleShowStaticQrScreen(call, result: result)
+            break
+        case "showDynamicQrScreen":
+            handleShowDynamicQrScreen(call, result: result)
             break
         case "startCharge":
             handleStartCharge(call, result: result)
@@ -212,9 +215,36 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func handleShowQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        //TODO: implement method
-        result(FlutterMethodNotImplemented)
+    private func handleShowStaticQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let view = Utils.getView()
+        self.acquiring.presentStaticSBPQR(on: view)
+        awaitingResult = false
+    }
+    
+    private func handleShowDynamicQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args = call.arguments as? Dictionary<String, Any>
+        let paymentFlow = args?["paymentFlow"] as! String
+        let orderOptions = Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>)
+        let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as! Dictionary<String, Any>)
+        let paymentId = args?["paymentId"] as? String
+        let amount = args?["amount"] as? Int64
+        let orderId = args?["orderId"] as? String
+        
+        let view = Utils.getView()
+        
+        self.acquiring.presentDynamicSBPQR(
+            on: view,
+            paymentFlow: Utils.parsePaymentFlow(
+                paymentFlow: paymentFlow,
+                orderOptions: orderOptions,
+                customerOptions: customerOptions,
+                paymentId: paymentId,
+                amount: amount,
+                orderId: orderId
+            ),
+            completion: setPaymentHandler(view, flutterResult: result)
+        )
+        
         awaitingResult = false
     }
     

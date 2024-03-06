@@ -23,10 +23,10 @@ class Method {
   static const Activate activate = const Activate();
   static const OpenPaymentScreen openPaymentScreen = const OpenPaymentScreen();
   static const AttachCardScreen attachCardScreen = const AttachCardScreen();
-  static const ShowQrScreen showQrScreen = const ShowQrScreen();
-  // static const IsNativePayAvailable isNativePayAvailable =
-  //     const IsNativePayAvailable();
-  // static const OpenNativePayment openNativePayment = const OpenNativePayment();
+  static const ShowStaticQrScreen showStaticQrScreen =
+      const ShowStaticQrScreen();
+  static const ShowDynamicQrScreen showDynamicQrScreen =
+      const ShowDynamicQrScreen();
   static const StartCharge startCharge = const StartCharge();
   static const GetCardList getCardList = const GetCardList();
 }
@@ -68,12 +68,25 @@ class AttachCardScreen {
   String get featuresOptions => 'featuresOptions';
 }
 
-class ShowQrScreen {
-  const ShowQrScreen();
+class ShowStaticQrScreen {
+  const ShowStaticQrScreen();
 
-  String get name => 'showQrScreen';
+  String get name => 'showStaticQrScreen';
 
   String get localization => 'localizationSource';
+}
+
+class ShowDynamicQrScreen {
+  const ShowDynamicQrScreen();
+
+  String get name => 'showDynamicQrScreen';
+
+  String get paymentFlow => 'paymentFlow';
+  String get orderOptions => 'orderOptions';
+  String get customerOptions => 'customerOptions';
+  String get paymentId => 'paymentId';
+  String get amount => 'amount';
+  String get orderId => 'orderId';
 }
 
 class StartCharge {

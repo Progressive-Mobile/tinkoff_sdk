@@ -149,6 +149,26 @@ class Utils {
         }
     }
     
+    static func parsePaymentFlow(paymentFlow: String, orderOptions: OrderOptions?, customerOptions: CustomerOptions, paymentId: String?, amount: Int64?, orderId: String?) -> PaymentFlow {
+        if (paymentFlow == "full") {
+            return PaymentFlow.full(
+                paymentOptions: PaymentOptions(
+                    orderOptions: orderOptions!,
+                    customerOptions: customerOptions
+                )
+            )
+        } else {
+            return PaymentFlow.finish(
+                paymentOptions: FinishPaymentOptions(
+                    paymentId: paymentId!,
+                    amount: amount!,
+                    orderId: orderId!,
+                    customerOptions: customerOptions
+                )
+            )
+        }
+    }
+    
     static func parseSupplierInfo(args: Dictionary<String, Any>?) -> SupplierInfo? {
         if (args == nil) {
             return nil

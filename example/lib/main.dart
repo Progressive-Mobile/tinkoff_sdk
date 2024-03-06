@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
   AppBar _getAppBar() => AppBar(
       title: Text('Tinkoff SDK'),
       centerTitle: true,
-      actions: TinkoffSdk().activated
+      actions: acquiring.activated
           ? [_getCardAttachAction(), _getSBPShowQRAction()]
           : []);
 
@@ -555,29 +555,47 @@ class _MyAppState extends State<MyApp> {
 
   Widget _getCardAttachAction() {
     return IconButton(
-        icon: Icon(Icons.credit_card),
-        onPressed: _customerOptions != null
-            ? () async {
-                await acquiring.openAttachCardScreen(
-                    customerOptions: _customerOptions!,
-                    featuresOptions: _featuresOptions);
-              }
-            : null);
+      icon: Icon(Icons.add_card_rounded),
+      onPressed: _customerOptions != null
+          ? () async {
+              await acquiring.openAttachCardScreen(
+                customerOptions: _customerOptions!,
+                featuresOptions: _featuresOptions,
+              );
+            }
+          : null,
+    );
   }
 
   Widget _getSBPShowQRAction() {
     return IconButton(
-        icon: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Icon(Icons.apps),
-            Icon(Icons.camera_alt, size: 7.0, color: Colors.grey)
-          ],
-        ),
-        onPressed:
-            null /*() async {
-        await acquiring.showSBPQrScreen();
-      },*/
+      icon: Icon(Icons.qr_code_rounded),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          isDismissible: true,
+          constraints: BoxConstraints.expand(),
+          builder: (context) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () async => await acquiring.showStaticQRCode(),
+                  child: Text('Статический QR-код'),
+                ),
+                TextButton(
+                  onPressed: () async => await acquiring.showDynamicQRCode(
+                    paymentFlow: PaymentFlow.full,
+                    orderOptions: _orderOptions!,
+                    customerOptions: _customerOptions!,
+                  ),
+                  child: Text('Динамический QR-код'),
+                ),
+              ],
+            );
+          },
         );
+      },
+    );
   }
 }
