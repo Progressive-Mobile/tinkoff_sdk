@@ -60,7 +60,7 @@ class TinkoffSdkParser() {
         return options
     }
 
-    fun createPaymentOptions(arguments: Map<String?, Any?>): PaymentOptions {
+    fun createPaymentOptions(arguments: Map<String, Any>): PaymentOptions {
         val terminalKey = arguments["terminalKey"] as String
         val publicKey = arguments["publicKey"] as String
 
@@ -69,6 +69,13 @@ class TinkoffSdkParser() {
         }
 
         val ffdVersion = arguments["ffdVersion"] as String?
+
+        val orderOptions = parseOrderOptions(
+            arguments = arguments["orderOptions"] as Map<String, Any>,
+            ffdVersion = ffdVersion
+        )
+        paymentsOptions.order = orderOptions
+
         var receipt: Receipt? = null
         if (arguments["receipt"] != null && ffdVersion != null) {
             receipt = parseReceipt(
@@ -76,51 +83,47 @@ class TinkoffSdkParser() {
                 ffdVersion = ffdVersion
             )
 
-            val orderOptions = parseOrderOptions(
-                arguments = arguments["orderOptions"] as Map<String, Any>,
-                ffdVersion = ffdVersion
-            )
-
-            paymentsOptions.order = orderOptions
             paymentsOptions.order.receipt = receipt
         }
 
         val customerOptions = parseCustomerOptions(
             arguments = arguments["customerOptions"] as Map<String, Any>
         )
-        val featuresOptions = parseFeatureOptions(
+        val featuresOptions = if (arguments["featuresOptions"] != null) parseFeatureOptions(
             arguments = arguments["featuresOptions"] as Map<String, Any>
-        )
+        ) else null
 
         paymentsOptions.customer = customerOptions
-        paymentsOptions.features = featuresOptions
+        paymentsOptions.features = featuresOptions ?: FeaturesOptions()
 
         return paymentsOptions
     }
 
-    private fun parseOrderOptions(arguments: Map<String, Any>, ffdVersion: String): OrderOptions {
+    private fun parseOrderOptions(arguments: Map<String, Any>, ffdVersion: String?): OrderOptions {
         val orderOptions = OrderOptions()
         orderOptions.orderId = arguments["orderId"] as String
         orderOptions.amount = ofCoins((arguments["amount"] as Int).toLong())
         orderOptions.recurrentPayment = arguments["recurrentPayment"] as Boolean
         orderOptions.title = arguments["title"] as String?
         orderOptions.description = arguments["description"] as String?
-        orderOptions.receipt = if (arguments["receipt"] == null) null else parseReceipt(
-            arguments = arguments["receipt"] as Map<String, Any>,
-            ffdVersion = ffdVersion
-        )
+        if (ffdVersion != null) {
+            orderOptions.receipt = if (arguments["receipt"] == null) null else parseReceipt(
+                arguments = arguments["receipt"] as Map<String, Any>,
+                ffdVersion = ffdVersion
+            )
+            orderOptions.receipts = (arguments["receipts"] as List<Map<String, Any>>?)?.map {
+                parseReceipt(it, ffdVersion)
+            }?.toList()
+            orderOptions.items = if (arguments["items"] == null) null else
+                (arguments["items"] as List<Map<String, Any>>).map { parseItem(it, ffdVersion) }.toMutableList()
+        }
         orderOptions.shops = (arguments["shops"] as List<Map<String, Any>>?)?.map {
             parseShop(it)
-        }?.toList()
-        orderOptions.receipts = (arguments["receipts"] as List<Map<String, Any>>?)?.map {
-            parseReceipt(it, ffdVersion)
         }?.toList()
         orderOptions.successURL = arguments["successURL"] as String?
         orderOptions.failURL = arguments["failURL"] as String?
         orderOptions.clientInfo = if (arguments["clientInfo"] == null) null else
             parseClientInfo(arguments["clientInfo"] as Map<String, Any>)
-        orderOptions.items = if (arguments["items"] == null) null else
-            (arguments["items"] as List<Map<String, Any>>).map { parseItem(it, ffdVersion) }.toMutableList()
         orderOptions.additionalData = arguments["additionalData"] as Map<String, String>?
 
         return orderOptions
@@ -135,7 +138,7 @@ class TinkoffSdkParser() {
         return customerOptions
     }
 
-    private fun parseFeatureOptions(arguments: Map<String, Any>): FeaturesOptions {
+    fun parseFeatureOptions(arguments: Map<String, Any>): FeaturesOptions {
         val featuresOptions = FeaturesOptions()
 
         featuresOptions.darkThemeMode = when (arguments["darkThemeMode"] as String?) {

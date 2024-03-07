@@ -149,7 +149,7 @@ class Utils {
         }
     }
     
-    static func parsePaymentFlow(paymentFlow: String, orderOptions: OrderOptions?, customerOptions: CustomerOptions, paymentId: String?, amount: Int64?, orderId: String?) -> PaymentFlow {
+    static func parsePaymentFlow(paymentFlow: String, orderOptions: OrderOptions?, customerOptions: CustomerOptions?, paymentId: String?, amount: Int64?, orderId: String?) -> PaymentFlow {
         if (paymentFlow == "full") {
             return PaymentFlow.full(
                 paymentOptions: PaymentOptions(

@@ -69,7 +69,8 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
             "cardList" -> handleCardList(call)
             "openPaymentScreen" -> handleOpenPaymentScreen(call)
             "attachCardScreen" -> handleAttachCardScreen(call)
-            "showQrScreen" -> handleShowQrScreen(call)
+            "showStaticQrScreen" -> handleShowStaticQrScreen(call)
+            "showDynamicQrScreen" -> handleShowDynamicQrScreen(call)
             "startCharge" -> handleStartCharge(call)
             else -> result.notImplemented()
         }
@@ -98,6 +99,7 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
 
     private fun handleCardList(call: MethodCall) {
         try {
+            tinkoffAcquiring!!.sdk.getCardList {  }
 //            val request = tinkoffAcquiring!!.sdk.getCardList { }
 //            val thread = Thread {
 //                request.execute(
@@ -141,13 +143,11 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
 
     private fun handleOpenPaymentScreen(call: MethodCall) {
         try {
-            val arguments = call.arguments as Map<String?, Any?>
+            val arguments = call.arguments as Map<String, Any>
             val paymentOptions = parser.createPaymentOptions(arguments)
 
             val intent = MainFormLauncher.Contract.createIntent(context, MainFormLauncher.StartData(paymentOptions))
-            act?.startActivityForResult(intent, 71)
-//            result!!.success(true)
-            result = null
+            act?.startActivityForResult(intent, 10)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
             result!!.error("Error opening payment screen", e.message, null)
@@ -171,9 +171,25 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
         }
     }
 
-    private fun handleShowQrScreen(call: MethodCall) {
-        //TODO: implement method
-        result!!.notImplemented()
+    private fun handleShowStaticQrScreen(call: MethodCall) {
+        val arguments = call.arguments as Map<String, Any>
+        val featuresOptions = parser.parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
+        tinkoffAcquiring!!.openStaticQrScreen(
+            activity = act!!,
+            featuresOptions = featuresOptions,
+            requestCode = STATIC_QR_CODE_SCREEN,
+        )
+    }
+
+    private fun handleShowDynamicQrScreen(call: MethodCall) {
+        val arguments = call.arguments as Map<String, Any>
+        val paymentOptions = parser.createPaymentOptions(arguments)
+
+        tinkoffAcquiring!!.openDynamicQrScreen(
+            activity = act!!,
+            options = paymentOptions,
+            requestCode = DYNAMIC_QR_CODE_SCREEN
+        )
     }
 
     private fun handleStartCharge(call: MethodCall) {
@@ -184,6 +200,8 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     companion object {
         private const val TAG = "tinkoff_sdk"
         private const val PAYMENT_SUCCESSFULL = 10
+        private const val STATIC_QR_CODE_SCREEN = 12
+        private const val DYNAMIC_QR_CODE_SCREEN = 13
 
         fun Activity.toast(message: String) = runOnUiThread {
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -220,12 +238,12 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode == PAYMENT_SUCCESSFULL) {
-            if (resultCode == Activity.RESULT_OK) {
-                result!!.success(true)
-            }
-            result = null
+        if (resultCode == Activity.RESULT_OK) {
+            result!!.success(true)
+        } else if (resultCode == Activity.RESULT_CANCELED) {
+            result!!.success(false)
         }
+        result = null
         return true
     }
 }

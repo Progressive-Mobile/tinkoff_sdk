@@ -580,14 +580,22 @@ class _MyAppState extends State<MyApp> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextButton(
-                  onPressed: () async => await acquiring.showStaticQRCode(),
+                  onPressed: () async => await acquiring.showStaticQRCode(
+                    featuresOptions: _featuresOptions,
+                  ),
                   child: Text('Статический QR-код'),
                 ),
                 TextButton(
                   onPressed: () async => await acquiring.showDynamicQRCode(
-                    paymentFlow: PaymentFlow.full,
-                    orderOptions: _orderOptions!,
-                    customerOptions: _customerOptions!,
+                    iOSDynamicQrCode: IosDynamicQrCodeFullPaymentFlow(
+                      orderOptions: _orderOptions!,
+                    ),
+                    androidDynamicQrCode: AndroidDynamicQrCode(
+                      orderOptions: _orderOptions!,
+                      customerOptions: _customerOptions!,
+                      terminalKey: _TERMINAL_KEY,
+                      publicKey: _PUBLIC_KEY,
+                    ),
                   ),
                   child: Text('Динамический QR-код'),
                 ),

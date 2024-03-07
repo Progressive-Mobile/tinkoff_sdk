@@ -72,8 +72,7 @@ class ShowStaticQrScreen {
   const ShowStaticQrScreen();
 
   String get name => 'showStaticQrScreen';
-
-  String get localization => 'localizationSource';
+  String get featuresOptions => 'featuresOptions';
 }
 
 class ShowDynamicQrScreen {
@@ -81,12 +80,18 @@ class ShowDynamicQrScreen {
 
   String get name => 'showDynamicQrScreen';
 
+  String get terminalKey => 'terminalKey';
+  String get publicKey => 'publicKey';
   String get paymentFlow => 'paymentFlow';
   String get orderOptions => 'orderOptions';
   String get customerOptions => 'customerOptions';
+  String get featuresOptions => 'featuresOptions';
   String get paymentId => 'paymentId';
   String get amount => 'amount';
   String get orderId => 'orderId';
+  String get successUrl => 'successUrl';
+  String get failureUrl => 'failureUrl';
+  String get paymentData => 'paymentData';
 }
 
 class StartCharge {

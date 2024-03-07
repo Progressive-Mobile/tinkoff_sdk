@@ -116,13 +116,14 @@ class TinkoffSdk {
 
     final arguments = <String, dynamic>{
       method.orderOptions: orderOptions.arguments,
-      method.customerOptions: customerOptions._arguments,
-      method.featuresOptions: featuresOptions._arguments(),
-      method.receipt: Platform.isIOS ? iosReceipt?.arguments : androidReceipt?.arguments,
+      method.customerOptions: customerOptions.arguments,
+      method.featuresOptions: featuresOptions.arguments,
+      method.receipt:
+          Platform.isIOS ? iosReceipt?.arguments : androidReceipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
       method.ffdVersion: ffdVersion,
-    };
+    }..removeWhere((key, value) => value == null);
 
     return _channel
         .invokeMethod(method.name, arguments)
@@ -142,8 +143,8 @@ class TinkoffSdk {
     final method = Method.attachCardScreen;
 
     final arguments = <String, dynamic>{
-      method.customerOptions: customerOptions._arguments,
-      method.featuresOptions: featuresOptions._arguments()
+      method.customerOptions: customerOptions.arguments,
+      method.featuresOptions: featuresOptions.arguments,
     };
 
     return _channel.invokeMethod(method.name, arguments);
@@ -154,11 +155,19 @@ class TinkoffSdk {
   ///
   /// При данном типе оплаты SDK никак не отслеживает статус платежа,
   /// соответственно [Completer] завершается только при ошибке либо отмене (закрытии экрана).
-  Future<void> showStaticQRCode() async {
+  Future<void> showStaticQRCode({
+    FeaturesOptions? featuresOptions,
+  }) async {
     _checkActivated();
     final method = Method.showStaticQrScreen;
 
-    return _channel.invokeMethod(method.name).then(parseTinkoffResult);
+    final arguments = <String, dynamic>{
+      method.featuresOptions: featuresOptions?.arguments ?? FeaturesOptions().arguments,
+    };
+
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
   }
 
   /// Отображает экран с одноразовым `QR-кодом`, отсканировав который,
@@ -167,38 +176,54 @@ class TinkoffSdk {
   /// При данном типе оплаты сумма и информация о платеже фиксируется,
   /// и SDK способен получить и обработать статус платежа
   Future<TinkoffResult> showDynamicQRCode({
-    required PaymentFlow paymentFlow,
-    OrderOptions? orderOptions,
-    required CustomerOptions customerOptions,
-    String? paymentId,
-    int? amount,
-    String? orderId,
+    required AndroidDynamicQrCode androidDynamicQrCode,
+    required IosDynamicQrCode iOSDynamicQrCode,
   }) async {
-    assert(
-      (paymentFlow != PaymentFlow.full || orderOptions == null) ^
-          (paymentFlow != PaymentFlow.finish ||
-              paymentId == null ||
-              amount == null ||
-              orderId == null),
-      """Для paymentFlow == PaymentFlow.full параметр orderOptions должен быть не null.
-      Для paymentFlow == PaymentFlow.finish параметры paymentId, amount и orderID
-      должны быть не null.""",
-    );
-
     _checkActivated();
     final method = Method.showDynamicQrScreen;
 
-    final arguments = <String, dynamic>{
-      method.paymentFlow: paymentFlow.name,
-      method.orderOptions: orderOptions?.arguments,
-      method.customerOptions: customerOptions._arguments,
-      method.paymentId: paymentId,
-      method.amount: amount,
-      method.orderId: orderId,
-    };
+    late final Map<String, dynamic> arguments;
+
+    if (Platform.isIOS) {
+      switch (iOSDynamicQrCode.runtimeType) {
+        case IosDynamicQrCodeFullPaymentFlow:
+          final code = iOSDynamicQrCode as IosDynamicQrCodeFullPaymentFlow;
+          arguments = {
+            method.orderOptions: code.orderOptions.arguments,
+            method.customerOptions: code.customerOptions?.arguments,
+            method.successUrl: code.successUrl,
+            method.failureUrl: code.failureUrl,
+            method.paymentData: code.paymentData,
+            method.paymentFlow: PaymentFlow.full.name,
+          };
+          break;
+        case IosDynamicQrCodeFinishPaymentFlow:
+          final code = iOSDynamicQrCode as IosDynamicQrCodeFinishPaymentFlow;
+          arguments = {
+            method.paymentId: code.paymentId,
+            method.amount: code.amount,
+            method.orderId: code.orderId,
+            method.customerOptions: code.customerOptions?.arguments,
+            method.paymentFlow: PaymentFlow.finish.name,
+          };
+          break;
+      }
+    } else {
+      arguments = {
+        method.terminalKey: androidDynamicQrCode.terminalKey,
+        method.publicKey: androidDynamicQrCode.publicKey,
+        method.orderOptions: androidDynamicQrCode.orderOptions.arguments,
+        method.customerOptions: androidDynamicQrCode.customerOptions.arguments,
+        method.paymentId: androidDynamicQrCode.paymentId,
+        method.featuresOptions: androidDynamicQrCode.featuresOptions?.arguments,
+      };
+    }
 
     return _channel
-        .invokeMethod(method.name, arguments)
+        .invokeMethod(
+          method.name,
+          arguments..removeWhere((key, value) => value == null),
+        )
         .then(parseTinkoffResult);
   }
 

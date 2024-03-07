@@ -224,8 +224,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleShowDynamicQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         let paymentFlow = args?["paymentFlow"] as! String
-        let orderOptions = Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>)
-        let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as! Dictionary<String, Any>)
+        let orderOptions = args?["orderOptions"] == nil ? nil : Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>)
+        let customerOptions = args?["customerOptions"] == nil ? nil : Utils.parseCustomerOptions(args: args?["customerOptions"] as! Dictionary<String, Any>)
         let paymentId = args?["paymentId"] as? String
         let amount = args?["amount"] as? Int64
         let orderId = args?["orderId"] as? String

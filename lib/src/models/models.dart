@@ -11,9 +11,13 @@ part 'item/supplier_info.dart';
 part 'item/tax.dart';
 part 'item/taxation.dart';
 
+part 'options/customer_options.dart';
+part 'options/features_options.dart';
 part 'options/order_options.dart';
 part 'options/payment_flow.dart';
 part 'options/shop.dart';
+
+part 'qr_code/qr_code.dart';
 
 part 'receipt/receipt.dart';
 part 'receipt/client_info.dart';

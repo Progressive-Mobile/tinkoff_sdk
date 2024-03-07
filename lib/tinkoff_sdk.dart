@@ -22,6 +22,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:tinkoff_sdk/src/models/models.dart';
 import 'package:tinkoff_sdk/tinkoff_sdk.dart';
 export 'src/models/models.dart';
 
