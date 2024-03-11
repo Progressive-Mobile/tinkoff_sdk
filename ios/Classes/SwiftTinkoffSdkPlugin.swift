@@ -101,37 +101,10 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     
     private func handleCardList(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
-        let customerKey = args!["customerKey"] as! String
-        var cardsController = acquiring.cardsController(customerKey: customerKey)
+        let customerKey = (args!["customerOptions"] as! Dictionary<String, Any>)["customerKey"] as! String
         
-        var cardList = [] as [String?]
-        
-//        cardsController.getActiveCards(completion: (result) in
-//                                       switch result {
-//            self?.activeCards = cards
-//                            self?.tableView.reloadData()
-//        }
-//        )
-        
-        cardsController.getActiveCards { response in
-            switch response {
-                case let .success(cards):
-                    let cardsAmount = cards.count
-                    if (cardsAmount > 0) {
-                        for index in 0...cardsAmount-1 {
-                            var map = Dictionary<String, Any>()
-                            map["cardId"] = cards[index].cardId
-                            map["pan"] = cards[index].pan
-                            map["expDate"] = cards[index].expDate
-                            cardList.append(Utils.prepareJson(map))
-                        }
-                    }
-                    result(cardList)
-                    self.awaitingResult = false
-                case .failure:
-                    break
-            }
-        }
+        let view = Utils.getView()
+        acquiring.presentCardList(on: view, customerKey: customerKey)
     }
     
     private func handleOpenPaymentScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -180,21 +153,9 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         
         let customerOptionsArgs = args!["customerOptions"] as? Dictionary<String, Any>
         let customerKey = customerOptionsArgs?["customerKey"] as! String
-        let checkType = customerOptionsArgs!["checkType"] as! String
         
-//        let featuresOptionsArgs = args!["featuresOptions"] as? Dictionary<String, Any>
-//        let cameraCardScannerEnabled = featuresOptionsArgs!["enableCameraCardScanner"] as! Bool
-        //let darkThemeMode = featuresOptionsArgs!["darkThemeMode"] as! String
-        
-//        let cardListViewConfiguration = AcquiringViewConfiguration.init()
-//        
-//        if (cameraCardScannerEnabled) {
-//            cardListViewConfiguration.scaner = self
-//        }
-
-//        cardListViewConfiguration.localizableInfo = Utils.getLanguage()
         let controller = Utils.getView()
-        self.acquiring.presentCardList(
+        self.acquiring.presentAddCard(
             on: controller,
             customerKey: customerKey
         )
