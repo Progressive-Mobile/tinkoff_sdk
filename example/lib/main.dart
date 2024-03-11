@@ -128,7 +128,6 @@ class _MyAppState extends State<MyApp> {
         _getOrderCard(),
         _getCustomerCard(),
         _getFeatureCard(),
-        SizedBox(height: 8.0),
         _getPaymentAction(),
         _getCardsAction(),
       ],
@@ -309,8 +308,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _getCardLayout(
-      {required String title, required Widget body, VoidCallback? onTap}) {
+  Widget _getCardLayout({
+    required String title,
+    required Widget body,
+    VoidCallback? onTap,
+  }) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 4.0, horizontal: 24.0),
       child: InkWell(
@@ -377,8 +379,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showOrderOptionsDialog() async {
-    final orderIdController =
-        TextEditingController(text: _orderOptions?.orderId.toString() ?? '12397987');
+    final orderIdController = TextEditingController(
+        text: _orderOptions?.orderId.toString() ?? '111111');
     final titleController =
         TextEditingController(text: _orderOptions?.title ?? 'test');
     final descriptionController =
@@ -633,40 +635,17 @@ class _MyAppState extends State<MyApp> {
     return IconButton(
       icon: Icon(Icons.qr_code_rounded),
       onPressed: _orderOptions != null && _customerOptions != null
-          ? () {
-              showModalBottomSheet(
-                context: context,
-                isDismissible: true,
-                constraints: BoxConstraints.expand(),
-                builder: (context) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextButton(
-                        onPressed: () async => await acquiring.showStaticQRCode(
-                          featuresOptions: _featuresOptions,
-                        ),
-                        child: Text('Статический QR-код'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          await acquiring.showDynamicQRCode(
-                            iOSDynamicQrCode: IosDynamicQrCodeFullPaymentFlow(
-                              orderOptions: _orderOptions!,
-                            ),
-                            androidDynamicQrCode: AndroidDynamicQrCode(
-                              orderOptions: _orderOptions!,
-                              customerOptions: _customerOptions!,
-                              terminalKey: _TERMINAL_KEY,
-                              publicKey: _PUBLIC_KEY,
-                            ),
-                          );
-                        },
-                        child: Text('Динамический QR-код'),
-                      ),
-                    ],
-                  );
-                },
+          ? () async {
+              await acquiring.showDynamicQRCode(
+                iOSDynamicQrCode: IosDynamicQrCodeFullPaymentFlow(
+                  orderOptions: _orderOptions!,
+                ),
+                androidDynamicQrCode: AndroidDynamicQrCode(
+                  orderOptions: _orderOptions!,
+                  customerOptions: _customerOptions!,
+                  terminalKey: _TERMINAL_KEY,
+                  publicKey: _PUBLIC_KEY,
+                ),
               );
             }
           : null,

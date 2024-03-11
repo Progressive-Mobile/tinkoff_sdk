@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tinkoffbank</string>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>bank100000000111</string>
+		<string>bank100000000004</string>
+		<string>bank110000000005</string>
+		<string>bank100000000007</string>
+		<string>bank100000000008</string>
+		<string>bank100000000001</string>
+		<string>bank100000000015</string>
+		<string>bank100000000010</string>
+		<string>bank100000000013</string>
+		<string>bank100000000020</string>
+		<string>bank100000000006</string>
+		<string>bank100000000166</string>
+	</array>
 </dict>
 </plist>
