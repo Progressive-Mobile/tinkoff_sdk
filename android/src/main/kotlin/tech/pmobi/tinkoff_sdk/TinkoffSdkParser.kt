@@ -1,6 +1,6 @@
 /*
 
-  Copyright © 2020 ProgressiveMobile
+  Copyright © 2024 ProgressiveMobile
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 */
 package tech.pmobi.tinkoff_sdk
 
-import android.os.Parcel
-import ru.tinkoff.acquiring.sdk.cardscanners.CameraCardScanner
+import java.util.ArrayList
 import ru.tinkoff.acquiring.sdk.models.AgentData
 import ru.tinkoff.acquiring.sdk.models.ClientInfo
 import ru.tinkoff.acquiring.sdk.models.DarkThemeMode
@@ -41,12 +40,9 @@ import ru.tinkoff.acquiring.sdk.models.enums.Taxation
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions
 import ru.tinkoff.acquiring.sdk.models.options.OrderOptions
-import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions
-import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions
 import ru.tinkoff.acquiring.sdk.utils.Money.Companion.ofCoins
 import ru.tinkoff.acquiring.sdk.utils.builders.ReceiptBuilder
-import java.util.ArrayList
 
 class TinkoffSdkParser() {
     fun createCardOptions(arguments: Map<String, Any>): Map<String, Any> {
@@ -56,10 +52,10 @@ class TinkoffSdkParser() {
         val featuresOptions = parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
 
         return mapOf(
-            "terminalKey" to terminalKey,
-            "publicKey" to publicKey,
-            "customer" to customerOptions,
-            "features" to featuresOptions,
+                "terminalKey" to terminalKey,
+                "publicKey" to publicKey,
+                "customer" to customerOptions,
+                "features" to featuresOptions,
         )
     }
 
@@ -67,34 +63,37 @@ class TinkoffSdkParser() {
         val terminalKey = arguments["terminalKey"] as String
         val publicKey = arguments["publicKey"] as String
 
-        val paymentsOptions = PaymentOptions().setOptions {
-            setTerminalParams(terminalKey, publicKey)
-        }
+        val paymentsOptions =
+                PaymentOptions().setOptions { setTerminalParams(terminalKey, publicKey) }
 
         val ffdVersion = arguments["ffdVersion"] as String?
 
-        val orderOptions = parseOrderOptions(
-            arguments = arguments["orderOptions"] as Map<String, Any>,
-            ffdVersion = ffdVersion
-        )
+        val orderOptions =
+                parseOrderOptions(
+                        arguments = arguments["orderOptions"] as Map<String, Any>,
+                        ffdVersion = ffdVersion
+                )
         paymentsOptions.order = orderOptions
 
         var receipt: Receipt? = null
         if (arguments["receipt"] != null && ffdVersion != null) {
-            receipt = parseReceipt(
-                arguments = arguments["receipt"] as Map<String, Any>,
-                ffdVersion = ffdVersion
-            )
+            receipt =
+                    parseReceipt(
+                            arguments = arguments["receipt"] as Map<String, Any>,
+                            ffdVersion = ffdVersion
+                    )
 
             paymentsOptions.order.receipt = receipt
         }
 
-        val customerOptions = parseCustomerOptions(
-            arguments = arguments["customerOptions"] as Map<String, Any>
-        )
-        val featuresOptions = if (arguments["featuresOptions"] != null) parseFeatureOptions(
-            arguments = arguments["featuresOptions"] as Map<String, Any>
-        ) else null
+        val customerOptions =
+                parseCustomerOptions(arguments = arguments["customerOptions"] as Map<String, Any>)
+        val featuresOptions =
+                if (arguments["featuresOptions"] != null)
+                        parseFeatureOptions(
+                                arguments = arguments["featuresOptions"] as Map<String, Any>
+                        )
+                else null
 
         paymentsOptions.customer = customerOptions
         paymentsOptions.features = featuresOptions ?: FeaturesOptions()
@@ -110,23 +109,31 @@ class TinkoffSdkParser() {
         orderOptions.title = arguments["title"] as String?
         orderOptions.description = arguments["description"] as String?
         if (ffdVersion != null) {
-            orderOptions.receipt = if (arguments["receipt"] == null) null else parseReceipt(
-                arguments = arguments["receipt"] as Map<String, Any>,
-                ffdVersion = ffdVersion
-            )
-            orderOptions.receipts = (arguments["receipts"] as List<Map<String, Any>>?)?.map {
-                parseReceipt(it, ffdVersion)
-            }?.toList()
-            orderOptions.items = if (arguments["items"] == null) null else
-                (arguments["items"] as List<Map<String, Any>>).map { parseItem(it, ffdVersion) }.toMutableList()
+            orderOptions.receipt =
+                    if (arguments["receipt"] == null) null
+                    else
+                            parseReceipt(
+                                    arguments = arguments["receipt"] as Map<String, Any>,
+                                    ffdVersion = ffdVersion
+                            )
+            orderOptions.receipts =
+                    (arguments["receipts"] as List<Map<String, Any>>?)
+                            ?.map { parseReceipt(it, ffdVersion) }
+                            ?.toList()
+            orderOptions.items =
+                    if (arguments["items"] == null) null
+                    else
+                            (arguments["items"] as List<Map<String, Any>>)
+                                    .map { parseItem(it, ffdVersion) }
+                                    .toMutableList()
         }
-        orderOptions.shops = (arguments["shops"] as List<Map<String, Any>>?)?.map {
-            parseShop(it)
-        }?.toList()
+        orderOptions.shops =
+                (arguments["shops"] as List<Map<String, Any>>?)?.map { parseShop(it) }?.toList()
         orderOptions.successURL = arguments["successURL"] as String?
         orderOptions.failURL = arguments["failURL"] as String?
-        orderOptions.clientInfo = if (arguments["clientInfo"] == null) null else
-            parseClientInfo(arguments["clientInfo"] as Map<String, Any>)
+        orderOptions.clientInfo =
+                if (arguments["clientInfo"] == null) null
+                else parseClientInfo(arguments["clientInfo"] as Map<String, Any>)
         orderOptions.additionalData = arguments["additionalData"] as Map<String, String>?
 
         return orderOptions
@@ -144,12 +151,13 @@ class TinkoffSdkParser() {
     fun parseFeatureOptions(arguments: Map<String, Any>): FeaturesOptions {
         val featuresOptions = FeaturesOptions()
 
-        featuresOptions.darkThemeMode = when (arguments["darkThemeMode"] as String?) {
-            "ENABLED" -> DarkThemeMode.ENABLED
-            "DISABLED" -> DarkThemeMode.DISABLED
-            "AUTO" -> DarkThemeMode.AUTO
-            else -> DarkThemeMode.AUTO
-        }
+        featuresOptions.darkThemeMode =
+                when (arguments["darkThemeMode"] as String?) {
+                    "ENABLED" -> DarkThemeMode.ENABLED
+                    "DISABLED" -> DarkThemeMode.DISABLED
+                    "AUTO" -> DarkThemeMode.AUTO
+                    else -> DarkThemeMode.AUTO
+                }
         featuresOptions.useSecureKeyboard = arguments["useSecureKeyboard"] as Boolean
         featuresOptions.handleCardListErrorInSdk = arguments["handleCardListErrorInSdk"] as Boolean
         featuresOptions.fpsEnabled = arguments["fpsEnabled"] as Boolean
@@ -173,19 +181,26 @@ class TinkoffSdkParser() {
             receipt = ReceiptBuilder.ReceiptBuilder105(taxation).build()
             receipt.email = arguments["email"] as String?
             receipt.phone = arguments["phone"] as String?
-            receipt.items = (arguments["items"] as List<Map<String, Any>>).map {
-                parseItem(arguments = it, ffdVersion = ffdVersion) as Item105
-            }.toMutableList()
+            receipt.items =
+                    (arguments["items"] as List<Map<String, Any>>)
+                            .map { parseItem(arguments = it, ffdVersion = ffdVersion) as Item105 }
+                            .toMutableList()
         } else {
-            receipt = ReceiptBuilder.ReceiptBuilder12(
-                taxation = taxation,
-                clientInfo = parseClientInfo(arguments["clientInfo"] as Map<String, Any>)
-            ).build()
+            receipt =
+                    ReceiptBuilder.ReceiptBuilder12(
+                                    taxation = taxation,
+                                    clientInfo =
+                                            parseClientInfo(
+                                                    arguments["clientInfo"] as Map<String, Any>
+                                            )
+                            )
+                            .build()
             receipt.email = arguments["email"] as String?
             receipt.phone = arguments["phone"] as String?
-            receipt.items = (arguments["items"] as List<Map<String, Any>>).map {
-                parseItem(arguments = it, ffdVersion = ffdVersion) as Item12
-            }.toMutableList()
+            receipt.items =
+                    (arguments["items"] as List<Map<String, Any>>)
+                            .map { parseItem(arguments = it, ffdVersion = ffdVersion) as Item12 }
+                            .toMutableList()
         }
 
         return receipt
@@ -194,37 +209,42 @@ class TinkoffSdkParser() {
     private fun parseItem(arguments: Map<String, Any>, ffdVersion: String): Item {
         if (ffdVersion == "105") {
             return Item105(
-                name = arguments["name"] as String,
-                price = (arguments["price"] as Int).toLong(),
-                quantity = arguments["quantity"] as Double,
-                amount = (arguments["amount"] as Int).toLong(),
-                tax = parseTax(arguments["tax"] as String),
-                ean13 = arguments["ean13"] as String?,
-                shopCode = arguments["shopCode"] as String?,
-                paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?),
-                paymentObject = parsePaymentObject105(arguments["paymentObject"] as String?),
-                agentData = parseAgentData(arguments["agentData"] as Map<String, Any>?),
+                    name = arguments["name"] as String,
+                    price = (arguments["price"] as Int).toLong(),
+                    quantity = arguments["quantity"] as Double,
+                    amount = (arguments["amount"] as Int).toLong(),
+                    tax = parseTax(arguments["tax"] as String),
+                    ean13 = arguments["ean13"] as String?,
+                    shopCode = arguments["shopCode"] as String?,
+                    paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?),
+                    paymentObject = parsePaymentObject105(arguments["paymentObject"] as String?),
+                    agentData = parseAgentData(arguments["agentData"] as Map<String, Any>?),
             )
         } else {
             return Item12(
-                price = (arguments["price"] as Int).toLong(),
-                quantity = arguments["quantity"] as Double,
-                name = arguments["name"] as String?,
-                amount = (arguments["amount"] as Int?)?.toLong(),
-                tax = parseTax(arguments["tax"] as String),
-                paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?),
-                paymentObject = parsePaymentObject12(arguments["paymentObject"] as String?),
-                agentData = parseAgentData(arguments["agentData"] as Map<String, Any>?),
-                supplierInfo = parseSupplierInfo(arguments["supplierInfo"] as Map<String, Any>?),
-                userData = arguments["userData"] as String?,
-                excise = arguments["excise"] as Double?,
-                countryCode = arguments["countryCode"] as String?,
-                declarationNumber = arguments["declarationNumber"] as String?,
-                measurementUnit = arguments["measurementUnit"] as String,
-                markProcessingMode = arguments["markProcessingMode"] as String?,
-                markCode = parseMarkCode(arguments["markCode"] as Map<String, Any>?),
-                markQuantity = parseMarkQuantity(arguments["markQuantity"] as Map<String, Any>?),
-                sectoralItemProps = (arguments["sectoralItemProps"] as Array<Map<String, Any>>?)?.map { parseSectoralItemProps(it) }?.toList(),
+                    price = (arguments["price"] as Int).toLong(),
+                    quantity = arguments["quantity"] as Double,
+                    name = arguments["name"] as String?,
+                    amount = (arguments["amount"] as Int?)?.toLong(),
+                    tax = parseTax(arguments["tax"] as String),
+                    paymentMethod = parsePaymentMethod(arguments["paymentMethod"] as String?),
+                    paymentObject = parsePaymentObject12(arguments["paymentObject"] as String?),
+                    agentData = parseAgentData(arguments["agentData"] as Map<String, Any>?),
+                    supplierInfo =
+                            parseSupplierInfo(arguments["supplierInfo"] as Map<String, Any>?),
+                    userData = arguments["userData"] as String?,
+                    excise = arguments["excise"] as Double?,
+                    countryCode = arguments["countryCode"] as String?,
+                    declarationNumber = arguments["declarationNumber"] as String?,
+                    measurementUnit = arguments["measurementUnit"] as String,
+                    markProcessingMode = arguments["markProcessingMode"] as String?,
+                    markCode = parseMarkCode(arguments["markCode"] as Map<String, Any>?),
+                    markQuantity =
+                            parseMarkQuantity(arguments["markQuantity"] as Map<String, Any>?),
+                    sectoralItemProps =
+                            (arguments["sectoralItemProps"] as Array<Map<String, Any>>?)
+                                    ?.map { parseSectoralItemProps(it) }
+                                    ?.toList(),
             )
         }
     }
@@ -309,14 +329,17 @@ class TinkoffSdkParser() {
             "resortTax" -> PaymentObject12.RESORT_TAX
             "pledge" -> PaymentObject12.PLEDGE
             "incomeDecrease" -> PaymentObject12.INCOME_DECREASE
-            "iePensionInsuranceWithoutPayments" -> PaymentObject12.IE_PENSION_INSURANCE_WITHOUT_PAYMENTS
+            "iePensionInsuranceWithoutPayments" ->
+                    PaymentObject12.IE_PENSION_INSURANCE_WITHOUT_PAYMENTS
             "iePensionInsuranceWithPayments" -> PaymentObject12.IE_PENSION_INSURANCE_WITH_PAYMENTS
-            "ieMedicalInsuranceWithoutPayments" -> PaymentObject12.IE_MEDICAL_INSURANCE_WITHOUT_PAYMENTS
+            "ieMedicalInsuranceWithoutPayments" ->
+                    PaymentObject12.IE_MEDICAL_INSURANCE_WITHOUT_PAYMENTS
             "ieMedicalInsuranceWithPayments" -> PaymentObject12.IE_MEDICAL_INSURANCE_WITH_PAYMENTS
             "socialInsurance" -> PaymentObject12.SOCIAL_INSURANCE
             "casinoChips" -> PaymentObject12.CASINO_CHIPS
             "agentPayment" -> PaymentObject12.AGENT_PAYMENT
-            "excisableGoodsWithoutMarkingCode" -> PaymentObject12.EXCISABLE_GOODS_WITHOUT_MARKING_CODE
+            "excisableGoodsWithoutMarkingCode" ->
+                    PaymentObject12.EXCISABLE_GOODS_WITHOUT_MARKING_CODE
             "excisableGoodsWithMarkingCode" -> PaymentObject12.EXCISABLE_GOODS_WITH_MARKING_CODE
             "goodsWithoutMarkingCode" -> PaymentObject12.GOODS_WITHOUT_MARKING_CODE
             "goodsWithMarkingCode" -> PaymentObject12.GOODS_WITH_MARKING_CODE
@@ -326,20 +349,20 @@ class TinkoffSdkParser() {
 
     private fun parseShop(arguments: Map<String, Any>): Shop {
         return Shop(
-            shopCode = arguments["shopCode"] as String,
-            name = arguments["name"] as String,
-            amount = (arguments["amount"] as Double).toLong(),
-            fee = arguments["fee"] as String?
+                shopCode = arguments["shopCode"] as String,
+                name = arguments["name"] as String,
+                amount = (arguments["amount"] as Double).toLong(),
+                fee = arguments["fee"] as String?
         )
     }
 
     private fun parseClientInfo(arguments: Map<String, Any>): ClientInfo {
         return ClientInfo(
-            arguments["birthdate"] as String?,
-            arguments["citizenship"] as String?,
-            arguments["documentCode"] as String?,
-            arguments["documentData"] as String?,
-            arguments["address"] as String?
+                arguments["birthdate"] as String?,
+                arguments["citizenship"] as String?,
+                arguments["documentCode"] as String?,
+                arguments["documentData"] as String?,
+                arguments["address"] as String?
         )
     }
 
@@ -352,8 +375,10 @@ class TinkoffSdkParser() {
         agentData.agentSign = parseAgentSign(arguments["agentSign"] as String?)
         agentData.operationName = arguments["operationName"] as String?
         agentData.phones = (arguments["phones"] as ArrayList<String>?)?.toTypedArray()
-        agentData.receiverPhones = (arguments["receiverPhones"] as ArrayList<String>?)?.toTypedArray()
-        agentData.transferPhones = (arguments["transferPhones"] as ArrayList<String>?)?.toTypedArray()
+        agentData.receiverPhones =
+                (arguments["receiverPhones"] as ArrayList<String>?)?.toTypedArray()
+        agentData.transferPhones =
+                (arguments["transferPhones"] as ArrayList<String>?)?.toTypedArray()
         agentData.operatorName = arguments["operatorName"] as String?
         agentData.operatorAddress = arguments["operatorAddress"] as String?
         agentData.operatorInn = arguments["operatorInn"] as String?
@@ -391,8 +416,8 @@ class TinkoffSdkParser() {
         }
 
         return MarkCode(
-            markCodeType = parseMarkCodeType(arguments["markCodeType"] as String)!!,
-            value = arguments["value"] as String
+                markCodeType = parseMarkCodeType(arguments["markCodeType"] as String)!!,
+                value = arguments["value"] as String
         )
     }
 
@@ -425,10 +450,10 @@ class TinkoffSdkParser() {
 
     private fun parseSectoralItemProps(arguments: Map<String, Any>): SectoralItemProps {
         return SectoralItemProps(
-            federalId = arguments["federalId"] as String,
-            date = arguments["date"] as String,
-            number = arguments["number"] as String,
-            value = arguments["value"] as String
+                federalId = arguments["federalId"] as String,
+                date = arguments["date"] as String,
+                number = arguments["number"] as String,
+                value = arguments["value"] as String
         )
     }
 }

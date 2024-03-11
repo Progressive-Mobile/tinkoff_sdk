@@ -1,6 +1,6 @@
 /*
 
-  Copyright © 2020 ProgressiveMobile
+  Copyright © 2024 ProgressiveMobile
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -172,7 +172,8 @@ class TinkoffSdk {
     final method = Method.showStaticQrScreen;
 
     final arguments = <String, dynamic>{
-      method.featuresOptions: featuresOptions?.arguments ?? FeaturesOptions().arguments,
+      method.featuresOptions:
+          featuresOptions?.arguments ?? FeaturesOptions().arguments,
     };
 
     return _channel

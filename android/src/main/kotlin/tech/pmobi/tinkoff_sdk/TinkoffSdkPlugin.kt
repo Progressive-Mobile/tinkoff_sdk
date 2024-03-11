@@ -1,6 +1,6 @@
 /*
 
-  Copyright © 2020 ProgressiveMobile
+  Copyright © 2024 ProgressiveMobile
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.PluginRegistry
@@ -30,40 +29,38 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import org.json.JSONException
 import org.json.JSONObject
 import ru.tinkoff.acquiring.sdk.AcquiringSdk
 import ru.tinkoff.acquiring.sdk.TinkoffAcquiring
-import ru.tinkoff.acquiring.sdk.models.enums.CardStatus
-import ru.tinkoff.acquiring.sdk.models.enums.CheckType
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions
-import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions
 import ru.tinkoff.acquiring.sdk.redesign.cards.attach.AttachCardLauncher
 import ru.tinkoff.acquiring.sdk.redesign.cards.list.SavedCardsLauncher
 import ru.tinkoff.acquiring.sdk.redesign.mainform.MainFormLauncher
-import ru.tinkoff.acquiring.sdk.responses.GetCardListResponse
-import ru.tinkoff.acquiring.sdk.utils.Money
-import ru.tinkoff.acquiring.sdk.utils.SampleAcquiringTokenGenerator
 
-class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
-    io.flutter.plugin.common.PluginRegistry.ActivityResultListener {
+class TinkoffSdkPlugin :
+        MethodCallHandler,
+        FlutterPlugin,
+        ActivityAware,
+        io.flutter.plugin.common.PluginRegistry.ActivityResultListener {
     private var methodChannel: MethodChannel? = null
     private var result: MethodChannel.Result? = null
     private var tinkoffAcquiring: TinkoffAcquiring? = null
     private var parser: TinkoffSdkParser = TinkoffSdkParser()
     private lateinit var context: Context
 
-
     private var act: Activity? = null
 
-//    private val byMainFormPayment = registerForActivityResult(MainFormLauncher.Contract) { result ->
-//        when (result) {
-//            is MainFormLauncher.Canceled -> toast("payment canceled")
-//            is MainFormLauncher.Error ->  toast(result.error.message ?: getString(ru.tinkoff.acquiring.sdk.R.string.acq_banklist_title))
-//            is MainFormLauncher.Success ->  toast("payment Success-  paymentId:${result.paymentId}")
-//        }
-//    }
+    //    private val byMainFormPayment = registerForActivityResult(MainFormLauncher.Contract) {
+    // result ->
+    //        when (result) {
+    //            is MainFormLauncher.Canceled -> toast("payment canceled")
+    //            is MainFormLauncher.Error ->  toast(result.error.message ?:
+    // getString(ru.tinkoff.acquiring.sdk.R.string.acq_banklist_title))
+    //            is MainFormLauncher.Success ->  toast("payment Success-
+    // paymentId:${result.paymentId}")
+    //        }
+    //    }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (this.result != null) return
@@ -90,10 +87,7 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
             val isDebug = arguments["isDebug"] as Boolean? ?: false
             AcquiringSdk.isDeveloperMode = isDeveloperMode
             AcquiringSdk.isDebug = isDebug
-            tinkoffAcquiring = TinkoffAcquiring(
-                context,
-                terminalKey!!, publicKey!!
-            )
+            tinkoffAcquiring = TinkoffAcquiring(context, terminalKey!!, publicKey!!)
             result!!.success(true)
         } catch (e: Exception) {
             result!!.success(false)
@@ -105,28 +99,44 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
         try {
             val arguments = parser.createCardOptions(call.arguments as Map<String, Any>)
 
-            val options = tinkoffAcquiring!!.savedCardsOptions {
-                setTerminalParams(arguments["terminalKey"] as String, arguments["publicKey"] as String)
-                customerOptions {
-                    customerKey = (arguments["customer"] as CustomerOptions).customerKey
-                    checkType = (arguments["customer"] as CustomerOptions).checkType
-                    email = (arguments["customer"] as CustomerOptions).email
-                }
-                featuresOptions {
-                    darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
-                    useSecureKeyboard = (arguments["features"] as FeaturesOptions).useSecureKeyboard
-                    handleCardListErrorInSdk = (arguments["features"] as FeaturesOptions).handleCardListErrorInSdk
-                    fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
-                    tinkoffPayEnabled = (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
-                    yandexPayEnabled = (arguments["features"] as FeaturesOptions).yandexPayEnabled
-                    userCanSelectCard = (arguments["features"] as FeaturesOptions).userCanSelectCard
-                    showOnlyRecurrentCards = (arguments["features"] as FeaturesOptions).showOnlyRecurrentCards
-                    handleErrorsInSdk = (arguments["features"] as FeaturesOptions).handleErrorsInSdk
-                    emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
-                    duplicateEmailToReceipt = (arguments["features"] as FeaturesOptions).duplicateEmailToReceipt
-                    validateExpiryDate = (arguments["features"] as FeaturesOptions).validateExpiryDate
-                }
-            }
+            val options =
+                    tinkoffAcquiring!!.savedCardsOptions {
+                        setTerminalParams(
+                                arguments["terminalKey"] as String,
+                                arguments["publicKey"] as String
+                        )
+                        customerOptions {
+                            customerKey = (arguments["customer"] as CustomerOptions).customerKey
+                            checkType = (arguments["customer"] as CustomerOptions).checkType
+                            email = (arguments["customer"] as CustomerOptions).email
+                        }
+                        featuresOptions {
+                            darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
+                            useSecureKeyboard =
+                                    (arguments["features"] as FeaturesOptions).useSecureKeyboard
+                            handleCardListErrorInSdk =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .handleCardListErrorInSdk
+                            fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
+                            tinkoffPayEnabled =
+                                    (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
+                            yandexPayEnabled =
+                                    (arguments["features"] as FeaturesOptions).yandexPayEnabled
+                            userCanSelectCard =
+                                    (arguments["features"] as FeaturesOptions).userCanSelectCard
+                            showOnlyRecurrentCards =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .showOnlyRecurrentCards
+                            handleErrorsInSdk =
+                                    (arguments["features"] as FeaturesOptions).handleErrorsInSdk
+                            emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
+                            duplicateEmailToReceipt =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .duplicateEmailToReceipt
+                            validateExpiryDate =
+                                    (arguments["features"] as FeaturesOptions).validateExpiryDate
+                        }
+                    }
             val intent = SavedCardsLauncher.Contract.createIntent(context, options)
             act?.startActivityForResult(intent, SAVED_CARDS_SCREEN)
         } catch (e: Exception) {
@@ -141,7 +151,11 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
             val arguments = call.arguments as Map<String, Any>
             val paymentOptions = parser.createPaymentOptions(arguments)
 
-            val intent = MainFormLauncher.Contract.createIntent(context, MainFormLauncher.StartData(paymentOptions))
+            val intent =
+                    MainFormLauncher.Contract.createIntent(
+                            context,
+                            MainFormLauncher.StartData(paymentOptions)
+                    )
             act?.startActivityForResult(intent, PAYMENT_SCREEN)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
@@ -154,28 +168,44 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
         try {
             val arguments = parser.createCardOptions(call.arguments as Map<String, Any>)
 
-            val options = tinkoffAcquiring!!.attachCardOptions {
-                setTerminalParams(arguments["terminalKey"] as String, arguments["publicKey"] as String)
-                customerOptions {
-                    customerKey = (arguments["customer"] as CustomerOptions).customerKey
-                    checkType = (arguments["customer"] as CustomerOptions).checkType
-                    email = (arguments["customer"] as CustomerOptions).email
-                }
-                featuresOptions {
-                    darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
-                    useSecureKeyboard = (arguments["features"] as FeaturesOptions).useSecureKeyboard
-                    handleCardListErrorInSdk = (arguments["features"] as FeaturesOptions).handleCardListErrorInSdk
-                    fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
-                    tinkoffPayEnabled = (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
-                    yandexPayEnabled = (arguments["features"] as FeaturesOptions).yandexPayEnabled
-                    userCanSelectCard = (arguments["features"] as FeaturesOptions).userCanSelectCard
-                    showOnlyRecurrentCards = (arguments["features"] as FeaturesOptions).showOnlyRecurrentCards
-                    handleErrorsInSdk = (arguments["features"] as FeaturesOptions).handleErrorsInSdk
-                    emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
-                    duplicateEmailToReceipt = (arguments["features"] as FeaturesOptions).duplicateEmailToReceipt
-                    validateExpiryDate = (arguments["features"] as FeaturesOptions).validateExpiryDate
-                }
-            }
+            val options =
+                    tinkoffAcquiring!!.attachCardOptions {
+                        setTerminalParams(
+                                arguments["terminalKey"] as String,
+                                arguments["publicKey"] as String
+                        )
+                        customerOptions {
+                            customerKey = (arguments["customer"] as CustomerOptions).customerKey
+                            checkType = (arguments["customer"] as CustomerOptions).checkType
+                            email = (arguments["customer"] as CustomerOptions).email
+                        }
+                        featuresOptions {
+                            darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
+                            useSecureKeyboard =
+                                    (arguments["features"] as FeaturesOptions).useSecureKeyboard
+                            handleCardListErrorInSdk =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .handleCardListErrorInSdk
+                            fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
+                            tinkoffPayEnabled =
+                                    (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
+                            yandexPayEnabled =
+                                    (arguments["features"] as FeaturesOptions).yandexPayEnabled
+                            userCanSelectCard =
+                                    (arguments["features"] as FeaturesOptions).userCanSelectCard
+                            showOnlyRecurrentCards =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .showOnlyRecurrentCards
+                            handleErrorsInSdk =
+                                    (arguments["features"] as FeaturesOptions).handleErrorsInSdk
+                            emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
+                            duplicateEmailToReceipt =
+                                    (arguments["features"] as FeaturesOptions)
+                                            .duplicateEmailToReceipt
+                            validateExpiryDate =
+                                    (arguments["features"] as FeaturesOptions).validateExpiryDate
+                        }
+                    }
             val intent = AttachCardLauncher.Contract.createIntent(context, options = options)
             act?.startActivityForResult(intent, ATTACH_CARD_SCREEN)
         } catch (e: Exception) {
@@ -187,11 +217,12 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     private fun handleShowStaticQrScreen(call: MethodCall) {
         try {
             val arguments = call.arguments as Map<String, Any>
-            val featuresOptions = parser.parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
+            val featuresOptions =
+                    parser.parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
             tinkoffAcquiring!!.openStaticQrScreen(
-                activity = act!!,
-                featuresOptions = featuresOptions,
-                requestCode = STATIC_QR_CODE_SCREEN,
+                    activity = act!!,
+                    featuresOptions = featuresOptions,
+                    requestCode = STATIC_QR_CODE_SCREEN,
             )
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
@@ -206,9 +237,9 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
             val paymentOptions = parser.createPaymentOptions(arguments)
 
             tinkoffAcquiring!!.openDynamicQrScreen(
-                activity = act!!,
-                options = paymentOptions,
-                requestCode = DYNAMIC_QR_CODE_SCREEN
+                    activity = act!!,
+                    options = paymentOptions,
+                    requestCode = DYNAMIC_QR_CODE_SCREEN
             )
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
@@ -218,7 +249,7 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     }
 
     private fun handleStartCharge(call: MethodCall) {
-        //TODO: implement method
+        // TODO: implement method
         result!!.notImplemented()
     }
 
@@ -252,7 +283,7 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        act = null;
+        act = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -261,23 +292,25 @@ class TinkoffSdkPlugin : MethodCallHandler, FlutterPlugin, ActivityAware,
     }
 
     override fun onDetachedFromActivity() {
-        act = null;
+        act = null
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (resultCode == Activity.RESULT_OK) {
-            val json = JSONObject(mapOf(
-                "success" to true,
-                "isError" to false,
-                "message" to "Success"
-            )).toString()
+            val json =
+                    JSONObject(mapOf("success" to true, "isError" to false, "message" to "Success"))
+                            .toString()
             result!!.success(json)
         } else if (resultCode == Activity.RESULT_CANCELED) {
-            val json = JSONObject(mapOf(
-                "success" to false,
-                "isError" to false,
-                "message" to "Cancelled"
-            )).toString()
+            val json =
+                    JSONObject(
+                                    mapOf(
+                                            "success" to false,
+                                            "isError" to false,
+                                            "message" to "Cancelled"
+                                    )
+                            )
+                            .toString()
             result!!.success(json)
         }
         result = null
