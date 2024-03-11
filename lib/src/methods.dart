@@ -64,6 +64,8 @@ class AttachCardScreen {
 
   String get name => 'attachCardScreen';
 
+  String get terminalKey => 'terminalKey';
+  String get publicKey => 'publicKey';
   String get customerOptions => 'customerOptions';
   String get featuresOptions => 'featuresOptions';
 }
@@ -105,5 +107,8 @@ class GetCardList {
 
   String get name => 'cardList';
 
-  String get customerKey => 'customerKey';
+  String get terminalKey => 'terminalKey';
+  String get publicKey => 'publicKey';
+  String get customerOptions => 'customerOptions';
+  String get featuresOptions => 'featuresOptions';
 }

@@ -75,14 +75,23 @@ class TinkoffSdk {
     return activated;
   }
 
-  Future<List<CardData>> getCardList(String customerKey) async {
+  /// Открытие экрана списка привязанных карт
+  Future<List<CardData>> getCardList({
+    required String terminalKey,
+    required String publicKey,
+    required CustomerOptions customerOptions,
+    FeaturesOptions featuresOptions = const FeaturesOptions(),
+  }) async {
     _checkActivated();
 
     final method = Method.getCardList;
 
     final arguments = <String, dynamic>{
-      method.customerKey: customerKey,
-    };
+      method.terminalKey: terminalKey,
+      method.publicKey: publicKey,
+      method.customerOptions: customerOptions.arguments,
+      method.featuresOptions: featuresOptions.arguments,
+    }..removeWhere((key, value) => value == null);
 
     return _channel
         .invokeMethod(method.name, arguments)
@@ -130,11 +139,10 @@ class TinkoffSdk {
         .then(parseTinkoffResult);
   }
 
-  /// Открытие экрана привязки карт.
-  ///
-  /// Подробное описание параметров см. в реализации
-  /// [CustomerOptions], [FeaturesOptions].
+  /// Открытие экрана привязки карт
   Future<void> openAttachCardScreen({
+    required String terminalKey,
+    required String publicKey,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
   }) async {
@@ -143,9 +151,11 @@ class TinkoffSdk {
     final method = Method.attachCardScreen;
 
     final arguments = <String, dynamic>{
+      method.terminalKey: terminalKey,
+      method.publicKey: publicKey,
       method.customerOptions: customerOptions.arguments,
       method.featuresOptions: featuresOptions.arguments,
-    };
+    }..removeWhere((key, value) => value == null);
 
     return _channel.invokeMethod(method.name, arguments);
   }

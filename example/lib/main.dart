@@ -179,14 +179,30 @@ class _MyAppState extends State<MyApp> {
         title: 'Настройки экрана',
         body: Column(
           children: [
-            _getEntryText('СБП включено', _featuresOptions.fpsEnabled),
+            _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
             _getEntryText(
                 'Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
+            _getEntryText('Обработка ошибок списка карт в SDK',
+                _featuresOptions.handleCardListErrorInSdk),
+            _getEntryText('СБП включено', _featuresOptions.fpsEnabled),
             _getEntryText('Сканер карт включён',
                 _featuresOptions.enableCameraCardScanner),
             _getEntryText(
-                'Обработка ошибок', _featuresOptions.handleCardListErrorInSdk),
-            _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
+                'Tinkoff Pay включен', _featuresOptions.tinkoffPayEnabled),
+            _getEntryText(
+                'Yandex Pay включен', _featuresOptions.yandexPayEnabled),
+            _getEntryText(
+                'Выбор приоритетной карты', _featuresOptions.userCanSelectCard),
+            _getEntryText('Показ только реккурентных карт',
+                _featuresOptions.showOnlyRecurrentCards),
+            _getEntryText(
+                'Обработка ошибок', _featuresOptions.handleErrorsInSdk),
+            _getEntryText(
+                'Обязательный e-mail', _featuresOptions.emailRequired),
+            _getEntryText('Дублирование e-mail в чек',
+                _featuresOptions.duplicateEmailToReceipt),
+            _getEntryText('Валидация срока действия карты',
+                _featuresOptions.validateExpiryDate),
           ],
         ),
         onTap: _showFeatureOptionsDialog);
@@ -243,7 +259,12 @@ class _MyAppState extends State<MyApp> {
     return ElevatedButton(
       onPressed: _customerOptions != null
           ? () {
-              acquiring.getCardList(_customerOptions!.customerKey);
+              acquiring.getCardList(
+                terminalKey: _TERMINAL_KEY,
+                publicKey: _PUBLIC_KEY,
+                customerOptions: _customerOptions!,
+                featuresOptions: _featuresOptions,
+              );
             }
           : null,
       child: Text('Список карт'),
@@ -472,67 +493,103 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showFeatureOptionsDialog() async {
-    final sbp = ValueNotifier<bool>(_featuresOptions.fpsEnabled);
-    final secureKeyboard =
-        ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
-    final scanner =
-        ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
-    final errorHandle =
-        ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
-    final darkTheme =
+    final darkThemeMode =
         ValueNotifier<DarkThemeMode>(_featuresOptions.darkThemeMode);
+    final useSecureKeyboard =
+        ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
+    final handleCardListErrorInSdk =
+        ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
+    final fpsEnabled = ValueNotifier<bool>(_featuresOptions.fpsEnabled);
+    final enableCameraCardScanner =
+        ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
+    final tinkoffPayEnabled =
+        ValueNotifier<bool>(_featuresOptions.tinkoffPayEnabled);
+    final yandexPayEnabled =
+        ValueNotifier<bool>(_featuresOptions.yandexPayEnabled);
+    final userCanSelectCard =
+        ValueNotifier<bool>(_featuresOptions.userCanSelectCard);
+    final showOnlyRecurrentCards =
+        ValueNotifier<bool>(_featuresOptions.showOnlyRecurrentCards);
+    final handleErrorsInSdk =
+        ValueNotifier<bool>(_featuresOptions.handleErrorsInSdk);
+    final emailRequired = ValueNotifier<bool>(_featuresOptions.emailRequired);
+    final duplicateEmailToReceipt =
+        ValueNotifier<bool>(_featuresOptions.duplicateEmailToReceipt);
+    final validateExpiryDate =
+        ValueNotifier<bool>(_featuresOptions.validateExpiryDate);
 
     await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              contentPadding: EdgeInsets.zero,
-              content: SingleChildScrollView(
-                padding: EdgeInsets.all(14.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _getCheckboxRow('СБП', sbp),
-                    _getCheckboxRow('Безопасная клавиатура', secureKeyboard),
-                    _getCheckboxRow('Сканнер карт', scanner),
-                    _getCheckboxRow('Обработка ошибок', errorHandle),
-                    Row(
-                      children: <Widget>[
-                        Text('Темная тема'),
-                        Spacer(),
-                        ValueListenableBuilder<DarkThemeMode>(
-                          valueListenable: darkTheme,
-                          builder: (context, value, _) =>
-                              DropdownButton<DarkThemeMode>(
-                                  value: value,
-                                  items: [
-                                    DropdownMenuItem(
-                                      value: DarkThemeMode.auto,
-                                      child: Text('AUTO'),
-                                    ),
-                                    DropdownMenuItem(
-                                        value: DarkThemeMode.enabled,
-                                        child: Text('ENABLED')),
-                                    DropdownMenuItem(
-                                        value: DarkThemeMode.disabled,
-                                        child: Text('DISABLED'))
-                                  ],
-                                  onChanged: (value) {
-                                    darkTheme.value = value!;
-                                  }),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: SingleChildScrollView(
+          padding: EdgeInsets.all(14.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: <Widget>[
+                  Text('Темная тема'),
+                  Spacer(),
+                  ValueListenableBuilder<DarkThemeMode>(
+                    valueListenable: darkThemeMode,
+                    builder: (context, value, _) =>
+                        DropdownButton<DarkThemeMode>(
+                            value: value,
+                            items: [
+                              DropdownMenuItem(
+                                value: DarkThemeMode.auto,
+                                child: Text('AUTO'),
+                              ),
+                              DropdownMenuItem(
+                                  value: DarkThemeMode.enabled,
+                                  child: Text('ENABLED')),
+                              DropdownMenuItem(
+                                  value: DarkThemeMode.disabled,
+                                  child: Text('DISABLED'))
+                            ],
+                            onChanged: (value) {
+                              darkThemeMode.value = value!;
+                            }),
+                  ),
+                ],
               ),
-            ));
+              _getCheckboxRow('Безопасная клавиатура', useSecureKeyboard),
+              _getCheckboxRow('Обработка ошибок списка карт в SDK',
+                  handleCardListErrorInSdk),
+              _getCheckboxRow('СБП', fpsEnabled),
+              _getCheckboxRow('Сканнер карт', enableCameraCardScanner),
+              _getCheckboxRow('Tinkoff Pay включен', tinkoffPayEnabled),
+              _getCheckboxRow('Yandex Pay включен', yandexPayEnabled),
+              _getCheckboxRow('Выбор приоритетной карты', userCanSelectCard),
+              _getCheckboxRow(
+                  'Показ только реккурентных карт', showOnlyRecurrentCards),
+              _getCheckboxRow('Обработка ошибок', handleErrorsInSdk),
+              _getCheckboxRow('Обязательный e-mail', emailRequired),
+              _getCheckboxRow(
+                  'Дублирование e-mail в чек', duplicateEmailToReceipt),
+              _getCheckboxRow(
+                  'Валидация срока действия карты', validateExpiryDate),
+            ],
+          ),
+        ),
+      ),
+    );
     setState(() {
       _featuresOptions = FeaturesOptions(
-        fpsEnabled: sbp.value,
-        useSecureKeyboard: secureKeyboard.value,
-        enableCameraCardScanner: scanner.value,
-        handleCardListErrorInSdk: errorHandle.value,
-        darkThemeMode: darkTheme.value,
+        darkThemeMode: darkThemeMode.value,
+        useSecureKeyboard: useSecureKeyboard.value,
+        handleCardListErrorInSdk: handleCardListErrorInSdk.value,
+        fpsEnabled: fpsEnabled.value,
+        enableCameraCardScanner: enableCameraCardScanner.value,
+        tinkoffPayEnabled: tinkoffPayEnabled.value,
+        yandexPayEnabled: yandexPayEnabled.value,
+        userCanSelectCard: userCanSelectCard.value,
+        showOnlyRecurrentCards: showOnlyRecurrentCards.value,
+        handleErrorsInSdk: handleErrorsInSdk.value,
+        emailRequired: emailRequired.value,
+        duplicateEmailToReceipt: duplicateEmailToReceipt.value,
+        validateExpiryDate: validateExpiryDate.value,
       );
     });
   }
@@ -540,8 +597,11 @@ class _MyAppState extends State<MyApp> {
   Widget _getCheckboxRow(String title, ValueNotifier<bool> valueListenable) {
     return Row(
       children: <Widget>[
-        Text(title),
-        Spacer(),
+        Expanded(
+          child: Text(
+            title,
+          ),
+        ),
         ValueListenableBuilder<bool>(
           valueListenable: valueListenable,
           builder: (context, value, _) => Checkbox(
@@ -559,6 +619,8 @@ class _MyAppState extends State<MyApp> {
       onPressed: _customerOptions != null
           ? () async {
               await acquiring.openAttachCardScreen(
+                terminalKey: _TERMINAL_KEY,
+                publicKey: _PUBLIC_KEY,
                 customerOptions: _customerOptions!,
                 featuresOptions: _featuresOptions,
               );
@@ -570,40 +632,44 @@ class _MyAppState extends State<MyApp> {
   Widget _getSBPShowQRAction() {
     return IconButton(
       icon: Icon(Icons.qr_code_rounded),
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          isDismissible: true,
-          constraints: BoxConstraints.expand(),
-          builder: (context) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: () async => await acquiring.showStaticQRCode(
-                    featuresOptions: _featuresOptions,
-                  ),
-                  child: Text('Статический QR-код'),
-                ),
-                TextButton(
-                  onPressed: () async => await acquiring.showDynamicQRCode(
-                    iOSDynamicQrCode: IosDynamicQrCodeFullPaymentFlow(
-                      orderOptions: _orderOptions!,
-                    ),
-                    androidDynamicQrCode: AndroidDynamicQrCode(
-                      orderOptions: _orderOptions!,
-                      customerOptions: _customerOptions!,
-                      terminalKey: _TERMINAL_KEY,
-                      publicKey: _PUBLIC_KEY,
-                    ),
-                  ),
-                  child: Text('Динамический QR-код'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      onPressed: _orderOptions != null && _customerOptions != null
+          ? () {
+              showModalBottomSheet(
+                context: context,
+                isDismissible: true,
+                constraints: BoxConstraints.expand(),
+                builder: (context) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton(
+                        onPressed: () async => await acquiring.showStaticQRCode(
+                          featuresOptions: _featuresOptions,
+                        ),
+                        child: Text('Статический QR-код'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          await acquiring.showDynamicQRCode(
+                            iOSDynamicQrCode: IosDynamicQrCodeFullPaymentFlow(
+                              orderOptions: _orderOptions!,
+                            ),
+                            androidDynamicQrCode: AndroidDynamicQrCode(
+                              orderOptions: _orderOptions!,
+                              customerOptions: _customerOptions!,
+                              terminalKey: _TERMINAL_KEY,
+                              publicKey: _PUBLIC_KEY,
+                            ),
+                          );
+                        },
+                        child: Text('Динамический QR-код'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          : null,
     );
   }
 }

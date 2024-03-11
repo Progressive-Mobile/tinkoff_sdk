@@ -41,6 +41,7 @@ import ru.tinkoff.acquiring.sdk.models.enums.Taxation
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions
 import ru.tinkoff.acquiring.sdk.models.options.OrderOptions
+import ru.tinkoff.acquiring.sdk.models.options.screen.AttachCardOptions
 import ru.tinkoff.acquiring.sdk.models.options.screen.PaymentOptions
 import ru.tinkoff.acquiring.sdk.models.options.screen.SavedCardsOptions
 import ru.tinkoff.acquiring.sdk.utils.Money.Companion.ofCoins
@@ -48,16 +49,18 @@ import ru.tinkoff.acquiring.sdk.utils.builders.ReceiptBuilder
 import java.util.ArrayList
 
 class TinkoffSdkParser() {
-    fun createSavedCardOptions(arguments: Map<String?, Any?>): SavedCardsOptions {
-        val options = SavedCardsOptions.createFromParcel(Parcel.obtain());
-        val customer = parseCustomerOptions(arguments["customerOptions"] as Map<String, Any>)
-        options.customer = customer
-        val featuresOptionsArguments = arguments["featuresOptions"] as Map<String, Any>?
-        if (featuresOptionsArguments != null) {
-            val features = parseFeatureOptions(featuresOptionsArguments)
-            options.features = features
-        }
-        return options
+    fun createCardOptions(arguments: Map<String, Any>): Map<String, Any> {
+        val terminalKey = arguments["terminalKey"] as String
+        val publicKey = arguments["publicKey"] as String
+        val customerOptions = parseCustomerOptions(arguments["customerOptions"] as Map<String, Any>)
+        val featuresOptions = parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
+
+        return mapOf(
+            "terminalKey" to terminalKey,
+            "publicKey" to publicKey,
+            "customer" to customerOptions,
+            "features" to featuresOptions,
+        )
     }
 
     fun createPaymentOptions(arguments: Map<String, Any>): PaymentOptions {
