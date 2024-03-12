@@ -76,7 +76,7 @@ class TinkoffSdk {
   }
 
   /// Открытие экрана списка привязанных карт
-  Future<List<CardData>> getCardList({
+  Future<void> getCardList({
     required String terminalKey,
     required String publicKey,
     required CustomerOptions customerOptions,
@@ -94,8 +94,7 @@ class TinkoffSdk {
     }..removeWhere((key, value) => value == null);
 
     return _channel
-        .invokeMethod(method.name, arguments)
-        .then(parseCardListResult);
+        .invokeMethod(method.name, arguments);
   }
 
   /// Открытие экрана оплаты.
