@@ -384,7 +384,7 @@ class _MyAppState extends State<MyApp> {
     final titleController =
         TextEditingController(text: _orderOptions?.title ?? 'test');
     final descriptionController =
-        TextEditingController(text: _orderOptions?.description ?? 'test');
+        TextEditingController(text: _orderOptions?.description ?? 'Книга');
     final amountController =
         TextEditingController(text: _orderOptions?.amount.toString() ?? '1000');
     final ValueNotifier<bool> reccurent =
