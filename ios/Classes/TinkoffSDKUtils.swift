@@ -35,10 +35,6 @@ class Utils {
         return "\(amountFormatter.string(from: value) ?? "\(value)") \(currency)"
     }
     
-    //    static func getLanguage() -> AcquiringViewConfiguration.LocalizableInfo! {
-    //       return AcquiringViewConfiguration.LocalizableInfo.init(lang: self.language)
-    //    }
-    
     static func getView(_ navigator: Bool = false) -> UIViewController {
         var topController: UIViewController = UIApplication.shared.windows.filter{$0.isKeyWindow}.first!.rootViewController!
         

@@ -104,7 +104,10 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let customerKey = (args!["customerOptions"] as! Dictionary<String, Any>)["customerKey"] as! String
         
         let view = Utils.getView()
-        acquiring.presentCardList(on: view, customerKey: customerKey)
+        acquiring.presentCardList(
+            on: view,
+            customerKey: customerKey
+        )
     }
     
     private func handleOpenPaymentScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -114,22 +117,6 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs)
         
         let customerOptions = Utils.parseCustomerOptions(args: args!["customerOptions"] as! Dictionary<String, Any>)
-        
-        var paymentData = PaymentInitData(
-            amount: orderOptions.amount,
-            orderId: orderOptions.orderId,
-            customerKey: customerOptions.customerKey,
-            payType: orderOptions.payType,
-            successURL: orderOptionsArgs["successURL"] as? String,
-            failURL: orderOptionsArgs["failURL"] as? String
-        );
-        
-        let receiptArgs = args!["receipt"] as? Dictionary<String, Any>
-        if (receiptArgs != nil) {
-            let receipt = Utils.parseReceipt(receiptArgs: receiptArgs!)
-            
-            paymentData.receipt = receipt;
-        }
         
         let view = Utils.getView()
         let paymentFlow = PaymentFlow.full(
