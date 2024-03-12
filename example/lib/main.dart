@@ -434,7 +434,7 @@ class _MyAppState extends State<MyApp> {
     final idController =
         TextEditingController(text: _customerOptions?.customerKey ?? '1');
     final emailController = TextEditingController(
-        text: _customerOptions?.email ?? 'fsog1920@gmail.com');
+        text: _customerOptions?.email ?? '');
     final checkType =
         ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
 
