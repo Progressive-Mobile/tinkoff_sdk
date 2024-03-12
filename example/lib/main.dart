@@ -192,7 +192,7 @@ class _MyAppState extends State<MyApp> {
                 'Yandex Pay включен', _featuresOptions.yandexPayEnabled),
             _getEntryText(
                 'Выбор приоритетной карты', _featuresOptions.userCanSelectCard),
-            _getEntryText('Показ только реккурентных карт',
+            _getEntryText('Показ только рекуррентных карт',
                 _featuresOptions.showOnlyRecurrentCards),
             _getEntryText(
                 'Обработка ошибок', _featuresOptions.handleErrorsInSdk),
@@ -565,7 +565,7 @@ class _MyAppState extends State<MyApp> {
               _getCheckboxRow('Yandex Pay включен', yandexPayEnabled),
               _getCheckboxRow('Выбор приоритетной карты', userCanSelectCard),
               _getCheckboxRow(
-                  'Показ только реккурентных карт', showOnlyRecurrentCards),
+                  'Показ только рекуррентных карт', showOnlyRecurrentCards),
               _getCheckboxRow('Обработка ошибок', handleErrorsInSdk),
               _getCheckboxRow('Обязательный e-mail', emailRequired),
               _getCheckboxRow(
