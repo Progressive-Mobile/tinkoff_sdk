@@ -37,7 +37,6 @@ class Activate {
   String get name => 'activate';
 
   String get terminalKey => 'terminalKey';
-  String get password => 'password';
   String get publicKey => 'publicKey';
 
   String get isDeveloperMode => 'isDeveloperMode';

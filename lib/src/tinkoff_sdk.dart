@@ -39,7 +39,6 @@ class TinkoffSdk {
   /// Данные для активации выдаются в личном кабинете после подключения к ​Интернет-Эквайрингу.​
   ///
   /// [terminalKey] - Терминал Продавца.
-  /// [password] - Пароль от терминала.
   /// [publicKey] - Публичный ключ. Используется для шифрования данных.
   ///               Необходим для интеграции вашего приложения с интернет-эквайрингом Тинькофф.
   ///
@@ -48,7 +47,6 @@ class TinkoffSdk {
   /// [logging] - Логирование запросов.
   Future<bool> activate({
     required String terminalKey,
-    required String password,
     required String publicKey,
     bool isDeveloperMode = false,
     bool logging = false,
@@ -57,7 +55,6 @@ class TinkoffSdk {
 
     final arguments = <String, dynamic>{
       method.terminalKey: terminalKey,
-      method.password: password,
       method.publicKey: publicKey,
       method.isDeveloperMode: isDeveloperMode,
       method.logging: logging,

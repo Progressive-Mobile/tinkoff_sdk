@@ -42,12 +42,9 @@ class _MyAppState extends State<MyApp> {
   final TinkoffSdk acquiring = TinkoffSdk();
 
   static const _TERMINAL_KEY = '';
-  static const _PASSWORD = '';
-  static const _PUBLIC_KEY =
-      '';
+  static const _PUBLIC_KEY = '';
 
   final _terminalKeyController = TextEditingController(text: _TERMINAL_KEY);
-  final _passwordController = TextEditingController(text: _PASSWORD);
   final _publicKeyController = TextEditingController(text: _PUBLIC_KEY);
 
   OrderOptions? _orderOptions;
@@ -89,7 +86,6 @@ class _MyAppState extends State<MyApp> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _getTextForm('Terminal Key', _terminalKeyController),
-          _getTextForm('Password', _passwordController),
           _getTextForm('Public Key', _publicKeyController),
           SizedBox(height: 16.0),
           ElevatedButton(
@@ -97,7 +93,6 @@ class _MyAppState extends State<MyApp> {
               acquiring
                   .activate(
                 terminalKey: _terminalKeyController.text,
-                password: _passwordController.text,
                 publicKey: _publicKeyController.text,
                 logging: true,
                 isDeveloperMode: false,
