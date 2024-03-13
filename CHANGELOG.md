@@ -1,7 +1,3 @@
-## 0.5.1
-* Remove required `password` field in `activate` method
-* Update example
-
 ## 0.5.0
 
 ### iOS
