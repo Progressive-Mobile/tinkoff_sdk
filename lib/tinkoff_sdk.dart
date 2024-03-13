@@ -1,6 +1,6 @@
 /*
 
-  Copyright © 2020 ProgressiveMobile
+  Copyright © 2024 ProgressiveMobile
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,11 +19,16 @@
 library tinkoff_sdk;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:tinkoff_sdk/src/models/models.dart';
+import 'package:tinkoff_sdk/tinkoff_sdk.dart';
 
 import 'src/methods.dart';
 import 'src/utils.dart';
+
+export 'src/models/models.dart';
 
 part 'src/models.dart';
 part 'src/tinkoff_sdk.dart';
