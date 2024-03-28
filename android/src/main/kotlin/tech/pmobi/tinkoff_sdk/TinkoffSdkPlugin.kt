@@ -51,17 +51,6 @@ class TinkoffSdkPlugin :
 
     private var act: Activity? = null
 
-    //    private val byMainFormPayment = registerForActivityResult(MainFormLauncher.Contract) {
-    // result ->
-    //        when (result) {
-    //            is MainFormLauncher.Canceled -> toast("payment canceled")
-    //            is MainFormLauncher.Error ->  toast(result.error.message ?:
-    // getString(ru.tinkoff.acquiring.sdk.R.string.acq_banklist_title))
-    //            is MainFormLauncher.Success ->  toast("payment Success-
-    // paymentId:${result.paymentId}")
-    //        }
-    //    }
-
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (this.result != null) return
         this.result = result
@@ -296,6 +285,15 @@ class TinkoffSdkPlugin :
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+        if (requestCode != PAYMENT_SCREEN &&
+                        requestCode != ATTACH_CARD_SCREEN &&
+                        requestCode != STATIC_QR_CODE_SCREEN &&
+                        requestCode != DYNAMIC_QR_CODE_SCREEN &&
+                        requestCode != SAVED_CARDS_SCREEN
+        ) {
+            return true
+        }
+
         if (resultCode == Activity.RESULT_OK) {
             val json =
                     JSONObject(mapOf("success" to true, "isError" to false, "message" to "Success"))
