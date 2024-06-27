@@ -1,12 +1,62 @@
 PODS:
+  - AppMetricaCore (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaEncodingUtils (= 5.5.0)
+    - AppMetricaFMDB (= 5.5.0)
+    - AppMetricaHostState (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
+    - AppMetricaNetwork (= 5.5.0)
+    - AppMetricaPlatform (= 5.5.0)
+    - AppMetricaProtobuf (= 5.5.0)
+    - AppMetricaProtobufUtils (= 5.5.0)
+    - AppMetricaStorageUtils (= 5.5.0)
+  - AppMetricaCoreUtils (5.5.0):
+    - AppMetricaLog (= 5.5.0)
+  - AppMetricaEncodingUtils (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
+    - AppMetricaPlatform (= 5.5.0)
+  - AppMetricaFMDB (5.5.0)
+  - AppMetricaHostState (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
+  - AppMetricaLog (5.5.0)
+  - AppMetricaNetwork (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
+    - AppMetricaPlatform (= 5.5.0)
+  - AppMetricaPlatform (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
+  - AppMetricaProtobuf (5.5.0)
+  - AppMetricaProtobufUtils (5.5.0):
+    - AppMetricaProtobuf (= 5.5.0)
+  - AppMetricaStorageUtils (5.5.0):
+    - AppMetricaCoreUtils (= 5.5.0)
+    - AppMetricaLog (= 5.5.0)
   - Flutter (1.0.0)
-  - tinkoff_sdk (0.0.1):
+  - TASDKCore (6.0.0)
+  - TASDKUI (5.0.0):
+    - TASDKCore
+  - TASDKYandexPay (4.0.0):
+    - TASDKCore
+    - TASDKUI
+    - YandexPaySDK/Static (= 1.7.0)
+  - tinkoff_sdk (0.5.1):
     - Flutter
-    - TinkoffASDKCore (= 3.1.1)
-    - TinkoffASDKUI (= 3.1.1)
-  - TinkoffASDKCore (3.1.1)
-  - TinkoffASDKUI (3.1.1):
-    - TinkoffASDKCore
+    - TASDKCore (= 6.0.0)
+    - TASDKUI (= 5.0.0)
+    - TASDKYandexPay (= 4.0.0)
+  - Varioqub (0.6.1):
+    - Varioqub/Core (= 0.6.1)
+  - Varioqub/Core (0.6.1):
+    - Varioqub/VQSwiftProtobuf
+  - Varioqub/VQSwiftProtobuf (0.6.1)
+  - YandexLoginSDK (2.1.1)
+  - YandexPaySDK/Static (1.7.0):
+    - AppMetricaCore (~> 5.2)
+    - Varioqub (~> 0.6)
+    - YandexLoginSDK (~> 2.1)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -14,8 +64,23 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - TinkoffASDKCore
-    - TinkoffASDKUI
+    - AppMetricaCore
+    - AppMetricaCoreUtils
+    - AppMetricaEncodingUtils
+    - AppMetricaFMDB
+    - AppMetricaHostState
+    - AppMetricaLog
+    - AppMetricaNetwork
+    - AppMetricaPlatform
+    - AppMetricaProtobuf
+    - AppMetricaProtobufUtils
+    - AppMetricaStorageUtils
+    - TASDKCore
+    - TASDKUI
+    - TASDKYandexPay
+    - Varioqub
+    - YandexLoginSDK
+    - YandexPaySDK
 
 EXTERNAL SOURCES:
   Flutter:
@@ -24,11 +89,26 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/tinkoff_sdk/ios"
 
 SPEC CHECKSUMS:
+  AppMetricaCore: bd97243c91d3e75788596fc519b167b4206fb27a
+  AppMetricaCoreUtils: fcd251217bf808470671e5dc0b98dc2b1980540e
+  AppMetricaEncodingUtils: 09ce0f002711537ecc8b0c838f4cc85ce4542806
+  AppMetricaFMDB: 9d1febed181c31b5d74d2f5b88817019c6af1b72
+  AppMetricaHostState: 50cafe45bb2805f2ba7882bcb40a55d5effb1694
+  AppMetricaLog: 53b9377d722f7257cd87306d7492e12ec62f7efb
+  AppMetricaNetwork: 6618153f7ae7355dc24565c4c9b4e4649d7b3455
+  AppMetricaPlatform: d340334299135ee9fe23273004b35fcf80cc7c1a
+  AppMetricaProtobuf: 9e4f847b6e6d9357cfed16d5c9df200382b1d4bb
+  AppMetricaProtobufUtils: 3915df70e8d7dc5bdefcac2a5857cc5b10ad67c8
+  AppMetricaStorageUtils: cfd044862155b5ee973a36d8fcfe28d640ad4858
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  tinkoff_sdk: 7b29b1f924bd87ef888b58ffc71d5d0a61d32a43
-  TinkoffASDKCore: ca48fcef4a11f09d07f200c0046446e563fda205
-  TinkoffASDKUI: f2742afa9c4c5434aa11753b15b49e40b040873d
+  TASDKCore: b35edeb4eb727ed5ebb77e72f11032804a2889fe
+  TASDKUI: a3862ad4c9cf27cbe8dd1eb71ebee31cc69db20f
+  TASDKYandexPay: 32c8b56b416bc996cc8d351c97a9dbd6423ed075
+  tinkoff_sdk: f1c4baeb8c3e9304bef57971034198934d62635b
+  Varioqub: d27899fd1f1cfe894cfffbb84b7924f1e606a6b7
+  YandexLoginSDK: ad9a07aca36a7748353af17c9cbbf2b83be9ba26
+  YandexPaySDK: e5950641ca05da9832ea117a5e7b36859dabd503
 
-PODFILE CHECKSUM: 57c8aed26fba39d3ec9424816221f294a07c58eb
+PODFILE CHECKSUM: 9dd591eb0020e94c409074d2e11d04ff4b149a37
 
 COCOAPODS: 1.15.0
