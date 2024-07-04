@@ -220,7 +220,7 @@ class _MyAppState extends State<MyApp> {
                             featuresOptions: _featuresOptions,
                             terminalKey: _TERMINAL_KEY,
                             publicKey: _PUBLIC_KEY,
-                            androidReceipt: AndroidReceiptFfd105(
+                            receipt: Receipt105(
                               taxation: Taxation.osn,
                               email: '',
                               items: [
@@ -232,9 +232,6 @@ class _MyAppState extends State<MyApp> {
                                   quantity: 1,
                                 ),
                               ],
-                            ),
-                            iosReceipt: IosReceipt(
-                              email: '',
                             ),
                           )
                           .then(_showResultDialog)
@@ -421,6 +418,19 @@ class _MyAppState extends State<MyApp> {
         title: titleController.text,
         description: descriptionController.text,
         recurrentPayment: reccurent.value,
+        receipt: Receipt105(
+          taxation: Taxation.osn,
+          email: '',
+          items: [
+            AndroidItem105(
+              name: 'Кружка 350 мл',
+              amount: 1000,
+              tax: Tax.vat10,
+              price: 1000,
+              quantity: 1,
+            ),
+          ],
+        ),
       );
     });
   }

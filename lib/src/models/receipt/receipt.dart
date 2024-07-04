@@ -23,113 +23,30 @@ abstract class Receipt {
   Map<String, dynamic> get arguments;
 }
 
-/// Android-реализация объекта чека
-abstract class AndroidReceipt implements Receipt {
-  Map<String, dynamic> get arguments;
-}
-
-class AndroidReceiptFfd105 implements AndroidReceipt {
+/// Реализация объекта чека с ФФД 1.05
+class Receipt105 implements Receipt {
   static const _email = 'email';
   static const _phone = 'phone';
   static const _taxation = 'taxation';
   static const _items = 'items';
-
-  /// Электронный адрес для отправки чека покупателю. Параметр email или phone должен быть заполнен
-  final String? email;
-
-  /// Телефон покупателя. Параметр email или phone должен быть заполнен
-  final String? phone;
-
-  /// Система налогообложения
-  final Taxation taxation;
-
-  /// Массив, содержащий в себе информацию о товарах
-  final List<AndroidItem105> items;
-
-  AndroidReceiptFfd105({
-    this.email,
-    this.phone,
-    required this.taxation,
-    required this.items,
-  });
-
-  @override
-  Map<String, dynamic> get arguments => {
-        _email: email,
-        _phone: phone,
-        _taxation: taxation.name,
-        _items: items.map((e) => e.arguments).toList(),
-      }..removeWhere((key, value) => value == null);
-}
-
-class AndroidReceiptFfd12 implements AndroidReceipt {
-  static const _clientInfo = 'clientInfo';
-  static const _taxation = 'taxation';
-  static const _email = 'email';
-  static const _phone = 'phone';
-  static const _items = 'items';
-
-  /// Информация о клиенте
-  final ClientInfo clientInfo;
-
-  /// Система налогообложения
-  final Taxation taxation;
-
-  /// Электронный адрес для отправки чека покупателю. Параметр email или phone должен быть заполнен
-  final String? email;
-
-  /// Телефон покупателя. Параметр email или phone должен быть заполнен
-  final String? phone;
-
-  /// Массив, содержащий в себе информацию о товарах
-  final List<AndroidItem12> items;
-
-  AndroidReceiptFfd12({
-    required this.clientInfo,
-    required this.taxation,
-    this.email,
-    this.phone,
-    required this.items,
-  });
-
-  @override
-  Map<String, dynamic> get arguments => {
-        _clientInfo: clientInfo._arguments,
-        _taxation: taxation.name,
-        _email: email,
-        _phone: phone,
-        _items: items.map((e) => e.arguments).toList(),
-      }..removeWhere((key, value) => value == null);
-}
-
-/// iOS-реализация объекта чека
-class IosReceipt implements Receipt {
   static const _shopCode = 'shopCode';
-  static const _email = 'email';
-  static const _phone = 'phone';
-  static const _taxation = 'taxation';
-  static const _items = 'items';
   static const _agentData = 'agentData';
   static const _supplierInfo = 'supplierInfo';
-  static const _customer = 'customer';
-  static const _customerInn = 'customerInn';
+
+  /// Электронный адрес для отправки чека покупателю. Параметр email или phone должен быть заполнен
+  final String? email;
+
+  /// Телефон покупателя. Параметр email или phone должен быть заполнен
+  final String? phone;
+
+  /// Система налогообложения
+  final Taxation taxation;
+
+  /// Массив, содержащий в себе информацию о товарах
+  final List<Item105> items;
 
   /// Код магазина
   final String? shopCode;
-
-  /// Электронный адрес для отправки чека покупателю.
-  /// Параметр `email` или `phone` должен быть заполнен
-  final String? email;
-
-  /// Телефон покупателя.
-  /// Параметр `email` или `phone` должен быть заполнен
-  final String? phone;
-
-  /// Система налогообложения
-  final Taxation? taxation;
-
-  /// Массив, содержащий в себе информацию о товарах
-  final List<IosItem>? items;
 
   /// Данные агента
   final AgentData? agentData;
@@ -137,34 +54,112 @@ class IosReceipt implements Receipt {
   /// Данные поставщика платежного агента
   final SupplierInfo? supplierInfo;
 
+  Receipt105({
+    this.email,
+    this.phone,
+    required this.taxation,
+    required this.items,
+    this.shopCode,
+    this.agentData,
+    this.supplierInfo,
+  }) : assert(email != null || phone != null);
+
+  @override
+  Map<String, dynamic> get arguments => {
+        _email: email,
+        _phone: phone,
+        _taxation: taxation.name,
+        _items: items.map((e) => e.arguments).toList(),
+        _shopCode: shopCode,
+        _agentData: agentData?._arguments,
+        _supplierInfo: supplierInfo?._arguments,
+      }..removeWhere((key, value) => value == null);
+}
+
+/// Реализация объекта чека с ФФД 1.2
+class Receipt12 implements Receipt {
+  static const _email = 'email';
+  static const _phone = 'phone';
+  static const _taxation = 'taxation';
+  static const _items = 'items';
+  static const _clientInfo = 'clientInfo';
+  static const _customer = 'customer';
+  static const _customerInn = 'customerInn';
+  static const _payments = 'payments';
+  static const _operatingCheckProps = 'operatingCheckProps';
+  static const _sectoralCheckProps = 'sectoralCheckProps';
+  static const _addUserProp = 'addUserProp';
+  static const _additionalCheckProps = 'additionalCheckProps';
+
+  /// Электронный адрес для отправки чека покупателю. Параметр email или phone должен быть заполнен
+  final String? email;
+
+  /// Телефон покупателя. Параметр email или phone должен быть заполнен
+  final String? phone;
+
+  /// Система налогообложения
+  final Taxation taxation;
+
+  /// Массив, содержащий в себе информацию о товарах
+  final List<Item12> items;
+
+  /// Информация о клиенте.
+  final ClientInfo? clientInfo;
+
   /// Идентификатор покупателя
   final String? customer;
 
   /// Инн покупателя. Если ИНН иностранного гражданина, необходимо указать 00000000000
   final String? customerInn;
 
-  IosReceipt({
-    this.shopCode,
+  /// Детали платежа. Если объект не передан, будет автоматически указана итоговая сумма чека с
+  /// видом оплаты "Безналичный". Если передан объект receipt.Payments, то значение в Electronic
+  ///  должно быть равно итоговому значению Amount в методе Init. При этом сумма введенных значений
+  ///  по всем видам оплат, включая Electronic, должна быть равна сумме (Amount) всех товаров, переданных в
+  ///  объекте receipt.Items.
+  final Payments? payments;
+
+  /// Операционный реквизит чека (тег 1270)
+  final OperatingCheckProps? operatingCheckProps;
+
+  /// Отраслевой реквизит чека (тег 1261)
+  final SectoralCheckProps? sectoralCheckProps;
+
+  /// Дополнительный реквизит пользователя (тег 1084)
+  final AddUserProp? addUserProp;
+
+  /// Дополнительный реквизит чека (БСО) (тег 1192)
+  final String? additionalCheckProps;
+
+  Receipt12({
     this.email,
     this.phone,
-    this.taxation,
-    this.items,
-    this.agentData,
-    this.supplierInfo,
+    required this.taxation,
+    required this.items,
+    this.clientInfo,
     this.customer,
     this.customerInn,
-  });
+    this.payments,
+    this.operatingCheckProps,
+    this.sectoralCheckProps,
+    this.addUserProp,
+    this.additionalCheckProps,
+  }) : assert(email != null || phone != null);
 
   @override
   Map<String, dynamic> get arguments => {
-        _shopCode: shopCode,
         _email: email,
         _phone: phone,
-        _taxation: taxation?.name,
-        _items: items?.map((e) => e.arguments).toList(),
-        _agentData: agentData?._arguments,
-        _supplierInfo: supplierInfo?._arguments,
+        _taxation: taxation.name,
+        _items: items.map((e) => e.arguments).toList(),
+        _clientInfo: clientInfo?._arguments,
         _customer: customer,
         _customerInn: customerInn,
+        _payments: payments?.arguments,
+        _operatingCheckProps: operatingCheckProps?._arguments,
+        _sectoralCheckProps: sectoralCheckProps?._arguments,
+        _addUserProp: addUserProp?._arguments,
+        _additionalCheckProps: additionalCheckProps,
       }..removeWhere((key, value) => value == null);
 }
+

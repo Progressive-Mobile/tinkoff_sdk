@@ -37,5 +37,9 @@ part 'options/shop.dart';
 
 part 'qr_code/qr_code.dart';
 
-part 'receipt/receipt.dart';
 part 'receipt/client_info.dart';
+part 'receipt/operating_check_props.dart';
+part 'receipt/add_user_prop.dart';
+part 'receipt/sectoral_check_props.dart';
+part 'receipt/payments.dart';
+part 'receipt/receipt.dart';

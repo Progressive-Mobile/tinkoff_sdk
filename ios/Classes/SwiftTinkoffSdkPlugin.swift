@@ -106,7 +106,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let view = Utils.getView()
         acquiring.presentCardList(
             on: view,
-            customerKey: customerKey
+            customerKey: customerKey,
+            addCardOptions: AddCardOptions(attachCardData: AdditionalData.empty())
         )
     }
     
@@ -114,9 +115,9 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         
         let orderOptionsArgs = args!["orderOptions"] as! Dictionary<String, Any>
-        let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs)
+        let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs, ffdVersion: args!["ffdVersion"] as! String)
         
-        let customerOptions = Utils.parseCustomerOptions(args: args!["customerOptions"] as! Dictionary<String, Any>)
+        let customerOptions = Utils.parseCustomerOptions(args: args!["customerOptions"] as? Dictionary<String, Any>)
         
         let view = Utils.getView()
         let paymentFlow = PaymentFlow.full(
@@ -144,7 +145,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let controller = Utils.getView()
         self.acquiring.presentAddCard(
             on: controller,
-            customerKey: customerKey
+            customerKey: customerKey,
+            addCardOptions: AddCardOptions(attachCardData: AdditionalData.empty())
         )
 
         checkForDismiss(controller, result: result)
@@ -172,8 +174,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleShowDynamicQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         let paymentFlow = args?["paymentFlow"] as! String
-        let orderOptions = args?["orderOptions"] == nil ? nil : Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>)
-        let customerOptions = args?["customerOptions"] == nil ? nil : Utils.parseCustomerOptions(args: args?["customerOptions"] as! Dictionary<String, Any>)
+        let orderOptions = args?["orderOptions"] == nil ? nil : Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>, ffdVersion: args?["ffdVersion"] as! String)
+        let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as? Dictionary<String, Any>)
         let paymentId = args?["paymentId"] as? String
         let amount = args?["amount"] as? Int64
         let orderId = args?["orderId"] as? String
