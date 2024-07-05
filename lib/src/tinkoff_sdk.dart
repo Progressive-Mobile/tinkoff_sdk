@@ -132,6 +132,27 @@ class TinkoffSdk {
         .then(parseTinkoffResult);
   }
 
+  Future<TinkoffResult> finishPayment({
+    required String paymentId,
+    required int amount,
+    required String orderId,
+    CustomerOptions? customerOptions,
+    String? orderDescription,
+  }) async {
+    final method = Method.finishPayment;
+    final arguments = {
+      method.paymentId: paymentId,
+      method.amount: amount,
+      method.orderId: orderId,
+      method.customerOptions: customerOptions?.arguments,
+      method.orderDescription: orderDescription,
+    }..removeWhere((key, value) => value == null);
+
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
+  }
+
   /// Открытие экрана привязки карт
   Future<void> openAttachCardScreen({
     required String terminalKey,

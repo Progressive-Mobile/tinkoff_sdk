@@ -58,6 +58,8 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         case "startCharge":
             handleStartCharge(call, result: result)
             break
+        case "finishPayment":
+            handleFinishPayment(call, result: result)
         default:
             result(FlutterMethodNotImplemented)
             awaitingResult = false
@@ -201,6 +203,36 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleStartCharge(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         //TODO: implement method
         result(FlutterMethodNotImplemented)
+        awaitingResult = false
+    }
+    
+    private func handleFinishPayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        let args = call.arguments as? Dictionary<String, Any>
+        let paymentId = args?["paymentId"] as! String
+        let amount = args?["amount"] as! Int64
+        let orderId = args?["orderId"] as! String
+        let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as? Dictionary<String, Any>)
+        let orderDescription = args?["orderDescription"] as? String
+        
+        let finishPaymentOptions = FinishPaymentOptions(
+            paymentId: paymentId,
+            amount: amount,
+            orderId: orderId,
+            customerOptions: customerOptions
+        )
+        
+        let paymentFlow = PaymentFlow.finish(paymentOptions: finishPaymentOptions)
+        
+        let view = Utils.getView()
+        let viewConfiguration = MainFormUIConfiguration.init(orderDescription: orderDescription)
+        
+        self.acquiring.presentMainForm(
+            on: view,
+            paymentFlow: paymentFlow,
+            configuration: viewConfiguration,
+            completion: setPaymentHandler(view, flutterResult: result)
+        )
+        
         awaitingResult = false
     }
     

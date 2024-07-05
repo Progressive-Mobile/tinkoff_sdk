@@ -29,6 +29,7 @@ class Method {
       const ShowDynamicQrScreen();
   static const StartCharge startCharge = const StartCharge();
   static const GetCardList getCardList = const GetCardList();
+  static const FinishPayment finishPayment = const FinishPayment();
 }
 
 class Activate {
@@ -56,6 +57,18 @@ class OpenPaymentScreen {
   String get terminalKey => 'terminalKey';
   String get publicKey => 'publicKey';
   String get ffdVersion => 'ffdVersion';
+}
+
+class FinishPayment {
+  const FinishPayment();
+
+  String get name => 'finishPayment';
+
+  String get paymentId => 'paymentId';
+  String get amount => 'amount';
+  String get orderId => 'orderId';
+  String get customerOptions => 'customerOptions';
+  String get orderDescription => 'orderDescription';
 }
 
 class AttachCardScreen {

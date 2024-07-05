@@ -125,6 +125,7 @@ class _MyAppState extends State<MyApp> {
         _getFeatureCard(),
         _getPaymentAction(),
         _getCardsAction(),
+        _getFinishPayment(),
       ],
     );
   }
@@ -259,6 +260,25 @@ class _MyAppState extends State<MyApp> {
             }
           : null,
       child: Text('Список карт'),
+    );
+  }
+
+  Widget _getFinishPayment() {
+    return ElevatedButton(
+      onPressed: _orderOptions != null
+          ? () {
+              acquiring.finishPayment(
+                paymentId: '',
+                amount: _orderOptions!.amount,
+                orderId: _orderOptions!.orderId,
+                customerOptions: _customerOptions,
+                orderDescription: _orderOptions!.description,
+              );
+            }
+          : null,
+      child: Text(
+        'Завершить оплату',
+      ),
     );
   }
 
