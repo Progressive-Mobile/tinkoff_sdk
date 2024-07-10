@@ -1,39 +1,39 @@
 PODS:
-  - AppMetricaCore (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaEncodingUtils (= 5.5.0)
-    - AppMetricaFMDB (= 5.5.0)
-    - AppMetricaHostState (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
-    - AppMetricaNetwork (= 5.5.0)
-    - AppMetricaPlatform (= 5.5.0)
-    - AppMetricaProtobuf (= 5.5.0)
-    - AppMetricaProtobufUtils (= 5.5.0)
-    - AppMetricaStorageUtils (= 5.5.0)
-  - AppMetricaCoreUtils (5.5.0):
-    - AppMetricaLog (= 5.5.0)
-  - AppMetricaEncodingUtils (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
-    - AppMetricaPlatform (= 5.5.0)
-  - AppMetricaFMDB (5.5.0)
-  - AppMetricaHostState (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
-  - AppMetricaLog (5.5.0)
-  - AppMetricaNetwork (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
-    - AppMetricaPlatform (= 5.5.0)
-  - AppMetricaPlatform (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
-  - AppMetricaProtobuf (5.5.0)
-  - AppMetricaProtobufUtils (5.5.0):
-    - AppMetricaProtobuf (= 5.5.0)
-  - AppMetricaStorageUtils (5.5.0):
-    - AppMetricaCoreUtils (= 5.5.0)
-    - AppMetricaLog (= 5.5.0)
+  - AppMetricaCore (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaEncodingUtils (= 5.6.0)
+    - AppMetricaFMDB (= 5.6.0)
+    - AppMetricaHostState (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
+    - AppMetricaNetwork (= 5.6.0)
+    - AppMetricaPlatform (= 5.6.0)
+    - AppMetricaProtobuf (= 5.6.0)
+    - AppMetricaProtobufUtils (= 5.6.0)
+    - AppMetricaStorageUtils (= 5.6.0)
+  - AppMetricaCoreUtils (5.6.0):
+    - AppMetricaLog (= 5.6.0)
+  - AppMetricaEncodingUtils (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
+    - AppMetricaPlatform (= 5.6.0)
+  - AppMetricaFMDB (5.6.0)
+  - AppMetricaHostState (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
+  - AppMetricaLog (5.6.0)
+  - AppMetricaNetwork (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
+    - AppMetricaPlatform (= 5.6.0)
+  - AppMetricaPlatform (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
+  - AppMetricaProtobuf (5.6.0)
+  - AppMetricaProtobufUtils (5.6.0):
+    - AppMetricaProtobuf (= 5.6.0)
+  - AppMetricaStorageUtils (5.6.0):
+    - AppMetricaCoreUtils (= 5.6.0)
+    - AppMetricaLog (= 5.6.0)
   - Flutter (1.0.0)
   - TASDKCore (6.0.0)
   - TASDKUI (5.0.0):
@@ -89,26 +89,26 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/tinkoff_sdk/ios"
 
 SPEC CHECKSUMS:
-  AppMetricaCore: bd97243c91d3e75788596fc519b167b4206fb27a
-  AppMetricaCoreUtils: fcd251217bf808470671e5dc0b98dc2b1980540e
-  AppMetricaEncodingUtils: 09ce0f002711537ecc8b0c838f4cc85ce4542806
-  AppMetricaFMDB: 9d1febed181c31b5d74d2f5b88817019c6af1b72
-  AppMetricaHostState: 50cafe45bb2805f2ba7882bcb40a55d5effb1694
-  AppMetricaLog: 53b9377d722f7257cd87306d7492e12ec62f7efb
-  AppMetricaNetwork: 6618153f7ae7355dc24565c4c9b4e4649d7b3455
-  AppMetricaPlatform: d340334299135ee9fe23273004b35fcf80cc7c1a
-  AppMetricaProtobuf: 9e4f847b6e6d9357cfed16d5c9df200382b1d4bb
-  AppMetricaProtobufUtils: 3915df70e8d7dc5bdefcac2a5857cc5b10ad67c8
-  AppMetricaStorageUtils: cfd044862155b5ee973a36d8fcfe28d640ad4858
+  AppMetricaCore: ab504a62db40fb388080a8eff69f1dc91d8d84d1
+  AppMetricaCoreUtils: 85df2c9a765d68ec7655a80feb84c8cf21ed3674
+  AppMetricaEncodingUtils: d769d76639960c4f495067b1f68c8874186ed96d
+  AppMetricaFMDB: cafb143a494738be6cbd767d703b376ffbeb5c92
+  AppMetricaHostState: 68d333f2ae460a117e498b09120fdcee708ac240
+  AppMetricaLog: 319461a3fcd77332024311e109c82ce32fac4e38
+  AppMetricaNetwork: 7a592d9b5ba4a2973d7219b8c933ba744847172a
+  AppMetricaPlatform: c1fa9e83be342d2f173d878da99996d9e06f34b3
+  AppMetricaProtobuf: 2ec9b9fb300c7b06406858f1d4d53301ed65a3ea
+  AppMetricaProtobufUtils: c87c770b2f42b24d88f6cbeeca85d5431190d233
+  AppMetricaStorageUtils: 3ae99b72caa97624177bc7b223b593bc6e6d3956
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   TASDKCore: b35edeb4eb727ed5ebb77e72f11032804a2889fe
   TASDKUI: a3862ad4c9cf27cbe8dd1eb71ebee31cc69db20f
   TASDKYandexPay: 32c8b56b416bc996cc8d351c97a9dbd6423ed075
-  tinkoff_sdk: f1c4baeb8c3e9304bef57971034198934d62635b
+  tinkoff_sdk: 3928be2c2a2e916c2ae4ecbef3c46bc1facf7c33
   Varioqub: d27899fd1f1cfe894cfffbb84b7924f1e606a6b7
   YandexLoginSDK: ad9a07aca36a7748353af17c9cbbf2b83be9ba26
   YandexPaySDK: e5950641ca05da9832ea117a5e7b36859dabd503
 
-PODFILE CHECKSUM: 9dd591eb0020e94c409074d2e11d04ff4b149a37
+PODFILE CHECKSUM: bd295fc198b245bb51189c8140d55e735c8dd822
 
 COCOAPODS: 1.15.0
