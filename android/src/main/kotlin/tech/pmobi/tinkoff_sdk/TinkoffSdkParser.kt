@@ -74,6 +74,7 @@ class TinkoffSdkParser() {
                         ffdVersion = ffdVersion
                 )
         paymentsOptions.order = orderOptions
+        paymentsOptions.paymentId = (arguments["paymentId"] as String?)?.toLongOrNull()
 
         var receipt: Receipt? = null
         if (arguments["receipt"] != null && ffdVersion != null) {
@@ -106,7 +107,6 @@ class TinkoffSdkParser() {
         orderOptions.orderId = arguments["orderId"] as String
         orderOptions.amount = ofCoins((arguments["amount"] as Int).toLong())
         orderOptions.recurrentPayment = arguments["recurrentPayment"] as Boolean
-        orderOptions.title = arguments["title"] as String?
         orderOptions.description = arguments["description"] as String?
         if (ffdVersion != null) {
             orderOptions.receipt =
@@ -159,23 +159,13 @@ class TinkoffSdkParser() {
                     else -> DarkThemeMode.AUTO
                 }
         featuresOptions.useSecureKeyboard = arguments["useSecureKeyboard"] as Boolean
-        featuresOptions.handleCardListErrorInSdk = arguments["handleCardListErrorInSdk"] as Boolean
-        featuresOptions.fpsEnabled = arguments["fpsEnabled"] as Boolean
-        featuresOptions.tinkoffPayEnabled = arguments["tinkoffPayEnabled"] as Boolean
-        featuresOptions.yandexPayEnabled = arguments["yandexPayEnabled"] as Boolean
-        featuresOptions.selectedCardId = arguments["selectedCardId"] as String?
-        featuresOptions.userCanSelectCard = arguments["userCanSelectCard"] as Boolean
-        featuresOptions.showOnlyRecurrentCards = arguments["showOnlyRecurrentCards"] as Boolean
-        featuresOptions.handleErrorsInSdk = arguments["handleErrorsInSdk"] as Boolean
-        featuresOptions.emailRequired = arguments["emailRequired"] as Boolean
         featuresOptions.duplicateEmailToReceipt = arguments["duplicateEmailToReceipt"] as Boolean
-        featuresOptions.validateExpiryDate = arguments["validateExpiryDate"] as Boolean
 
         return featuresOptions
     }
 
     private fun parseReceipt(arguments: Map<String, Any>, ffdVersion: String): Receipt {
-        var receipt: Receipt?
+        val receipt: Receipt?
         val taxation = parseTaxation(arguments["taxation"] as String)
         if (ffdVersion == "105") {
             receipt = ReceiptBuilder.ReceiptBuilder105(taxation).build()
@@ -428,7 +418,7 @@ class TinkoffSdkParser() {
             "ean13" -> MarkCodeType.EAN13
             "itf14" -> MarkCodeType.ITF14
             "gs10" -> MarkCodeType.GS10
-            "gs1M" -> MarkCodeType.GS1M
+            "gs1m" -> MarkCodeType.GS1M
             "short" -> MarkCodeType.SHORT
             "fur" -> MarkCodeType.FUR
             "egais20" -> MarkCodeType.EGAIS20

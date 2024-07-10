@@ -109,8 +109,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _getPaymentLayout() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return ListView(
       children: <Widget>[
         Text(
           'Нажмите на карточку, чтобы внести в неё изменения',
@@ -120,11 +119,12 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
         SizedBox(height: 8.0),
-        _getOrderCard(),
         _getCustomerCard(),
+        _getOrderCard(),
         _getFeatureCard(),
         _getPaymentAction(),
         _getCardsAction(),
+        _getFinishPayment(),
       ],
     );
   }
@@ -220,22 +220,6 @@ class _MyAppState extends State<MyApp> {
                             featuresOptions: _featuresOptions,
                             terminalKey: _TERMINAL_KEY,
                             publicKey: _PUBLIC_KEY,
-                            androidReceipt: AndroidReceiptFfd105(
-                              taxation: Taxation.osn,
-                              email: '',
-                              items: [
-                                AndroidItem105(
-                                  name: 'Кружка 350 мл',
-                                  amount: 1000,
-                                  tax: Tax.vat10,
-                                  price: 1000,
-                                  quantity: 1,
-                                ),
-                              ],
-                            ),
-                            iosReceipt: IosReceipt(
-                              email: '',
-                            ),
                           )
                           .then(_showResultDialog)
                           .catchError(_showErrorDialog);
@@ -262,6 +246,26 @@ class _MyAppState extends State<MyApp> {
             }
           : null,
       child: Text('Список карт'),
+    );
+  }
+
+  Widget _getFinishPayment() {
+    return ElevatedButton(
+      onPressed: _orderOptions != null && _customerOptions != null
+          ? () {
+              acquiring.finishPayment(
+                terminalKey: _TERMINAL_KEY,
+                publicKey: _PUBLIC_KEY,
+                paymentId: '',
+                orderOptions: _orderOptions!,
+                customerOptions: _customerOptions,
+                featuresOptions: _featuresOptions,
+              );
+            }
+          : null,
+      child: Text(
+        'Завершить оплату',
+      ),
     );
   }
 
@@ -416,20 +420,33 @@ class _MyAppState extends State<MyApp> {
     final orderId = orderIdController.text;
     setState(() {
       _orderOptions = OrderOptions(
-        orderId: orderId,
-        amount: int.tryParse(amountController.text)!,
-        title: titleController.text,
-        description: descriptionController.text,
-        recurrentPayment: reccurent.value,
-      );
+          orderId: orderId,
+          amount: int.tryParse(amountController.text)!,
+          title: titleController.text,
+          description: descriptionController.text,
+          recurrentPayment: reccurent.value,
+          receipt: Receipt105(
+            taxation: Taxation.osn,
+            email: _customerOptions?.email ?? '',
+            items: [
+              Item105(
+                name: 'Кружка 350 мл',
+                amount: 1000,
+                tax: Tax.vat0,
+                paymentMethod: PaymentMethod.fullPrepayment,
+                price: 1000,
+                quantity: 1,
+              ),
+            ],
+          ));
     });
   }
 
   void _showCustomerOptionsDialog() async {
     final idController =
         TextEditingController(text: _customerOptions?.customerKey ?? '1');
-    final emailController = TextEditingController(
-        text: _customerOptions?.email ?? '');
+    final emailController =
+        TextEditingController(text: _customerOptions?.email ?? '');
     final checkType =
         ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
 
@@ -496,13 +513,8 @@ class _MyAppState extends State<MyApp> {
         ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
     final handleCardListErrorInSdk =
         ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
-    final fpsEnabled = ValueNotifier<bool>(_featuresOptions.fpsEnabled);
     final enableCameraCardScanner =
         ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
-    final tinkoffPayEnabled =
-        ValueNotifier<bool>(_featuresOptions.tinkoffPayEnabled);
-    final yandexPayEnabled =
-        ValueNotifier<bool>(_featuresOptions.yandexPayEnabled);
     final userCanSelectCard =
         ValueNotifier<bool>(_featuresOptions.userCanSelectCard);
     final showOnlyRecurrentCards =
@@ -554,10 +566,7 @@ class _MyAppState extends State<MyApp> {
               _getCheckboxRow('Безопасная клавиатура', useSecureKeyboard),
               _getCheckboxRow('Обработка ошибок списка карт в SDK',
                   handleCardListErrorInSdk),
-              _getCheckboxRow('СБП', fpsEnabled),
               _getCheckboxRow('Сканнер карт', enableCameraCardScanner),
-              _getCheckboxRow('Tinkoff Pay включен', tinkoffPayEnabled),
-              _getCheckboxRow('Yandex Pay включен', yandexPayEnabled),
               _getCheckboxRow('Выбор приоритетной карты', userCanSelectCard),
               _getCheckboxRow(
                   'Показ только рекуррентных карт', showOnlyRecurrentCards),
@@ -577,10 +586,7 @@ class _MyAppState extends State<MyApp> {
         darkThemeMode: darkThemeMode.value,
         useSecureKeyboard: useSecureKeyboard.value,
         handleCardListErrorInSdk: handleCardListErrorInSdk.value,
-        fpsEnabled: fpsEnabled.value,
         enableCameraCardScanner: enableCameraCardScanner.value,
-        tinkoffPayEnabled: tinkoffPayEnabled.value,
-        yandexPayEnabled: yandexPayEnabled.value,
         userCanSelectCard: userCanSelectCard.value,
         showOnlyRecurrentCards: showOnlyRecurrentCards.value,
         handleErrorsInSdk: handleErrorsInSdk.value,

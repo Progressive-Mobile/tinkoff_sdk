@@ -46,10 +46,6 @@ android {
 dependencies {
     def appcompat_version = "1.6.1"
 
-    implementation 'androidx.core:core-ktx:1.9.0'
-    // Tinkoff SDK
     implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation "ru.tinkoff.acquiring:ui:3.0.2"
-    implementation "ru.tinkoff.acquiring:threeds-sdk:3.0.2"
-    implementation "ru.tinkoff.acquiring:threeds-wrapper:3.0.2"
+    implementation "ru.tinkoff.acquiring:ui:3.1.0"
 }

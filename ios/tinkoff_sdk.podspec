@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'tinkoff_sdk'
-  s.version          = '0.0.1'
+  s.version          = '0.6.0'
   s.summary          = 'Flutter TinkoffSDK plugin'
   s.description      = 'TinkoffSDK Flutter implementation'
   s.homepage         = 'https://pmobi.tech'
@@ -9,9 +9,11 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'TinkoffASDKCore', '3.1.1'
-  s.dependency 'TinkoffASDKUI', '3.1.1'
-  s.platform = :ios, '15.0'
+  s.static_framework = true
+  s.dependency 'TASDKCore', '6.0.0'
+  s.dependency 'TASDKUI', '5.0.0'
+  s.dependency 'TASDKYandexPay', '4.0.0'
+  s.platform = :ios, '13.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
   s.swift_version = '5.0'

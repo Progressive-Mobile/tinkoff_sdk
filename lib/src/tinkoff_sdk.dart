@@ -90,8 +90,7 @@ class TinkoffSdk {
       method.featuresOptions: featuresOptions.arguments,
     }..removeWhere((key, value) => value == null);
 
-    return _channel
-        .invokeMethod(method.name, arguments);
+    return _channel.invokeMethod(method.name, arguments);
   }
 
   /// Открытие экрана оплаты.
@@ -106,16 +105,14 @@ class TinkoffSdk {
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
-    AndroidReceipt? androidReceipt,
-    IosReceipt? iosReceipt,
   }) async {
     _checkActivated();
 
     final method = Method.openPaymentScreen;
     String? ffdVersion;
-    if (androidReceipt?.runtimeType == AndroidReceiptFfd105) {
+    if (orderOptions.receipt?.runtimeType == Receipt105) {
       ffdVersion = "105";
-    } else if (androidReceipt?.runtimeType == AndroidReceiptFfd12) {
+    } else if (orderOptions.receipt?.runtimeType == Receipt12) {
       ffdVersion = "12";
     }
 
@@ -123,11 +120,33 @@ class TinkoffSdk {
       method.orderOptions: orderOptions.arguments,
       method.customerOptions: customerOptions.arguments,
       method.featuresOptions: featuresOptions.arguments,
-      method.receipt:
-          Platform.isIOS ? iosReceipt?.arguments : androidReceipt?.arguments,
+      method.receipt: orderOptions.receipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
       method.ffdVersion: ffdVersion,
+    }..removeWhere((key, value) => value == null);
+
+    return _channel
+        .invokeMethod(method.name, arguments)
+        .then(parseTinkoffResult);
+  }
+
+  Future<TinkoffResult> finishPayment({
+    required String terminalKey,
+    required String publicKey,
+    required String paymentId,
+    required OrderOptions orderOptions,
+    CustomerOptions? customerOptions,
+    FeaturesOptions featuresOptions = const FeaturesOptions(),
+  }) async {
+    final method = Method.finishPayment;
+    final arguments = {
+      method.terminalKey: terminalKey,
+      method.publicKey: publicKey,
+      method.paymentId: paymentId,
+      method.orderOptions: orderOptions.arguments,
+      method.customerOptions: customerOptions?.arguments,
+      method.featuresOptions: featuresOptions.arguments,
     }..removeWhere((key, value) => value == null);
 
     return _channel

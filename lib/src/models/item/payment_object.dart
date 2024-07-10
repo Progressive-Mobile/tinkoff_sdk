@@ -18,7 +18,7 @@
 
 part of tinkoff_sdk_models;
 
-/// Признак предмета расчета (Android)
+/// Признак предмета расчета (ФФД 1.05)
 enum PaymentObject105 {
   /// Подакцизный товар
   excise(name: 'excise'),
@@ -54,14 +54,17 @@ enum PaymentObject105 {
   composite(name: 'composite'),
 
   /// Иной предмет расчета
-  another(name: 'another');
+  another(name: 'another'),
+
+  /// Товар (только Android)
+  commodity(name: 'commodity');
 
   final String name;
 
   const PaymentObject105({required this.name});
 }
 
-/// Признак предмета расчета (Android)
+/// Признак предмета расчета (ФФД 1.2)
 enum PaymentObject12 {
   /// Подакцизный товар
   excise(name: 'excise'),
@@ -93,7 +96,7 @@ enum PaymentObject12 {
   /// Агентское вознаграждение
   agentCommission(name: 'agentCommission'),
 
-  /// Составной предмет расчета
+  /// Составной предмет расчета (**только Android**)
   composite(name: 'composite'),
 
   /// Иной предмет расчета
@@ -162,47 +165,4 @@ enum PaymentObject12 {
   final String name;
 
   const PaymentObject12({required this.name});
-}
-
-/// Признак предмета расчета (Android)
-enum PaymentObjectIos {
-  /// Подакцизный товар
-  excise(name: 'excise'),
-
-  /// Работа
-  job(name: 'job'),
-
-  /// Услуга
-  service(name: 'service'),
-
-  /// Ставка азартной игры
-  gamblingBet(name: 'gamblingBet'),
-
-  /// Выигрыш азартной игры
-  gamblingPrize(name: 'gamblingPrize'),
-
-  /// Лотерейный билет
-  lottery(name: 'lottery'),
-
-  /// Выигрыш лотереи
-  lotteryPrize(name: 'lotteryPrize'),
-
-  /// Предоставление результатов интеллектуальной деятельности
-  intellectualActivity(name: 'intellectualActivity'),
-
-  /// Платеж
-  payment(name: 'payment'),
-
-  /// Агентское вознаграждение
-  agentCommission(name: 'agentCommission'),
-
-  /// Составной предмет расчета
-  composite(name: 'composite'),
-
-  /// Иной предмет расчета
-  another(name: 'another');
-
-  final String name;
-
-  const PaymentObjectIos({required this.name});
 }
