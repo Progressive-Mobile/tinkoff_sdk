@@ -75,7 +75,7 @@ class TinkoffSdkPlugin :
             val terminalKey = arguments["terminalKey"] as String?
             val publicKey = arguments["publicKey"] as String?
             val isDeveloperMode = arguments["isDeveloperMode"] as Boolean? ?: false
-            val isDebug = arguments["isDebug"] as Boolean? ?: false
+            val isDebug = arguments["logging"] as Boolean? ?: false
             AcquiringSdk.isDeveloperMode = isDeveloperMode
             AcquiringSdk.isDebug = isDebug
             tinkoffAcquiring = TinkoffAcquiring(context, terminalKey!!, publicKey!!)
