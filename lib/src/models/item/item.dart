@@ -71,7 +71,7 @@ class Item105 implements Item {
   Item105({
     required this.name,
     this.price = 0,
-    this.quantity = 0,
+    required this.quantity,
     required this.amount,
     required this.tax,
     this.ean13,
