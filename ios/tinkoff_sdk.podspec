@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'tinkoff_sdk'
-  s.version          = '0.5.1'
+  s.version          = '0.6.0'
   s.summary          = 'Flutter TinkoffSDK plugin'
   s.description      = 'TinkoffSDK Flutter implementation'
   s.homepage         = 'https://pmobi.tech'
