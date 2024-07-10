@@ -227,8 +227,8 @@ class Utils {
         )
     }
     
-    static func parseOrderOptions(args: Dictionary<String, Any>, ffdVersion: String) -> OrderOptions {
-        let receipt = args["receipt"] == nil ? nil : ffdVersion == "105" ? parseReceipt105(receiptArgs: args["receipt"] as! Dictionary<String, Any>) : parseReceipt12(receiptArgs: args["receipt"] as! Dictionary<String, Any>)
+    static func parseOrderOptions(args: Dictionary<String, Any>, ffdVersion: String?) -> OrderOptions {
+        let receipt = args["receipt"] == nil || ffdVersion == nil ? nil : ffdVersion == "105" ? parseReceipt105(receiptArgs: args["receipt"] as! Dictionary<String, Any>) : parseReceipt12(receiptArgs: args["receipt"] as! Dictionary<String, Any>)
         
         let orderId = args["orderId"] as! String
         let amount = args["amount"] as! Int64
@@ -237,7 +237,7 @@ class Utils {
         let shops = (args["shops"] as? Array<Dictionary<String, Any>>)?.map({
             parseShop(args: $0)
         })
-        let receipts = (args["receipts"] as? Array<Dictionary<String, Any>>)?.map({
+        let receipts = ffdVersion == nil ? nil : (args["receipts"] as? Array<Dictionary<String, Any>>)?.map({
             ffdVersion == "105" ? parseReceipt105(receiptArgs: $0) :parseReceipt12(receiptArgs: $0)
         })
         let savingAsParentPayment = args["recurrentPayment"] as? Bool ?? false

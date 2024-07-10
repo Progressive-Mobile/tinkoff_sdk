@@ -117,7 +117,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         
         let orderOptionsArgs = args!["orderOptions"] as! Dictionary<String, Any>
-        let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs, ffdVersion: args!["ffdVersion"] as! String)
+        let orderOptions = Utils.parseOrderOptions(args: orderOptionsArgs, ffdVersion: args?["ffdVersion"] as? String)
         
         let customerOptions = Utils.parseCustomerOptions(args: args!["customerOptions"] as? Dictionary<String, Any>)
         
@@ -176,7 +176,7 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     private func handleShowDynamicQrScreen(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
         let paymentFlow = args?["paymentFlow"] as! String
-        let orderOptions = args?["orderOptions"] == nil ? nil : Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>, ffdVersion: args?["ffdVersion"] as! String)
+        let orderOptions = args?["orderOptions"] == nil ? nil : Utils.parseOrderOptions(args: args?["orderOptions"] as! Dictionary<String, Any>, ffdVersion: args?["ffdVersion"] as? String)
         let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as? Dictionary<String, Any>)
         let paymentId = args?["paymentId"] as? String
         let amount = args?["amount"] as? Int64
