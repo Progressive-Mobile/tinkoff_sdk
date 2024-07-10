@@ -9,6 +9,7 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
+  s.static_framework = true
   s.dependency 'TASDKCore', '6.0.0'
   s.dependency 'TASDKUI', '5.0.0'
   s.dependency 'TASDKYandexPay', '4.0.0'

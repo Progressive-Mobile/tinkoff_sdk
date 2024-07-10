@@ -208,11 +208,14 @@ public class SwiftTinkoffSdkPlugin: NSObject, FlutterPlugin {
     
     private func handleFinishPayment(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let args = call.arguments as? Dictionary<String, Any>
+        
+        let orderOptions = args?["orderOptions"] as! Dictionary<String, Any>
+        let amount = orderOptions["amount"] as! Int64
+        let orderId = orderOptions["orderId"] as! String
+        let orderDescription = orderOptions["description"] as? String
+        
         let paymentId = args?["paymentId"] as! String
-        let amount = args?["amount"] as! Int64
-        let orderId = args?["orderId"] as! String
         let customerOptions = Utils.parseCustomerOptions(args: args?["customerOptions"] as? Dictionary<String, Any>)
-        let orderDescription = args?["orderDescription"] as? String
         
         let finishPaymentOptions = FinishPaymentOptions(
             paymentId: paymentId,
