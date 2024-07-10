@@ -105,15 +105,14 @@ class TinkoffSdk {
     required OrderOptions orderOptions,
     required CustomerOptions customerOptions,
     FeaturesOptions featuresOptions = const FeaturesOptions(),
-    Receipt? receipt,
   }) async {
     _checkActivated();
 
     final method = Method.openPaymentScreen;
     String? ffdVersion;
-    if (receipt?.runtimeType == Receipt105) {
+    if (orderOptions.receipt?.runtimeType == Receipt105) {
       ffdVersion = "105";
-    } else if (receipt?.runtimeType == Receipt12) {
+    } else if (orderOptions.receipt?.runtimeType == Receipt12) {
       ffdVersion = "12";
     }
 
@@ -121,7 +120,7 @@ class TinkoffSdk {
       method.orderOptions: orderOptions.arguments,
       method.customerOptions: customerOptions.arguments,
       method.featuresOptions: featuresOptions.arguments,
-      method.receipt: receipt?.arguments,
+      method.receipt: orderOptions.receipt?.arguments,
       method.terminalKey: terminalKey,
       method.publicKey: publicKey,
       method.ffdVersion: ffdVersion,
@@ -133,19 +132,21 @@ class TinkoffSdk {
   }
 
   Future<TinkoffResult> finishPayment({
+    required String terminalKey,
+    required String publicKey,
     required String paymentId,
-    required int amount,
-    required String orderId,
+    required OrderOptions orderOptions,
     CustomerOptions? customerOptions,
-    String? orderDescription,
+    FeaturesOptions featuresOptions = const FeaturesOptions(),
   }) async {
     final method = Method.finishPayment;
     final arguments = {
+      method.terminalKey: terminalKey,
+      method.publicKey: publicKey,
       method.paymentId: paymentId,
-      method.amount: amount,
-      method.orderId: orderId,
+      method.orderOptions: orderOptions.arguments,
       method.customerOptions: customerOptions?.arguments,
-      method.orderDescription: orderDescription,
+      method.featuresOptions: featuresOptions.arguments,
     }..removeWhere((key, value) => value == null);
 
     return _channel

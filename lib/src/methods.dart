@@ -53,7 +53,6 @@ class OpenPaymentScreen {
   String get customerOptions => 'customerOptions';
   String get featuresOptions => 'featuresOptions';
   String get receipt => 'receipt';
-  String get token => 'token';
   String get terminalKey => 'terminalKey';
   String get publicKey => 'publicKey';
   String get ffdVersion => 'ffdVersion';
@@ -64,11 +63,12 @@ class FinishPayment {
 
   String get name => 'finishPayment';
 
+  String get terminalKey => 'terminalKey';
+  String get publicKey => 'publicKey';
   String get paymentId => 'paymentId';
-  String get amount => 'amount';
-  String get orderId => 'orderId';
+  String get orderOptions => 'orderOptions';
   String get customerOptions => 'customerOptions';
-  String get orderDescription => 'orderDescription';
+  String get featuresOptions => 'featuresOptions';
 }
 
 class AttachCardScreen {

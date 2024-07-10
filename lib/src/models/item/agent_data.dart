@@ -32,25 +32,37 @@ class AgentData {
   /// Признак агента
   final AgentSign agentSign;
 
-  /// Наименование операции
+  /// Наименование операции.
+  ///
+  /// **Обязателен если `agentSign` = `bankPayingAgent` или `agentSign` = `bankPayingSubagent`**
   final String? operationName;
 
-  /// Телефоны платежного агента
+  /// Телефоны платежного агента. Массив строк длиной от 1 до 19 символов.
+  ///
+  /// **Обязателен если `agentSign` имеет значения `bankPayingAgent`, `bankPayingSubagent`, `payingAgent` или `payingSubagent`**
   final List<String>? phones;
 
-  /// Телефоны оператора по приему платежей
+  /// Телефоны оператора по приему платежей. Массив строк длиной от 1 до 19 символов.
+  ///
+  /// **Обязателен если `agentSign` = `payingAgent` или `agentSign` = `payingSubagent`**
   final List<String>? receiverPhones;
 
-  /// Телефоны оператора перевода
+  /// Телефоны оператора перевода. Массив строк длиной от 1 до 19 символов.
+  ///
+  /// **Обязателен если `agentSign` = `bankPayingAgent` или `agentSign` = `bankPayingSubagent`**
   final List<String>? transferPhones;
 
-  /// Наименование оператора перевода
+  /// Наименование оператора перевода. Строка длиной от 1 до 64 символов.
   final String? operatorName;
 
-  /// Адрес оператора перевода
+  /// Адрес оператора перевода. Строка длиной от 1 до 243 символов.
+  ///
+  /// **Обязателен если `agentSign` = `bankPayingAgent` или `agentSign` = `bankPayingSubagent`**
   final String? operatorAddress;
 
-  /// ИНН оператора перевода
+  /// ИНН оператора перевода. Строка длиной от 10 до 12 символов.
+  ///
+  /// **Обязателен если `agentSign` = `bankPayingAgent` или `agentSign` = `bankPayingSubagent`**
   final String? operatorInn;
 
   AgentData({

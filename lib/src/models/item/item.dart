@@ -23,7 +23,7 @@ abstract class Item {
 }
 
 /// Позиция чека с информацией о товаре (ФФД 1.05)
-sealed class Item105 implements Item {
+class Item105 implements Item {
   static const String _name = 'name';
   static const String _price = 'price';
   static const String _quantity = 'quantity';
@@ -31,6 +31,7 @@ sealed class Item105 implements Item {
   static const String _tax = 'tax';
   static const String _ean13 = 'ean13';
   static const String _shopCode = 'shopCode';
+  static const String _paymentMethod = 'paymentMethod';
   static const String _paymentObject = 'paymentObject';
   static const String _agentData = 'agentData';
   static const String _supplierInfo = 'supplierInfo';
@@ -46,6 +47,8 @@ sealed class Item105 implements Item {
 
   /// Сумма в копейках. Целочисленное значение не более 10 знаков
   final int amount;
+
+  final PaymentMethod? paymentMethod;
 
   /// Признак предмета расчета
   final PaymentObject105? paymentObject;
@@ -73,6 +76,7 @@ sealed class Item105 implements Item {
     required this.tax,
     this.ean13,
     this.shopCode,
+    this.paymentMethod,
     this.paymentObject,
     this.agentData,
     this.supplierInfo,
@@ -87,65 +91,11 @@ sealed class Item105 implements Item {
         _tax: tax.name,
         _ean13: ean13,
         _shopCode: shopCode,
+        _paymentMethod: paymentMethod?.name,
         _paymentObject: paymentObject?.name,
         _agentData: agentData?._arguments,
         _supplierInfo: supplierInfo?._arguments,
       }..removeWhere((key, value) => value == null);
-}
-
-/// Позиция чека с информацией о товаре (Android, ФФД 1.05)
-class AndroidItem105 extends Item105 {
-  static const String _paymentMethod = 'paymentMethod';
-
-  /// Тип оплаты.
-  final PaymentMethod? paymentMethod;
-
-  AndroidItem105({
-    required super.name,
-    super.price,
-    super.quantity,
-    required super.amount,
-    required super.tax,
-    super.ean13,
-    super.shopCode,
-    this.paymentMethod,
-    super.paymentObject,
-    super.agentData,
-    super.supplierInfo,
-  });
-
-  Map<String, dynamic> get arguments => super.arguments
-    ..addAll({
-      _paymentMethod: paymentMethod?.name,
-    })
-    ..removeWhere((key, value) => value == null);
-}
-
-/// Позиция чека с информацией о товаре (iOS, ФФД 1.05)
-class iOSItem105 extends Item105 {
-  static const String _paymentMethod = 'paymentMethod';
-
-  /// Тип оплаты.
-  final PaymentMethod paymentMethod;
-
-  iOSItem105({
-    required super.name,
-    super.price,
-    super.quantity,
-    required super.amount,
-    required super.tax,
-    super.ean13,
-    super.shopCode,
-    required this.paymentMethod,
-    super.paymentObject,
-    super.agentData,
-    super.supplierInfo,
-  });
-
-  Map<String, dynamic> get arguments => super.arguments
-    ..addAll({
-      _paymentMethod: paymentMethod.name,
-    });
 }
 
 /// Позиция чека с информацией о товаре (ФФД 1.2)
@@ -165,7 +115,7 @@ sealed class Item12 implements Item {
   /// Сумма в копейках. Целочисленное значение не более 10 знаков
   final double price;
 
-  /// Количество/вес. Целая часть не более 8 знаков
+  /// Количество/вес. Целая часть не более 8 знаков, дробная часть не более 3 знаков
   final double quantity;
 
   /// Данные агента
