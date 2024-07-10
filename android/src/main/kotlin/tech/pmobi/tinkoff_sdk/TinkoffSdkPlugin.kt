@@ -35,8 +35,10 @@ import ru.tinkoff.acquiring.sdk.TinkoffAcquiring
 import ru.tinkoff.acquiring.sdk.models.options.CustomerOptions
 import ru.tinkoff.acquiring.sdk.models.options.FeaturesOptions
 import ru.tinkoff.acquiring.sdk.redesign.cards.attach.AttachCardLauncher
-import ru.tinkoff.acquiring.sdk.redesign.cards.list.SavedCardsLauncher
+import ru.tinkoff.acquiring.sdk.redesign.cards.list.ChooseCardLauncher
 import ru.tinkoff.acquiring.sdk.redesign.mainform.MainFormLauncher
+import ru.tinkoff.acquiring.sdk.ui.activities.QrCodeLauncher
+import java.lang.reflect.Method
 
 class TinkoffSdkPlugin :
         MethodCallHandler,
@@ -61,7 +63,7 @@ class TinkoffSdkPlugin :
             "attachCardScreen" -> handleAttachCardScreen(call)
             "showStaticQrScreen" -> handleShowStaticQrScreen(call)
             "showDynamicQrScreen" -> handleShowDynamicQrScreen(call)
-            "startCharge" -> handleStartCharge(call)
+            "finishPayment" -> handleFinishPayment(call)
             else -> result.notImplemented()
         }
     }
@@ -103,30 +105,12 @@ class TinkoffSdkPlugin :
                             darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
                             useSecureKeyboard =
                                     (arguments["features"] as FeaturesOptions).useSecureKeyboard
-                            handleCardListErrorInSdk =
-                                    (arguments["features"] as FeaturesOptions)
-                                            .handleCardListErrorInSdk
-                            fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
-                            tinkoffPayEnabled =
-                                    (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
-                            yandexPayEnabled =
-                                    (arguments["features"] as FeaturesOptions).yandexPayEnabled
-                            userCanSelectCard =
-                                    (arguments["features"] as FeaturesOptions).userCanSelectCard
-                            showOnlyRecurrentCards =
-                                    (arguments["features"] as FeaturesOptions)
-                                            .showOnlyRecurrentCards
-                            handleErrorsInSdk =
-                                    (arguments["features"] as FeaturesOptions).handleErrorsInSdk
-                            emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
                             duplicateEmailToReceipt =
                                     (arguments["features"] as FeaturesOptions)
                                             .duplicateEmailToReceipt
-                            validateExpiryDate =
-                                    (arguments["features"] as FeaturesOptions).validateExpiryDate
                         }
                     }
-            val intent = SavedCardsLauncher.Contract.createIntent(context, options)
+            val intent = ChooseCardLauncher.Contract.createIntent(context, ChooseCardLauncher.StartData(options))
             act?.startActivityForResult(intent, SAVED_CARDS_SCREEN)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
@@ -172,27 +156,9 @@ class TinkoffSdkPlugin :
                             darkThemeMode = (arguments["features"] as FeaturesOptions).darkThemeMode
                             useSecureKeyboard =
                                     (arguments["features"] as FeaturesOptions).useSecureKeyboard
-                            handleCardListErrorInSdk =
-                                    (arguments["features"] as FeaturesOptions)
-                                            .handleCardListErrorInSdk
-                            fpsEnabled = (arguments["features"] as FeaturesOptions).fpsEnabled
-                            tinkoffPayEnabled =
-                                    (arguments["features"] as FeaturesOptions).tinkoffPayEnabled
-                            yandexPayEnabled =
-                                    (arguments["features"] as FeaturesOptions).yandexPayEnabled
-                            userCanSelectCard =
-                                    (arguments["features"] as FeaturesOptions).userCanSelectCard
-                            showOnlyRecurrentCards =
-                                    (arguments["features"] as FeaturesOptions)
-                                            .showOnlyRecurrentCards
-                            handleErrorsInSdk =
-                                    (arguments["features"] as FeaturesOptions).handleErrorsInSdk
-                            emailRequired = (arguments["features"] as FeaturesOptions).emailRequired
                             duplicateEmailToReceipt =
                                     (arguments["features"] as FeaturesOptions)
                                             .duplicateEmailToReceipt
-                            validateExpiryDate =
-                                    (arguments["features"] as FeaturesOptions).validateExpiryDate
                         }
                     }
             val intent = AttachCardLauncher.Contract.createIntent(context, options = options)
@@ -208,11 +174,12 @@ class TinkoffSdkPlugin :
             val arguments = call.arguments as Map<String, Any>
             val featuresOptions =
                     parser.parseFeatureOptions(arguments["featuresOptions"] as Map<String, Any>)
-            tinkoffAcquiring!!.openStaticQrScreen(
-                    activity = act!!,
-                    featuresOptions = featuresOptions,
-                    requestCode = STATIC_QR_CODE_SCREEN,
-            )
+
+            val intent = QrCodeLauncher.Contract.createIntent(context, QrCodeLauncher.Params(
+                tinkoffAcquiring = tinkoffAcquiring!!,
+                featureOptions = featuresOptions
+            ))
+            act?.startActivityForResult(intent, STATIC_QR_CODE_SCREEN)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
             result!!.error("Error showing static QR code", e.message, null)
@@ -225,11 +192,11 @@ class TinkoffSdkPlugin :
             val arguments = call.arguments as Map<String, Any>
             val paymentOptions = parser.createPaymentOptions(arguments)
 
-            tinkoffAcquiring!!.openDynamicQrScreen(
-                    activity = act!!,
-                    options = paymentOptions,
-                    requestCode = DYNAMIC_QR_CODE_SCREEN
-            )
+            val intent = QrCodeLauncher.Contract.createIntent(context, QrCodeLauncher.Params(
+                tinkoffAcquiring = tinkoffAcquiring!!,
+                paymentOptions = paymentOptions
+            ))
+            act?.startActivityForResult(intent, DYNAMIC_QR_CODE_SCREEN)
         } catch (e: Exception) {
             Log.e(TAG, e.message!!, e)
             result!!.error("Error showing dynamic QR code", e.message, null)
@@ -237,9 +204,22 @@ class TinkoffSdkPlugin :
         }
     }
 
-    private fun handleStartCharge(call: MethodCall) {
-        // TODO: implement method
-        result!!.notImplemented()
+    private fun handleFinishPayment(call: MethodCall) {
+        try {
+            val arguments = call.arguments as Map<String, Any>
+            val paymentOptions = parser.createPaymentOptions(arguments)
+
+            val intent =
+                MainFormLauncher.Contract.createIntent(
+                    context,
+                    MainFormLauncher.StartData(paymentOptions)
+                )
+            act?.startActivityForResult(intent, PAYMENT_SCREEN)
+        } catch (e: Exception) {
+            Log.e(TAG, e.message!!, e)
+            result!!.error("Error opening payment screen", e.message, null)
+            result = null
+        }
     }
 
     companion object {
