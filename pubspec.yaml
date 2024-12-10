@@ -1,6 +1,6 @@
 name: tinkoff_sdk
 description: Flutter TinkoffSDK plugin
-version: 0.6.0
+version: 0.7.0
 homepage: "https://github.com/Progressive-Mobile/tinkoff_sdk"
 
 environment:

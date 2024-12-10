@@ -1,3 +1,8 @@
+## 0.7.0
+* Bump TASDKCore to 8.0.3
+* Bump TASDKUI to 6.1.1
+* Yandex Pay support removed
+
 ## 0.6.0
 * Bump TASDKCore to 6.0.0
 * Bump TASDKUI to 5.0.0
