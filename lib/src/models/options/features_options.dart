@@ -26,7 +26,6 @@ class FeaturesOptions {
   static const String _fpsEnabled = 'fpsEnabled';
   static const String _enableCameraCardScanner = 'enableCameraCardScanner';
   static const String _tinkoffPayEnabled = 'tinkoffPayEnabled';
-  static const String _yandexPayEnabled = 'yandexPayEnabled';
   static const String _selectedCardId = 'selectedCardId';
   static const String _userCanSelectCard = 'userCanSelectCard';
   static const String _showOnlyRecurrentCards = 'showOnlyRecurrentCards';
@@ -52,9 +51,6 @@ class FeaturesOptions {
 
   /// Включение приема платежа через Tinkoff Pay
   final bool tinkoffPayEnabled;
-
-  /// Включение приема платежа через Yandex Pay
-  final bool yandexPayEnabled;
 
   /// Идентификатор карты в системе банка.
   /// Если передан на экран оплаты - в списке карт на экране отобразится первой карта с этим cardId.
@@ -91,7 +87,6 @@ class FeaturesOptions {
     this.fpsEnabled = false,
     this.enableCameraCardScanner = false,
     this.tinkoffPayEnabled = true,
-    this.yandexPayEnabled = false,
     this.selectedCardId,
     this.userCanSelectCard = false,
     this.showOnlyRecurrentCards = false,
@@ -108,7 +103,6 @@ class FeaturesOptions {
         _fpsEnabled: fpsEnabled,
         _enableCameraCardScanner: enableCameraCardScanner,
         _tinkoffPayEnabled: tinkoffPayEnabled,
-        _yandexPayEnabled: yandexPayEnabled,
         _selectedCardId: selectedCardId,
         _userCanSelectCard: userCanSelectCard,
         _showOnlyRecurrentCards: showOnlyRecurrentCards,

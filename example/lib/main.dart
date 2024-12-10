@@ -67,9 +67,7 @@ class _MyAppState extends State<MyApp> {
   AppBar _getAppBar() => AppBar(
       title: Text('Tinkoff SDK'),
       centerTitle: true,
-      actions: acquiring.activated
-          ? [_getCardAttachAction(), _getSBPShowQRAction()]
-          : []);
+      actions: acquiring.activated ? [_getCardAttachAction(), _getSBPShowQRAction()] : []);
 
   Widget _getLayout() {
     if (!TinkoffSdk().activated) {
@@ -135,15 +133,11 @@ class _MyAppState extends State<MyApp> {
       body: _orderOptions != null
           ? Column(
               children: [
-                _getEntryText('ID заказа', _orderOptions!.orderId,
-                    required: true),
-                _getEntryText('Заголовок', _orderOptions!.title,
-                    required: true),
-                _getEntryText('Описание', _orderOptions!.description,
-                    required: true),
+                _getEntryText('ID заказа', _orderOptions!.orderId, required: true),
+                _getEntryText('Заголовок', _orderOptions!.title, required: true),
+                _getEntryText('Описание', _orderOptions!.description, required: true),
                 _getEntryText('Сумма (в копейках)', _orderOptions!.amount),
-                _getEntryText(
-                    'Рекуррентный платеж', _orderOptions!.recurrentPayment)
+                _getEntryText('Рекуррентный платеж', _orderOptions!.recurrentPayment)
               ],
             )
           : Text('Нажмите чтобы заполнить'),
@@ -157,11 +151,9 @@ class _MyAppState extends State<MyApp> {
         body: _customerOptions != null
             ? Column(
                 children: [
-                  _getEntryText('ID', _customerOptions!.customerKey,
-                      required: true),
+                  _getEntryText('ID', _customerOptions!.customerKey, required: true),
                   _getEntryText('E-mail', _customerOptions!.email),
-                  _getEntryText(
-                      'Тип проверки карты', _customerOptions!.checkType)
+                  _getEntryText('Тип проверки карты', _customerOptions!.checkType)
                 ],
               )
             : Text('Нажмите чтобы заполнить'),
@@ -174,29 +166,17 @@ class _MyAppState extends State<MyApp> {
         body: Column(
           children: [
             _getEntryText('Темная тема', _featuresOptions.darkThemeMode),
-            _getEntryText(
-                'Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
-            _getEntryText('Обработка ошибок списка карт в SDK',
-                _featuresOptions.handleCardListErrorInSdk),
+            _getEntryText('Безопасная клавиатура', _featuresOptions.useSecureKeyboard),
+            _getEntryText('Обработка ошибок списка карт в SDK', _featuresOptions.handleCardListErrorInSdk),
             _getEntryText('СБП включено', _featuresOptions.fpsEnabled),
-            _getEntryText('Сканер карт включён',
-                _featuresOptions.enableCameraCardScanner),
-            _getEntryText(
-                'Tinkoff Pay включен', _featuresOptions.tinkoffPayEnabled),
-            _getEntryText(
-                'Yandex Pay включен', _featuresOptions.yandexPayEnabled),
-            _getEntryText(
-                'Выбор приоритетной карты', _featuresOptions.userCanSelectCard),
-            _getEntryText('Показ только рекуррентных карт',
-                _featuresOptions.showOnlyRecurrentCards),
-            _getEntryText(
-                'Обработка ошибок', _featuresOptions.handleErrorsInSdk),
-            _getEntryText(
-                'Обязательный e-mail', _featuresOptions.emailRequired),
-            _getEntryText('Дублирование e-mail в чек',
-                _featuresOptions.duplicateEmailToReceipt),
-            _getEntryText('Валидация срока действия карты',
-                _featuresOptions.validateExpiryDate),
+            _getEntryText('Сканер карт включён', _featuresOptions.enableCameraCardScanner),
+            _getEntryText('Tinkoff Pay включен', _featuresOptions.tinkoffPayEnabled),
+            _getEntryText('Выбор приоритетной карты', _featuresOptions.userCanSelectCard),
+            _getEntryText('Показ только рекуррентных карт', _featuresOptions.showOnlyRecurrentCards),
+            _getEntryText('Обработка ошибок', _featuresOptions.handleErrorsInSdk),
+            _getEntryText('Обязательный e-mail', _featuresOptions.emailRequired),
+            _getEntryText('Дублирование e-mail в чек', _featuresOptions.duplicateEmailToReceipt),
+            _getEntryText('Валидация срока действия карты', _featuresOptions.validateExpiryDate),
           ],
         ),
         onTap: _showFeatureOptionsDialog);
@@ -276,33 +256,26 @@ class _MyAppState extends State<MyApp> {
     bool isDialog = false,
   }) {
     return Container(
-      margin: EdgeInsets.symmetric(
-          vertical: 2.0, horizontal: isDialog ? 0.0 : 24.0),
+      margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: isDialog ? 0.0 : 24.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType ?? TextInputType.text,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: hint,
-            alignLabelWithHint: true),
+        decoration: InputDecoration(border: OutlineInputBorder(), labelText: hint, alignLabelWithHint: true),
       ),
     );
   }
 
   Widget _getEntryText(String key, dynamic value, {bool required = false}) {
-    final canShow = (value != null && value is! String) ||
-        (value is String && value.isNotEmpty);
+    final canShow = (value != null && value is! String) || (value is String && value.isNotEmpty);
     return Row(
       children: [
         Text(key),
         Spacer(),
         Text(
           canShow ? value.toString() : 'не указано',
-          style: TextStyle(
-              fontSize: 12.0, color: canShow ? Colors.black : Colors.grey),
+          style: TextStyle(fontSize: 12.0, color: canShow ? Colors.black : Colors.grey),
         ),
-        if (!canShow && required)
-          Icon(Icons.warning, color: Colors.red, size: 14.0)
+        if (!canShow && required) Icon(Icons.warning, color: Colors.red, size: 14.0)
       ],
     );
   }
@@ -378,16 +351,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showOrderOptionsDialog() async {
-    final orderIdController = TextEditingController(
-        text: _orderOptions?.orderId.toString() ?? '111111');
-    final titleController =
-        TextEditingController(text: _orderOptions?.title ?? 'test');
-    final descriptionController =
-        TextEditingController(text: _orderOptions?.description ?? 'Книга');
-    final amountController =
-        TextEditingController(text: _orderOptions?.amount.toString() ?? '1000');
-    final ValueNotifier<bool> reccurent =
-        ValueNotifier(_orderOptions?.recurrentPayment ?? false);
+    final orderIdController = TextEditingController(text: _orderOptions?.orderId.toString() ?? '111111');
+    final titleController = TextEditingController(text: _orderOptions?.title ?? 'test');
+    final descriptionController = TextEditingController(text: _orderOptions?.description ?? 'Книга');
+    final amountController = TextEditingController(text: _orderOptions?.amount.toString() ?? '1000');
+    final ValueNotifier<bool> reccurent = ValueNotifier(_orderOptions?.recurrentPayment ?? false);
 
     await showDialog(
         context: context,
@@ -398,8 +366,7 @@ class _MyAppState extends State<MyApp> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _getTextForm('ID заказа', orderIdController,
-                        keyboardType: TextInputType.number, isDialog: true),
+                    _getTextForm('ID заказа', orderIdController, keyboardType: TextInputType.number, isDialog: true),
                     _getTextForm(
                       'Заголовок',
                       titleController,
@@ -427,7 +394,7 @@ class _MyAppState extends State<MyApp> {
           recurrentPayment: reccurent.value,
           receipt: Receipt105(
             taxation: Taxation.osn,
-            email: _customerOptions?.email ?? '',
+            email: _customerOptions?.email,
             items: [
               Item105(
                 name: 'Кружка 350 мл',
@@ -443,12 +410,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _showCustomerOptionsDialog() async {
-    final idController =
-        TextEditingController(text: _customerOptions?.customerKey ?? '1');
-    final emailController =
-        TextEditingController(text: _customerOptions?.email ?? '');
-    final checkType =
-        ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
+    final idController = TextEditingController(text: _customerOptions?.customerKey ?? '1');
+    final emailController = TextEditingController(text: _customerOptions?.email ?? "");
+    final checkType = ValueNotifier<CheckType>(_customerOptions?.checkType ?? CheckType.no);
 
     await showDialog(
         context: context,
@@ -460,36 +424,27 @@ class _MyAppState extends State<MyApp> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _getTextForm('ID', idController, isDialog: true),
-                    _getTextForm('E-mail', emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        isDialog: true),
+                    _getTextForm('E-mail', emailController, keyboardType: TextInputType.emailAddress, isDialog: true),
                     Row(
                       children: <Widget>[
                         Text('Тип проверки'),
                         Spacer(),
                         ValueListenableBuilder<CheckType>(
                           valueListenable: checkType,
-                          builder: (context, value, _) =>
-                              DropdownButton<CheckType>(
-                                  value: value,
-                                  items: [
-                                    DropdownMenuItem(
-                                      value: CheckType.no,
-                                      child: Text('NO'),
-                                    ),
-                                    DropdownMenuItem(
-                                        value: CheckType.hold,
-                                        child: Text('HOLD')),
-                                    DropdownMenuItem(
-                                        value: CheckType.threeDS,
-                                        child: Text('3DS')),
-                                    DropdownMenuItem(
-                                        value: CheckType.threeDS_hold,
-                                        child: Text('3DS_HOLD'))
-                                  ],
-                                  onChanged: (value) {
-                                    checkType.value = value!;
-                                  }),
+                          builder: (context, value, _) => DropdownButton<CheckType>(
+                              value: value,
+                              items: [
+                                DropdownMenuItem(
+                                  value: CheckType.no,
+                                  child: Text('NO'),
+                                ),
+                                DropdownMenuItem(value: CheckType.hold, child: Text('HOLD')),
+                                DropdownMenuItem(value: CheckType.threeDS, child: Text('3DS')),
+                                DropdownMenuItem(value: CheckType.threeDS_hold, child: Text('3DS_HOLD'))
+                              ],
+                              onChanged: (value) {
+                                checkType.value = value!;
+                              }),
                         ),
                       ],
                     )
@@ -500,32 +455,23 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _customerOptions = CustomerOptions(
         customerKey: idController.text,
-        email: emailController.text,
+        email: emailController.text.isEmpty ? null : emailController.text,
         checkType: checkType.value,
       );
     });
   }
 
   void _showFeatureOptionsDialog() async {
-    final darkThemeMode =
-        ValueNotifier<DarkThemeMode>(_featuresOptions.darkThemeMode);
-    final useSecureKeyboard =
-        ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
-    final handleCardListErrorInSdk =
-        ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
-    final enableCameraCardScanner =
-        ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
-    final userCanSelectCard =
-        ValueNotifier<bool>(_featuresOptions.userCanSelectCard);
-    final showOnlyRecurrentCards =
-        ValueNotifier<bool>(_featuresOptions.showOnlyRecurrentCards);
-    final handleErrorsInSdk =
-        ValueNotifier<bool>(_featuresOptions.handleErrorsInSdk);
+    final darkThemeMode = ValueNotifier<DarkThemeMode>(_featuresOptions.darkThemeMode);
+    final useSecureKeyboard = ValueNotifier<bool>(_featuresOptions.useSecureKeyboard);
+    final handleCardListErrorInSdk = ValueNotifier<bool>(_featuresOptions.handleCardListErrorInSdk);
+    final enableCameraCardScanner = ValueNotifier<bool>(_featuresOptions.enableCameraCardScanner);
+    final userCanSelectCard = ValueNotifier<bool>(_featuresOptions.userCanSelectCard);
+    final showOnlyRecurrentCards = ValueNotifier<bool>(_featuresOptions.showOnlyRecurrentCards);
+    final handleErrorsInSdk = ValueNotifier<bool>(_featuresOptions.handleErrorsInSdk);
     final emailRequired = ValueNotifier<bool>(_featuresOptions.emailRequired);
-    final duplicateEmailToReceipt =
-        ValueNotifier<bool>(_featuresOptions.duplicateEmailToReceipt);
-    final validateExpiryDate =
-        ValueNotifier<bool>(_featuresOptions.validateExpiryDate);
+    final duplicateEmailToReceipt = ValueNotifier<bool>(_featuresOptions.duplicateEmailToReceipt);
+    final validateExpiryDate = ValueNotifier<bool>(_featuresOptions.validateExpiryDate);
 
     await showDialog(
       context: context,
@@ -542,40 +488,31 @@ class _MyAppState extends State<MyApp> {
                   Spacer(),
                   ValueListenableBuilder<DarkThemeMode>(
                     valueListenable: darkThemeMode,
-                    builder: (context, value, _) =>
-                        DropdownButton<DarkThemeMode>(
-                            value: value,
-                            items: [
-                              DropdownMenuItem(
-                                value: DarkThemeMode.auto,
-                                child: Text('AUTO'),
-                              ),
-                              DropdownMenuItem(
-                                  value: DarkThemeMode.enabled,
-                                  child: Text('ENABLED')),
-                              DropdownMenuItem(
-                                  value: DarkThemeMode.disabled,
-                                  child: Text('DISABLED'))
-                            ],
-                            onChanged: (value) {
-                              darkThemeMode.value = value!;
-                            }),
+                    builder: (context, value, _) => DropdownButton<DarkThemeMode>(
+                        value: value,
+                        items: [
+                          DropdownMenuItem(
+                            value: DarkThemeMode.auto,
+                            child: Text('AUTO'),
+                          ),
+                          DropdownMenuItem(value: DarkThemeMode.enabled, child: Text('ENABLED')),
+                          DropdownMenuItem(value: DarkThemeMode.disabled, child: Text('DISABLED'))
+                        ],
+                        onChanged: (value) {
+                          darkThemeMode.value = value!;
+                        }),
                   ),
                 ],
               ),
               _getCheckboxRow('Безопасная клавиатура', useSecureKeyboard),
-              _getCheckboxRow('Обработка ошибок списка карт в SDK',
-                  handleCardListErrorInSdk),
+              _getCheckboxRow('Обработка ошибок списка карт в SDK', handleCardListErrorInSdk),
               _getCheckboxRow('Сканнер карт', enableCameraCardScanner),
               _getCheckboxRow('Выбор приоритетной карты', userCanSelectCard),
-              _getCheckboxRow(
-                  'Показ только рекуррентных карт', showOnlyRecurrentCards),
+              _getCheckboxRow('Показ только рекуррентных карт', showOnlyRecurrentCards),
               _getCheckboxRow('Обработка ошибок', handleErrorsInSdk),
               _getCheckboxRow('Обязательный e-mail', emailRequired),
-              _getCheckboxRow(
-                  'Дублирование e-mail в чек', duplicateEmailToReceipt),
-              _getCheckboxRow(
-                  'Валидация срока действия карты', validateExpiryDate),
+              _getCheckboxRow('Дублирование e-mail в чек', duplicateEmailToReceipt),
+              _getCheckboxRow('Валидация срока действия карты', validateExpiryDate),
             ],
           ),
         ),
