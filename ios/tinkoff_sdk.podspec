@@ -10,9 +10,8 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.static_framework = true
-  s.dependency 'TASDKCore', '6.0.0'
-  s.dependency 'TASDKUI', '5.0.0'
-  s.dependency 'TASDKYandexPay', '4.0.0'
+  s.dependency 'TASDKCore', '8.0.3'
+  s.dependency 'TASDKUI', '6.1.1'
   s.platform = :ios, '13.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
